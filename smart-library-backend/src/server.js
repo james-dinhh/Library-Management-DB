@@ -7,13 +7,15 @@ dotenv.config();
 import { mysqlPool } from './db/mysql.js';
 import { connectMongo } from './db/mongo.js';
 import statsRouter from './routes/stats.routes.js';
+import libraryRouter from './routes/library.routes.js';
+import adminRouter from './routes/admin.routes.js';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
-// test health
+// Test health
 app.get('/health', async (req, res) => {
   try {
     const [rows] = await mysqlPool.query('SELECT 1 AS ok');
@@ -23,16 +25,17 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// routes that call your MySQL functions
+// Routes that call MySQL functions
 app.use('/stats', statsRouter);
+app.use('/library', libraryRouter);
+app.use('/admin', adminRouter);
 
 const port = process.env.PORT || 4000;
 
 (async () => {
   try {
-    await connectMongo();
-    // also verifies MySQL connectivity once
-    await mysqlPool.query('SELECT 1');
+    // await connectMongo();
+    await mysqlPool.query('SELECT 1'); // Verify MySQL connectivity once
     app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
   } catch (err) {
     console.error('Startup error:', err);
