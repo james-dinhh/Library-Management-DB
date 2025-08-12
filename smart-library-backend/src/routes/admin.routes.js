@@ -3,7 +3,7 @@ import { mysqlPool } from '../db/mysql.js';
 
 const router = Router();
 
-// POST /admin/books  (add)
+// POST /admin/books (add)
 router.post('/books', async (req, res) => {
   const { staffId, title, genre, publisherId, copiesTotal } = req.body;
   try {
@@ -16,7 +16,7 @@ router.post('/books', async (req, res) => {
   }
 });
 
-// PUT /admin/books/:id/inventory  (update total)
+// PUT /admin/books/:id/inventory (update total)
 router.put('/books/:id/inventory', async (req, res) => {
   const bookId = Number(req.params.id);
   const { staffId, newTotal } = req.body;

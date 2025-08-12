@@ -1,14 +1,3 @@
--- ==========================================
--- Smart Library - Functions (MySQL 8+)
--- ==========================================
-
--- Note:
--- If MySQL server has binary logging and get:
--- "This function has none of DETERMINISTIC, NO SQL, or READS SQL DATA"
--- May need (temporarily) to:
---   SET GLOBAL log_bin_trust_function_creators = 1;
--- Then reconnect and run this file again.
-
 SET NAMES utf8mb4;
 USE smart_library;
 

@@ -1,6 +1,3 @@
--- ==========================================
--- Smart Library - Procedures (MySQL 8+)
--- ==========================================
 SET NAMES utf8mb4;
 USE smart_library;
 
@@ -13,10 +10,8 @@ DROP PROCEDURE IF EXISTS sp_retire_book;
 
 DELIMITER $$
 
--- --------------------------------------------------
 -- sp_borrow_book: concurrency-safe borrow operation
 -- Locks the book row, checks status & stock, inserts checkout, decrements stock.
--- --------------------------------------------------
 CREATE PROCEDURE sp_borrow_book (
   IN  p_user_id INT,
   IN  p_book_id INT,
@@ -69,10 +64,8 @@ BEGIN
   COMMIT;
 END$$
 
--- --------------------------------------------------
 -- sp_return_book: safe return operation
 -- Locks checkout and its book; idempotent (won't double-increment stock).
--- --------------------------------------------------
 CREATE PROCEDURE sp_return_book (
   IN p_checkout_id INT
 )
@@ -125,9 +118,7 @@ BEGIN
   END main;
 END$$
 
--- --------------------------------------------------
 -- sp_add_book: create book + initial stock, log admin action atomically
--- --------------------------------------------------
 CREATE PROCEDURE sp_add_book (
   IN p_staff_id INT,
   IN p_title VARCHAR(255),
@@ -157,10 +148,9 @@ BEGIN
   COMMIT;
 END$$
 
--- --------------------------------------------------
+
 -- sp_update_inventory: adjust copies_total safely, recompute available, log
 -- Ensures new total >= currently borrowed.
--- --------------------------------------------------
 CREATE PROCEDURE sp_update_inventory (
   IN p_staff_id INT,
   IN p_book_id INT,
@@ -207,10 +197,8 @@ BEGIN
   COMMIT;
 END$$
 
--- --------------------------------------------------
 -- sp_retire_book: retire a book (no further borrows), log action
 -- Sets status = 'retired' and sets available = 0 (borrowed copies remain tracked).
--- --------------------------------------------------
 CREATE PROCEDURE sp_retire_book (
   IN p_staff_id INT,
   IN p_book_id INT

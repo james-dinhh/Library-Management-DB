@@ -1,7 +1,3 @@
--- ================================
--- Smart Library - Schema (MySQL 8+)
--- ================================
-
 SET NAMES utf8mb4;
 SET sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 
