@@ -2,13 +2,13 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
-import { User, Publisher, Author, Book, BookAuthor, Checkout, Review, StaffLog } from './models.js';
+import { User, Publisher, Author, Book, BookAuthor, Checkout, Review, StaffLog } from '../src/db/models.js';
 
 dotenv.config();
 const MONGO_URI = process.env.MONGO_URI;
 
 // .json reader
-const filePath = path.resolve('./src/db/sample_library.json');
+const filePath = path.resolve('./sample_library.json');
 const rawData = fs.readFileSync(filePath);
 const data = JSON.parse(rawData);
 

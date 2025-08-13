@@ -11,10 +11,10 @@ async function connectMongo() {
     await client.connect();
     console.log('Connected to MongoDB!');
   } catch (err) {
-    console.error('Failed to connect', err);
-  } finally {
-    await client.close();
+    console.error('Failed to connect to MongoDB:', err);
+    process.exit(1);
   }
 }
 
-connectMongo();
+// Export the client and connection function
+export { client, connectMongo };
