@@ -1,8 +1,20 @@
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-dotenv.config();
+import { MongoClient } from 'mongodb';
 
-export async function connectMongo() {
-  await mongoose.connect(process.env.MONGO_URI);
-  console.log('MongoDB connected');
+dotenv.config();
+const uri = process.env.MONGODB_URI;
+
+const client = new MongoClient(uri);
+
+async function connectMongo() {
+  try {
+    await client.connect();
+    console.log('Connected to MongoDB!');
+  } catch (err) {
+    console.error('Failed to connect', err);
+  } finally {
+    await client.close();
+  }
 }
+
+connectMongo();
