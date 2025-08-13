@@ -4,14 +4,9 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Import MongoDB connection instead of MySQL
+// Import MongoDB connection and analytics router
 import { connectMongo } from './db/mongo.js';
-
-// Comment out MySQL imports for now
-// import { mysqlPool } from './db/mysql.js';
-// import statsRouter from './routes/stats.routes.js';
-// import libraryRouter from './routes/library.routes.js';
-// import adminRouter from './routes/admin.routes.js';
+import analyticsRouter from './routes/analytics.routes.js';
 
 const app = express();
 app.use(cors());
@@ -43,6 +38,9 @@ app.get('/', (req, res) => {
     }
   });
 });
+
+// Analytics routes
+app.use('/analytics', analyticsRouter);
 
 // Comment out MySQL-dependent routes for now
 // app.use('/stats', statsRouter);
