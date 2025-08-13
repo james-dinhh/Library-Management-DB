@@ -57,10 +57,6 @@ BEGIN
 
   SET p_checkout_id = LAST_INSERT_ID();
 
-  UPDATE books
-  SET copies_available = copies_available - 1
-  WHERE book_id = p_book_id;
-
   COMMIT;
 END$$
 
@@ -72,7 +68,6 @@ CREATE PROCEDURE sp_return_book (
 BEGIN
   DECLARE v_book_id INT;
   DECLARE v_return_date DATETIME;
-  DECLARE v_dummy INT;
 
   DECLARE EXIT HANDLER FOR SQLEXCEPTION
   BEGIN
@@ -100,19 +95,9 @@ BEGIN
       LEAVE main;
     END IF;
 
-    -- Lock the book row to adjust stock (select into dummy to avoid returning a result set)
-    SELECT 1 INTO v_dummy
-    FROM books
-    WHERE book_id = v_book_id
-    FOR UPDATE;
-
     UPDATE checkouts
     SET return_date = NOW()
     WHERE checkout_id = p_checkout_id;
-
-    UPDATE books
-    SET copies_available = copies_available + 1
-    WHERE book_id = v_book_id;
 
     COMMIT;
   END main;

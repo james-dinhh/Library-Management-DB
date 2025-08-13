@@ -47,6 +47,9 @@ CREATE TABLE books (
   copies_total INT NOT NULL,
   copies_available INT NOT NULL,
   status ENUM('active','retired') NOT NULL DEFAULT 'active',
+  rating_count INT NOT NULL DEFAULT 0,
+  rating_sum INT NOT NULL DEFAULT 0,
+  rating_avg DECIMAL(4,2) NOT NULL DEFAULT 0.00,
   CONSTRAINT fk_books_publisher
     FOREIGN KEY (publisher_id) REFERENCES publishers(publisher_id)
     ON UPDATE CASCADE
