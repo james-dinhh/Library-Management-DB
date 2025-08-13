@@ -43,16 +43,25 @@ CREATE TABLE books (
   book_id INT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
   genre VARCHAR(50) NOT NULL,
+  published_year SMALLINT NULL,
   publisher_id INT NOT NULL,
+  cover_image_url VARCHAR(512) NULL,
   copies_total INT NOT NULL,
   copies_available INT NOT NULL,
   status ENUM('active','retired') NOT NULL DEFAULT 'active',
+  avg_rating DECIMAL(3,2) NULL,
+  ratings_count INT NOT NULL DEFAULT 0,
   CONSTRAINT fk_books_publisher
     FOREIGN KEY (publisher_id) REFERENCES publishers(publisher_id)
     ON UPDATE CASCADE
     ON DELETE RESTRICT,
+
+  -- Integrity checks
   CONSTRAINT chk_copies_nonneg CHECK (copies_total >= 0 AND copies_available >= 0),
-  CONSTRAINT chk_copies_le_total CHECK (copies_available <= copies_total)
+  CONSTRAINT chk_copies_le_total CHECK (copies_available <= copies_total),
+  CONSTRAINT chk_published_year CHECK (
+    published_year IS NULL OR (published_year BETWEEN 1000 AND YEAR(CURDATE()))
+  )
 ) ENGINE=InnoDB;
 
 -- Authors

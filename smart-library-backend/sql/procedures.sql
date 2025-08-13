@@ -124,7 +124,9 @@ CREATE PROCEDURE sp_add_book (
   IN p_title VARCHAR(255),
   IN p_genre VARCHAR(50),
   IN p_publisher_id INT,
-  IN p_copies_total INT
+  IN p_copies_total INT,
+  IN p_published_year SMALLINT,         -- new, nullable
+  IN p_cover_image_url VARCHAR(512)     -- new, nullable
 )
 BEGIN
   DECLARE v_book_id INT;
@@ -137,8 +139,14 @@ BEGIN
 
   START TRANSACTION;
 
-  INSERT INTO books (title, genre, publisher_id, copies_total, copies_available, status)
-  VALUES (p_title, p_genre, p_publisher_id, p_copies_total, p_copies_total, 'active');
+  INSERT INTO books (
+    title, genre, published_year, publisher_id, cover_image_url,
+    copies_total, copies_available, status
+  )
+  VALUES (
+    p_title, p_genre, p_published_year, p_publisher_id, p_cover_image_url,
+    p_copies_total, p_copies_total, 'active'
+  );
 
   SET v_book_id = LAST_INSERT_ID();
 
@@ -147,7 +155,6 @@ BEGIN
 
   COMMIT;
 END$$
-
 
 -- sp_update_inventory: adjust copies_total safely, recompute available, log
 -- Ensures new total >= currently borrowed.

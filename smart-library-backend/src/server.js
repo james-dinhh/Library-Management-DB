@@ -34,7 +34,7 @@ const port = process.env.PORT || 4000;
 
 (async () => {
   try {
-    // await connectMongo();
+    await connectMongo();
     await mysqlPool.query('SELECT 1'); // Verify MySQL connectivity once
     app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
   } catch (err) {
