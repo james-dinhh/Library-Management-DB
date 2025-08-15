@@ -70,19 +70,21 @@ async function seedMySQLFromJson() {
     console.log('Inserting books...');
     for (const book of data.books) {
       await connection.execute(
-        `INSERT INTO books (book_id, title, genre, publisher_id, copies_total, copies_available, status, rating_count, rating_sum, rating_avg) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO books (
+          book_id, title, genre, published_year, publisher_id, cover_image_url, copies_total, copies_available, status, avg_rating, ratings_count
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          book.book_id, 
-          book.title, 
-          book.genre, 
-          book.publisher_id, 
-          book.copies_total, 
-          book.copies_available, 
-          book.status,
-          book.ratings_count || 0,
-          Math.round((book.avg_rating || 0) * (book.ratings_count || 0)), // Calculate sum from average
-          book.avg_rating || 0.00
+          book.book_id,
+          book.title,
+          book.genre,
+          book.published_year || null,
+          book.publisher_id,
+          book.cover_image_url || null,
+          book.copies_total,
+          book.copies_available,
+          book.status || 'active',
+          book.avg_rating || null,
+          book.ratings_count || 0
         ]
       );
     }

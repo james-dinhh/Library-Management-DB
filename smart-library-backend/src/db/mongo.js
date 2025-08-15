@@ -14,7 +14,7 @@ async function connectMongo() {
     console.error('Failed to connect to MongoDB:', err);
     process.exit(1);
   }
-});
+}
 
 // Export the client and connection function
 export { client, connectMongo };
