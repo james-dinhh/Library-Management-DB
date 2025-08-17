@@ -110,8 +110,8 @@ CREATE PROCEDURE sp_add_book (
   IN p_genre VARCHAR(50),
   IN p_publisher_id INT,
   IN p_copies_total INT,
-  IN p_published_year SMALLINT,         -- new, nullable
-  IN p_cover_image_url VARCHAR(512)     -- new, nullable
+  IN p_published_year SMALLINT,         
+  IN p_cover_image_url VARCHAR(512)     
 )
 BEGIN
   DECLARE v_book_id INT;

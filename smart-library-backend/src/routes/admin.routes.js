@@ -5,10 +5,10 @@ const router = Router();
 
 // POST /admin/books (add)
 router.post('/books', async (req, res) => {
-  const { staffId, title, genre, publisherId, copiesTotal } = req.body;
+  const { staffId, title, genre, publisherId, copiesTotal, publishedYear, coverImageUrl } = req.body;
   try {
-    await mysqlPool.query('CALL sp_add_book(?,?,?,?,?)', [
-      staffId, title, genre, publisherId, copiesTotal
+    await mysqlPool.query('CALL sp_add_book(?,?,?,?,?,?,?)', [
+      staffId, title, genre, publisherId, copiesTotal, publishedYear || null, coverImageUrl || null
     ]);
     res.json({ ok: true });
   } catch (e) {

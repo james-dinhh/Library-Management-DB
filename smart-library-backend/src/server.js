@@ -7,6 +7,9 @@ dotenv.config();
 // Import MongoDB connection and analytics router
 import { connectMongo } from './db/mongo.js';
 import analyticsRouter from './routes/analytics.routes.js';
+import statsRouter from './routes/stats.routes.js';
+import libraryRouter from './routes/library.routes.js';
+import adminRouter from './routes/admin.routes.js';
 
 const app = express();
 app.use(cors());
@@ -41,11 +44,9 @@ app.get('/', (req, res) => {
 
 // Analytics routes
 app.use('/analytics', analyticsRouter);
-
-// Comment out MySQL-dependent routes for now
-// app.use('/stats', statsRouter);
-// app.use('/library', libraryRouter);
-// app.use('/admin', adminRouter);
+app.use('/stats', statsRouter);
+app.use('/library', libraryRouter);
+app.use('/admin', adminRouter);
 
 const port = process.env.PORT || 4000;
 
