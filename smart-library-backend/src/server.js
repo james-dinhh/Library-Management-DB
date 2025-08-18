@@ -11,6 +11,8 @@ import analyticsRouter from './routes/analytics.routes.js';
 import statsRouter from './routes/stats.routes.js';
 import libraryRouter from './routes/library.routes.js';
 import adminRouter from './routes/admin.routes.js';
+import reviewsRouter from './routes/reviews.routes.js';
+import booksRouter from './routes/books.routes.js';
 
 const app = express();
 app.use(cors());
@@ -43,6 +45,8 @@ app.use('/analytics', analyticsRouter);
 app.use('/stats', statsRouter);
 app.use('/library', libraryRouter);
 app.use('/admin', adminRouter);
+app.use('/reviews', reviewsRouter);
+app.use('/books', booksRouter);
 
 const port = process.env.PORT || 4000;
 
