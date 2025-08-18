@@ -51,10 +51,14 @@ router.get('/', async (req, res) => {
       b.avg_rating,
       b.ratings_count,
       (
-        SELECT JSON_ARRAYAGG(a.name ORDER BY a.name)
-        FROM book_authors ba
-        JOIN authors a ON a.author_id = ba.author_id
-        WHERE ba.book_id = b.book_id
+        SELECT JSON_ARRAYAGG(name)
+        FROM (
+          SELECT a.name
+          FROM book_authors ba
+          JOIN authors a ON a.author_id = ba.author_id
+          WHERE ba.book_id = b.book_id
+          ORDER BY a.name
+        ) AS ordered_authors
       ) AS authors_json
     FROM books b
     JOIN publishers p ON p.publisher_id = b.publisher_id
@@ -67,7 +71,16 @@ router.get('/', async (req, res) => {
     const data = rows.map(r => ({
       id: r.id,
       title: r.title,
-      authors: r.authors_json ? JSON.parse(r.authors_json) : [],
+      authors: (() => {
+        if (r.authors_json == null) return [];
+        if (Array.isArray(r.authors_json)) return r.authors_json;
+        try {
+          const parsed = JSON.parse(r.authors_json);
+          return Array.isArray(parsed) ? parsed : [parsed];
+        } catch {
+          return [r.authors_json];
+        }
+      })(),
       publisher: r.publisher,
       genre: r.genre,
       publishedYear: r.published_year ?? null,
