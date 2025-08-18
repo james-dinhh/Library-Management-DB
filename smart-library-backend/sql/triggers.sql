@@ -48,9 +48,12 @@ AFTER INSERT ON reviews
 FOR EACH ROW
 BEGIN
   UPDATE books
-  SET rating_count = rating_count + 1,
-      rating_sum = rating_sum + NEW.rating,
-      rating_avg = ROUND((rating_sum + NEW.rating) / (rating_count + 1), 2)
+  SET ratings_count = ratings_count + 1,
+      avg_rating = (
+        SELECT ROUND(AVG(rating), 2)
+        FROM reviews
+        WHERE book_id = NEW.book_id
+      )
   WHERE book_id = NEW.book_id;
 END$$
 
@@ -60,23 +63,33 @@ AFTER UPDATE ON reviews
 FOR EACH ROW
 BEGIN
   IF NEW.book_id = OLD.book_id THEN
-    -- Same book: adjust sum; count unchanged
+    -- Same book: recompute avg only
     UPDATE books
-    SET rating_sum = rating_sum + (NEW.rating - OLD.rating),
-        rating_avg = ROUND((rating_sum + (NEW.rating - OLD.rating)) / rating_count, 2)
+    SET avg_rating = (
+          SELECT ROUND(AVG(rating), 2)
+          FROM reviews
+          WHERE book_id = NEW.book_id
+        )
     WHERE book_id = NEW.book_id;
   ELSE
-    -- Moved to a different book
+    -- Old book: decrement count & recompute avg
     UPDATE books
-    SET rating_count = rating_count - 1,
-        rating_sum = rating_sum - OLD.rating,
-        rating_avg = CASE WHEN rating_count - 1 <= 0 THEN 0.00 ELSE ROUND((rating_sum - OLD.rating) / (rating_count - 1), 2) END
+    SET ratings_count = ratings_count - 1,
+        avg_rating = (
+          SELECT COALESCE(ROUND(AVG(rating), 2), 0.00)
+          FROM reviews
+          WHERE book_id = OLD.book_id
+        )
     WHERE book_id = OLD.book_id;
 
+    -- New book: increment count & recompute avg
     UPDATE books
-    SET rating_count = rating_count + 1,
-        rating_sum = rating_sum + NEW.rating,
-        rating_avg = ROUND((rating_sum + NEW.rating) / (rating_count + 1), 2)
+    SET ratings_count = ratings_count + 1,
+        avg_rating = (
+          SELECT ROUND(AVG(rating), 2)
+          FROM reviews
+          WHERE book_id = NEW.book_id
+        )
     WHERE book_id = NEW.book_id;
   END IF;
 END$$
@@ -87,10 +100,13 @@ AFTER DELETE ON reviews
 FOR EACH ROW
 BEGIN
   UPDATE books
-  SET rating_count = rating_count - 1,
-      rating_sum = rating_sum - OLD.rating,
-      rating_avg = CASE WHEN rating_count - 1 <= 0 THEN 0.00 ELSE ROUND((rating_sum - OLD.rating) / (rating_count - 1), 2) END
+  SET ratings_count = ratings_count - 1,
+      avg_rating = (
+        SELECT COALESCE(ROUND(AVG(rating), 2), 0.00)
+        FROM reviews
+        WHERE book_id = OLD.book_id
+      )
   WHERE book_id = OLD.book_id;
 END$$
 
-DELIMITER ; 
+DELIMITER ;
