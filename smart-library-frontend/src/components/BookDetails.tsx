@@ -16,7 +16,7 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
   const [showReviewForm, setShowReviewForm] = useState(false);
 
-  const availability = getAvailabilityStatus(book.availableCopies);
+  const availability = getAvailabilityStatus(book.copiesAvailable);
 
   // Fetch reviews from backend
   useEffect(() => {
@@ -147,10 +147,10 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
                     <div>
                       <h3 className="font-semibold text-gray-900 mb-1">Availability</h3>
                       <p className={`text-sm font-medium ${availability.color}`}>
-                        {availability.status} - {book.availableCopies} of {book.totalCopies} copies available
+                        {availability.status} - {book.copiesAvailable} of {book.totalCopies} copies available
                       </p>
                     </div>
-                    {currentUser.role === 'user' && book.availableCopies > 0 && (
+                    {currentUser.role === 'user' && book.copiesAvailable > 0 && (
                       <button
                         onClick={() => onBorrow(book)}
                         className="px-6 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors duration-200 font-medium"

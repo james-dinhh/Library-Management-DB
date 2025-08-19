@@ -33,8 +33,8 @@ const BookSearch: React.FC<BookSearchProps> = ({ books, currentUser, onBorrow })
       const matchesGenre = !selectedGenre || book.genre === selectedGenre;
       
       const matchesAvailability = availabilityFilter === 'all' || 
-                                (availabilityFilter === 'available' && book.availableCopies > 0) ||
-                                (availabilityFilter === 'unavailable' && book.availableCopies === 0);
+                                (availabilityFilter === 'available' && book.copiesAvailable > 0) ||
+                                (availabilityFilter === 'unavailable' && book.copiesAvailable === 0);
       
       const matchesRating = book.rating >= minRating;
       
@@ -53,7 +53,7 @@ const BookSearch: React.FC<BookSearchProps> = ({ books, currentUser, onBorrow })
         case 'year':
           return b.publishedYear - a.publishedYear;
         case 'availability':
-          return b.availableCopies - a.availableCopies;
+          return b.copiesAvailable - a.copiesAvailable;
         default:
           return 0;
       }

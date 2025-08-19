@@ -42,7 +42,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       case 'author':
         return a.author.localeCompare(b.author);
       case 'availability':
-        return b.availableCopies - a.availableCopies;
+        return b.copiesAvailable - a.copiesAvailable;
       case 'rating':
         return b.rating - a.rating;
       default:
@@ -86,10 +86,10 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     setSelectedBook(null);
   };
 
-  const updateBookInventory = (bookId: string, totalCopies: number, availableCopies: number) => {
+  const updateBookInventory = (bookId: string, totalCopies: number, copiesAvailable: number) => {
     setBooks(books.map(book => 
       book.id === bookId 
-        ? { ...book, totalCopies, availableCopies }
+        ? { ...book, totalCopies, copiesAvailable }
         : book
     ));
   };
@@ -331,17 +331,17 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
                               <div className="flex items-center space-x-1">
                                 <Package className="h-4 w-4 text-gray-400" />
                                 <span className="text-sm">
-                                  {book.availableCopies}/{book.totalCopies} available
+                                  {book.copiesAvailable}/{book.totalCopies} available
                                 </span>
                               </div>
                               <div className="w-full bg-gray-200 rounded-full h-2">
                                 <div
                                   className={`h-2 rounded-full ${
-                                    book.availableCopies === 0 ? 'bg-red-500' :
-                                    book.availableCopies <= book.totalCopies * 0.3 ? 'bg-yellow-500' :
+                                    book.copiesAvailable === 0 ? 'bg-red-500' :
+                                    book.copiesAvailable <= book.totalCopies * 0.3 ? 'bg-yellow-500' :
                                     'bg-green-500'
                                   }`}
-                                  style={{ width: `${(book.availableCopies / book.totalCopies) * 100}%` }}
+                                  style={{ width: `${(book.copiesAvailable / book.totalCopies) * 100}%` }}
                                 />
                               </div>
                             </div>
@@ -355,15 +355,15 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center space-x-1">
-                              {book.availableCopies > 0 ? (
+                              {book.copiesAvailable > 0 ? (
                                 <CheckCircle className="h-4 w-4 text-green-500" />
                               ) : (
                                 <XCircle className="h-4 w-4 text-red-500" />
                               )}
                               <span className={`text-xs font-medium ${
-                                book.availableCopies > 0 ? 'text-green-700' : 'text-red-700'
+                                book.copiesAvailable > 0 ? 'text-green-700' : 'text-red-700'
                               }`}>
-                                {book.availableCopies > 0 ? 'Available' : 'Out of Stock'}
+                                {book.copiesAvailable > 0 ? 'Available' : 'Out of Stock'}
                               </span>
                             </div>
                           </td>

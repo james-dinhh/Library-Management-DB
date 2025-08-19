@@ -7,7 +7,7 @@ export interface Book {
   description: string;
   coverImage: string;
   totalCopies: number;
-  availableCopies: number;
+  copiesAvailable: number;
   rating: number;
   reviewCount: number;
   publishedYear: number;
