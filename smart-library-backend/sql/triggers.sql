@@ -9,6 +9,9 @@ DROP TRIGGER IF EXISTS trg_reviews_after_delete_avg;
 
 DELIMITER $$
 
+/* -----------------------------------------------------------
+   CHECKOUTS (validation only; procedures adjust stock)
+   ----------------------------------------------------------- */
 CREATE TRIGGER trg_checkouts_before_insert_validate
 BEFORE INSERT ON checkouts
 FOR EACH ROW
@@ -43,6 +46,10 @@ BEGIN
   -- IMPORTANT: Do NOT modify copies_available here.
   -- Stock changes are handled by stored procedures within transactions.
 END$$
+
+/* -----------------------------------------------------------
+   REVIEWS (maintain avg_rating + ratings_count)
+   ----------------------------------------------------------- */
 
 -- INSERT review: initialize or update rolling average
 CREATE TRIGGER trg_reviews_after_insert_avg
@@ -79,13 +86,23 @@ CREATE TRIGGER trg_reviews_after_update_avg
 AFTER UPDATE ON reviews
 FOR EACH ROW
 BEGIN
+  DECLARE v_count INT;
+  DECLARE v_avg DECIMAL(9,4);
+  DECLARE v_sum DECIMAL(12,4);
+  DECLARE v_new_avg DECIMAL(9,4);
+
+  DECLARE v_cnt_old INT;
+  DECLARE v_avg_old DECIMAL(9,4);
+  DECLARE v_sum_old DECIMAL(12,4);
+  DECLARE v_new_avg_old DECIMAL(9,4);
+
+  DECLARE v_cnt_new INT;
+  DECLARE v_avg_new DECIMAL(9,4);
+  DECLARE v_sum_new DECIMAL(12,4);
+  DECLARE v_new_avg_new DECIMAL(9,4);
+
   IF NEW.book_id = OLD.book_id THEN
     IF NEW.rating <> OLD.rating THEN
-      DECLARE v_count INT;
-      DECLARE v_avg DECIMAL(9,4);
-      DECLARE v_sum DECIMAL(12,4);
-      DECLARE v_new_avg DECIMAL(9,4);
-
       SELECT ratings_count, avg_rating
         INTO v_count, v_avg
       FROM books
@@ -101,9 +118,7 @@ BEGIN
     END IF;
   ELSE
     -- Moved review from OLD.book_id to NEW.book_id
-    DECLARE v_cnt_old INT; DECLARE v_avg_old DECIMAL(9,4);
-    DECLARE v_sum_old DECIMAL(12,4); DECLARE v_new_avg_old DECIMAL(9,4);
-
+    -- subtract from OLD
     SELECT ratings_count, avg_rating
       INTO v_cnt_old, v_avg_old
     FROM books
@@ -124,10 +139,7 @@ BEGIN
        WHERE book_id = OLD.book_id;
     END IF;
 
-    -- Add to NEW book
-    DECLARE v_cnt_new INT; DECLARE v_avg_new DECIMAL(9,4);
-    DECLARE v_sum_new DECIMAL(12,4); DECLARE v_new_avg_new DECIMAL(9,4);
-
+    -- add to NEW
     SELECT ratings_count, avg_rating
       INTO v_cnt_new, v_avg_new
     FROM books

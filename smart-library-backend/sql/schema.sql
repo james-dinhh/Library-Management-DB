@@ -61,7 +61,7 @@ CREATE TABLE books (
   CONSTRAINT chk_copies_nonneg CHECK (copies_total >= 0 AND copies_available >= 0),
   CONSTRAINT chk_copies_le_total CHECK (copies_available <= copies_total),
   CONSTRAINT chk_published_year CHECK (
-    published_year IS NULL OR (published_year BETWEEN 1000 AND YEAR(CURDATE()))
+    published_year IS NULL OR (published_year BETWEEN 1000 AND 9999)
   )
 ) ENGINE=InnoDB;
 
