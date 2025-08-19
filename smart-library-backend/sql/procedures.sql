@@ -4,10 +4,10 @@ USE smart_library;
 -- Re-run safe
 DROP PROCEDURE IF EXISTS sp_borrow_book;
 DROP PROCEDURE IF EXISTS sp_return_book;
-DROP PROCEDURE IF EXISTS sp_review_book;
 DROP PROCEDURE IF EXISTS sp_add_book;
 DROP PROCEDURE IF EXISTS sp_update_inventory;
 DROP PROCEDURE IF EXISTS sp_retire_book;
+DROP PROCEDURE IF EXISTS sp_review_book;
 
 DELIMITER $$
 
@@ -58,7 +58,15 @@ BEGIN
 
   SET p_checkout_id = LAST_INSERT_ID();
 
+  -- Decrement stock here (triggers only validate)
+  UPDATE books
+  SET copies_available = copies_available - 1
+  WHERE book_id = p_book_id;
+
   COMMIT;
+
+  -- Optional convenience result --> don't need @out_id
+  SELECT p_checkout_id AS checkout_id;
 END$$
 
 -- sp_return_book: safe return operation
@@ -69,6 +77,7 @@ CREATE PROCEDURE sp_return_book (
 BEGIN
   DECLARE v_book_id INT;
   DECLARE v_return_date DATETIME;
+  DECLARE v_dummy INT;
 
   DECLARE EXIT HANDLER FOR SQLEXCEPTION
   BEGIN
@@ -90,72 +99,41 @@ BEGIN
       SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Checkout not found';
     END IF;
 
-    -- If already returned, do nothing (idempotent)
+    -- If already returned, do nothing
     IF v_return_date IS NOT NULL THEN
       COMMIT;
       LEAVE main;
     END IF;
 
+    -- Lock the book row (explicit)
+    SELECT 1 INTO v_dummy
+    FROM books
+    WHERE book_id = v_book_id
+    FOR UPDATE;
+
     UPDATE checkouts
     SET return_date = NOW()
     WHERE checkout_id = p_checkout_id;
+
+    -- Increment stock
+    UPDATE books
+    SET copies_available = copies_available + 1
+    WHERE book_id = v_book_id;
 
     COMMIT;
   END main;
 END$$
 
-CREATE PROCEDURE sp_review_book (
-  IN p_user_id INT,
-  IN p_book_id INT,
-  IN p_rating TINYINT,
-  IN p_comment TEXT
-)
-BEGIN
-  DECLARE v_has_borrowed INT DEFAULT 0;
-
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
-  BEGIN
-    ROLLBACK;
-    RESIGNAL;
-  END;
-
-  -- Basic validation
-  IF p_rating < 1 OR p_rating > 5 THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Rating must be between 1 and 5';
-  END IF;
-
-  -- Ensure the user has borrowed the book at least once
-  SELECT COUNT(*) INTO v_has_borrowed
-  FROM checkouts
-  WHERE user_id = p_user_id
-    AND book_id = p_book_id;
-
-  IF v_has_borrowed = 0 THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'User must borrow the book before reviewing';
-  END IF;
-
-  START TRANSACTION;
-
-  -- Insert or update one review per (user, book)
-  INSERT INTO reviews (user_id, book_id, rating, comment, review_date)
-  VALUES (p_user_id, p_book_id, p_rating, p_comment, NOW())
-  ON DUPLICATE KEY UPDATE
-    rating = VALUES(rating),
-    comment = VALUES(comment),
-    review_date = VALUES(review_date);
-
-  COMMIT;
-END$$
-
 -- sp_add_book: create book + initial stock, log admin action atomically
+-- (includes optional published_year & cover_image_url)
 CREATE PROCEDURE sp_add_book (
   IN p_staff_id INT,
   IN p_title VARCHAR(255),
   IN p_genre VARCHAR(50),
   IN p_publisher_id INT,
   IN p_copies_total INT,
-  IN p_published_year SMALLINT,         
-  IN p_cover_image_url VARCHAR(512)     
+  IN p_published_year SMALLINT,
+  IN p_cover_image_url VARCHAR(512)
 )
 BEGIN
   DECLARE v_book_id INT;
@@ -280,6 +258,51 @@ BEGIN
 
     COMMIT;
   END main;
+END$$
+
+-- sp_review_book: validate + upsert a review (one per user/book)
+-- Requires UNIQUE KEY (user_id, book_id) on reviews table.
+CREATE PROCEDURE sp_review_book (
+  IN p_user_id INT,
+  IN p_book_id INT,
+  IN p_rating TINYINT,
+  IN p_comment TEXT
+)
+BEGIN
+  DECLARE v_has_borrowed INT DEFAULT 0;
+
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    ROLLBACK;
+    RESIGNAL;
+  END;
+
+  -- Basic validation
+  IF p_rating < 1 OR p_rating > 5 THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Rating must be between 1 and 5';
+  END IF;
+
+  -- Ensure the user has borrowed the book at least once
+  SELECT COUNT(*) INTO v_has_borrowed
+  FROM checkouts
+  WHERE user_id = p_user_id
+    AND book_id = p_book_id;
+
+  IF v_has_borrowed = 0 THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'User must borrow the book before reviewing';
+  END IF;
+
+  START TRANSACTION;
+
+  -- Insert or update one review per (user, book)
+  INSERT INTO reviews (user_id, book_id, rating, comment, review_date)
+  VALUES (p_user_id, p_book_id, p_rating, p_comment, NOW())
+  ON DUPLICATE KEY UPDATE
+    rating = VALUES(rating),
+    comment = VALUES(comment),
+    review_date = VALUES(review_date);
+
+  COMMIT;
 END$$
 
 DELIMITER ;
