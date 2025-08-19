@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, Calendar, Eye, Heart } from 'lucide-react';
+import { Calendar, Eye, Heart } from 'lucide-react';
 import { Book } from '../types';
 import { getAvailabilityStatus } from '../utils/helpers';
 

@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Star, Calendar, BookOpen, MessageCircle, User, Heart, Share2 } from 'lucide-react';
-import { Book, User as UserType, Review } from '../types';
-import { mockReviews } from '../utils/mockData';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Calendar, MessageCircle, User, Heart, Share2 } from 'lucide-react';
+import { Book, User as UserType } from '../types';
 import { formatDate, getAvailabilityStatus } from '../utils/helpers';
 
 interface BookDetailsProps {
@@ -12,18 +11,62 @@ interface BookDetailsProps {
 }
 
 const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, onBorrow }) => {
+  const [bookReviews, setBookReviews] = useState<any[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(true);
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
   const [showReviewForm, setShowReviewForm] = useState(false);
-  
-  const bookReviews = mockReviews.filter(review => review.bookId === book.id);
+
   const availability = getAvailabilityStatus(book.availableCopies);
 
-  const handleSubmitReview = (e: React.FormEvent) => {
+  // Fetch reviews from backend
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setLoadingReviews(true);
+        const response = await fetch(`/reviews/book/${book.id}`);
+        if (!response.ok) throw new Error('Failed to fetch reviews');
+        const data = await response.json();
+        setBookReviews(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingReviews(false);
+      }
+    };
+
+    fetchReviews();
+  }, [book.id]);
+
+  // Submit new review
+  const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would submit to the backend
-    console.log('Submitting review:', newReview);
-    setShowReviewForm(false);
-    setNewReview({ rating: 5, comment: '' });
+    try {
+      const response = await fetch('/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          bookId: book.id,
+          rating: newReview.rating,
+          comment: newReview.comment,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to submit review');
+
+      // Option 1: refetch all reviews
+      const refreshed = await fetch(`/reviews/book/${book.id}`);
+      const data = await refreshed.json();
+      setBookReviews(data);
+
+      // Option 2: append new review without refetch
+      // setBookReviews(prev => [...prev, { ...newReview, userName: currentUser.name, date: new Date().toISOString(), id: Date.now() }]);
+
+      setShowReviewForm(false);
+      setNewReview({ rating: 5, comment: '' });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -197,37 +240,39 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
           )}
 
           {/* Reviews List */}
-          <div className="space-y-4">
-            {bookReviews.map((review) => (
-              <div key={review.id} className="border border-gray-200 rounded-xl p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
-                    <User className="h-10 w-10 text-gray-400 bg-gray-100 rounded-full p-2" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <h4 className="font-semibold text-gray-900">{review.userName}</h4>
-                      <div className="flex text-yellow-400 text-sm">
-                        {'★'.repeat(review.rating)}
-                        {'☆'.repeat(5 - review.rating)}
-                      </div>
-                      <span className="text-sm text-gray-500">
-                        {formatDate(review.date)}
-                      </span>
+          {loadingReviews ? (
+            <p className="text-gray-500">Loading reviews...</p>
+          ) : bookReviews.length > 0 ? (
+            <div className="space-y-4">
+              {bookReviews.map((review) => (
+                <div key={review.id} className="border border-gray-200 rounded-xl p-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0">
+                      <User className="h-10 w-10 text-gray-400 bg-gray-100 rounded-full p-2" />
                     </div>
-                    <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <h4 className="font-semibold text-gray-900">{review.userName}</h4>
+                        <div className="flex text-yellow-400 text-sm">
+                          {'★'.repeat(review.rating)}
+                          {'☆'.repeat(5 - review.rating)}
+                        </div>
+                        <span className="text-sm text-gray-500">
+                          {formatDate(review.date)}
+                        </span>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-            
-            {bookReviews.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                <MessageCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                <p>No reviews yet. Be the first to review this book!</p>
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <MessageCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+              <p>No reviews yet. Be the first to review this book!</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

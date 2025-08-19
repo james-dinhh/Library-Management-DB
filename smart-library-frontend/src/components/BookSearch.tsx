@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, Grid, List, SortAsc } from 'lucide-react';
+import { Search, Filter, Grid, List } from 'lucide-react';
 import { Book, User } from '../types';
 import BookCard from './BookCard';
 import BookDetails from './BookDetails';

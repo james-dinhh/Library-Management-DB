@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { 
   Users, BookOpen, Clock, AlertTriangle, TrendingUp, 
   Plus, Edit, Trash2, Eye, BarChart3, PieChart, Package,
-  Calendar, Search, Filter, CheckCircle, XCircle
+  Search, CheckCircle, XCircle
 } from 'lucide-react';
-import { Book, User, BorrowRecord, Analytics } from '../types';
+import { Book, User } from '../types';
 import { mockBooks, mockUsers, mockBorrowRecords, mockAnalytics } from '../utils/mockData';
 import { formatDate } from '../utils/helpers';
 import BookForm from './BookForm';

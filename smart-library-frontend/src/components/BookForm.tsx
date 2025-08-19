@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, Save, AlertCircle } from 'lucide-react';
+import { X, Save, AlertCircle } from 'lucide-react';
 import { Book } from '../types';
 
 interface BookFormProps {

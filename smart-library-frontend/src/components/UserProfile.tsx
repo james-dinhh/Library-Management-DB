@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { User, Calendar, BookOpen, Clock, Star, ChevronRight, Award, TrendingUp } from 'lucide-react';
-import { User as UserType, BorrowRecord, Book } from '../types';
+import { User, Calendar, BookOpen, Star, ChevronRight, Award, TrendingUp } from 'lucide-react';
+import { User as UserType, BorrowRecord } from '../types';
 import { mockBorrowRecords, mockBooks, mockReviews } from '../utils/mockData';
 import { formatDate, calculateDaysUntilDue } from '../utils/helpers';
 
