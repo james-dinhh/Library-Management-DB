@@ -310,7 +310,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <img
-                                src={book.coverImage}
+                                src={book.coverImageUrl}
                                 alt={book.title}
                                 className="w-12 h-16 object-cover rounded-lg mr-4"
                               />

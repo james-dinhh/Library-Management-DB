@@ -161,7 +161,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser }) => {
                         <div key={record.id} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
                           <div className="flex space-x-3">
                             <img
-                              src={book.coverImage}
+                              src={book.coverImageUrl}
                               alt={book.title}
                               className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
                             />
@@ -196,7 +196,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser }) => {
                 {allBooksWithRecords.map(({ book, record }) => (
                   <div key={record.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
                     <img
-                      src={book.coverImage}
+                      src={book.coverImageUrl}
                       alt={book.title}
                       className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
                     />
@@ -248,7 +248,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser }) => {
                       <div className="flex items-start space-x-4">
                         {book && (
                           <img
-                            src={book.coverImage}
+                            src={book.coverImageUrl}
                             alt={book.title}
                             className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
                           />

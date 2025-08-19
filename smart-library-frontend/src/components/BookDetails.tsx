@@ -86,7 +86,7 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
           {/* Book Cover */}
           <div className="md:w-1/3 lg:w-1/4">
             <img
-              src={book.coverImage}
+              src={book.coverImageUrl}
               alt={book.title}
               className="w-full h-96 md:h-full object-cover"
             />

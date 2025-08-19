@@ -16,7 +16,7 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
     genre: '',
     isbn: '',
     description: '',
-    coverImage: '',
+    coverImageUrl: '',
     totalCopies: 1,
     copiesAvailable: 1,
     publishedYear: new Date().getFullYear(),
@@ -50,7 +50,7 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
         genre: book.genre,
         isbn: book.isbn,
         description: book.description,
-        coverImage: book.coverImage,
+        coverImageUrl: book.coverImageUrl,
         totalCopies: book.totalCopies,
         copiesAvailable: book.copiesAvailable,
         publishedYear: book.publishedYear,
@@ -64,7 +64,7 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
         genre: '',
         isbn: '',
         description: '',
-        coverImage: stockImages[0],
+        coverImageUrl: stockImages[0],
         totalCopies: 1,
         copiesAvailable: 1,
         publishedYear: new Date().getFullYear(),
@@ -349,7 +349,7 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
                 <div className="space-y-4">
                   <div className="flex justify-center">
                     <img
-                      src={formData.coverImage}
+                      src={formData.coverImageUrl}
                       alt="Book cover preview"
                       className="w-32 h-40 object-cover rounded-lg shadow-md"
                     />
@@ -361,8 +361,8 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
                     </label>
                     <input
                       type="url"
-                      value={formData.coverImage}
-                      onChange={(e) => handleInputChange('coverImage', e.target.value)}
+                      value={formData.coverImageUrl}
+                      onChange={(e) => handleInputChange('coverImageUrl', e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                       placeholder="https://example.com/image.jpg"
                     />
@@ -377,9 +377,9 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
                         <button
                           key={index}
                           type="button"
-                          onClick={() => handleInputChange('coverImage', image)}
+                          onClick={() => handleInputChange('coverImageUrl', image)}
                           className={`relative rounded-lg overflow-hidden border-2 transition-all ${
-                            formData.coverImage === image
+                            formData.coverImageUrl === image
                               ? 'border-blue-500 ring-2 ring-blue-200'
                               : 'border-gray-200 hover:border-gray-300'
                           }`}
