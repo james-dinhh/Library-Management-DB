@@ -20,40 +20,47 @@ const BookSearch: React.FC<BookSearchProps> = ({ books, currentUser, onBorrow })
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
   const genres = useMemo(() => {
-    const uniqueGenres = [...new Set(books.map(book => book.genre))];
+    const uniqueGenres = [...new Set(books.map(book => String(book.genre ?? '')))];
     return uniqueGenres.sort();
   }, [books]);
 
   const filteredAndSortedBooks = useMemo(() => {
     let filtered = books.filter(book => {
-      const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          book.genre.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesGenre = !selectedGenre || book.genre === selectedGenre;
-      
-      const matchesAvailability = availabilityFilter === 'all' || 
-                                (availabilityFilter === 'available' && book.copiesAvailable > 0) ||
-                                (availabilityFilter === 'unavailable' && book.copiesAvailable === 0);
-      
-      const matchesRating = book.rating >= minRating;
-      
+      const title = String(book.title ?? '');
+      const author = String(book.author ?? '');
+      const genre = String(book.genre ?? '');
+      const rating = Number(book.rating ?? 0);
+      const copies = Number(book.copiesAvailable ?? 0);
+
+      const matchesSearch =
+        title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        genre.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesGenre = !selectedGenre || genre === selectedGenre;
+
+      const matchesAvailability =
+        availabilityFilter === 'all' ||
+        (availabilityFilter === 'available' && copies > 0) ||
+        (availabilityFilter === 'unavailable' && copies === 0);
+
+      const matchesRating = rating >= minRating;
+
       return matchesSearch && matchesGenre && matchesAvailability && matchesRating;
     });
 
-    // Sort books
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'title':
-          return a.title.localeCompare(b.title);
+          return String(a.title ?? '').localeCompare(String(b.title ?? ''));
         case 'author':
-          return a.author.localeCompare(b.author);
+          return String(a.author ?? '').localeCompare(String(b.author ?? ''));
         case 'rating':
-          return b.rating - a.rating;
+          return (Number(b.rating ?? 0)) - (Number(a.rating ?? 0));
         case 'year':
-          return b.publishedYear - a.publishedYear;
+          return (Number(b.publishedYear ?? 0)) - (Number(a.publishedYear ?? 0));
         case 'availability':
-          return b.copiesAvailable - a.copiesAvailable;
+          return (Number(b.copiesAvailable ?? 0)) - (Number(a.copiesAvailable ?? 0));
         default:
           return 0;
       }
@@ -80,7 +87,7 @@ const BookSearch: React.FC<BookSearchProps> = ({ books, currentUser, onBorrow })
         <h1 className="text-3xl font-bold text-gray-900 mb-6">
           {currentUser.role === 'staff' ? 'Book Catalog Management' : 'Discover Books'}
         </h1>
-        
+
         {/* Search Bar */}
         <div className="relative mb-6">
           <Search className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" />
@@ -199,13 +206,13 @@ const BookSearch: React.FC<BookSearchProps> = ({ books, currentUser, onBorrow })
       </div>
 
       {/* Book Grid/List */}
-      <div className={viewMode === 'grid' 
+      <div className={viewMode === 'grid'
         ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
         : 'space-y-4'
       }>
         {filteredAndSortedBooks.map(book => (
           <BookCard
-            key={book.id}
+            key={String(book.id)}
             book={book}
             onViewDetails={setSelectedBook}
             onBorrow={onBorrow}
