@@ -22,7 +22,23 @@ function App() {
         const res = await fetch(`${API_BASE}/books`);
         if (!res.ok) throw new Error("Failed to fetch books");
         const data = await res.json();
-        setBooks(data);
+
+        const mappedBooks: Book[] = data.map((b: any) => ({
+                id: b.id,
+                title: b.title,
+                author: b.author || b.authors || "Unknown",
+                coverImageUrl: b.coverImageUrl || "https://images.pexels.com/photos/1029141/pexels-photo-1029141.jpeg",
+                publishedYear: b.publishedYear || "Unknown",
+                genre: b.genre || b.category || "Unknown",
+                isbn: b.isbn || "",
+                rating: b.rating || 0,
+                reviewCount: b.reviewCount || 0,
+                copiesAvailable: b.copiesAvailable ?? 0,
+                totalCopies: b.totalCopies ?? 0,
+                description: b.description || "",
+              }));
+
+        setBooks(mappedBooks);
       } catch (err) {
         console.error("❌ Error fetching books:", err);
       }
