@@ -2,6 +2,7 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 import dotenv from 'dotenv';
 
 dotenv.config();
+console.log("MONGO_URI from .env:", process.env.MONGO_URI);
 const uri = process.env.MONGO_URI;
 
 const client = new MongoClient(uri);

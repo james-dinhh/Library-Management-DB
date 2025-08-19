@@ -1,8 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
-dotenv.config();
 
 // Import MongoDB connection and analytics router
 import { connectMongo } from './db/mongo.js';
@@ -15,9 +15,23 @@ import reviewsRouter from './routes/reviews.routes.js';
 import booksRouter from './routes/books.routes.js';
 
 const app = express();
-app.use(cors());
+
+// Middleware
 app.use(express.json());
 app.use(morgan('dev'));
+
+// Allow your Vite dev origin and your prod site
+const allowedOrigins = [
+  "http://localhost:5173",           // Vite dev server
+  process.env.FRONTEND_URL           // e.g. https://app.your-domain.com
+].filter(Boolean);
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization"]
+}));
 
 // Health endpoint
 app.get('/health', (req, res) => {
@@ -67,6 +81,7 @@ async function startServer() {
     // Connect to MongoDB
     await connectMongo();
     console.log('MongoDB connection established');
+
     // Test MySQL connection
     try {
       const [rows] = await mysqlPool.query('SELECT 1');
@@ -75,6 +90,7 @@ async function startServer() {
       console.error('Failed to connect to MySQL:', mysqlErr);
       process.exit(1);
     }
+
     app.listen(port, () => {
       console.log(`🚀 Server running on http://localhost:${port}`);
       console.log(`📊 Health check available at http://localhost:${port}/health`);
