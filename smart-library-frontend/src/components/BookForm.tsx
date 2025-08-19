@@ -98,17 +98,40 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
-      onSave(formData);
+      let response;
+
+      if (book) {
+        // Update existing book
+        response = await fetch(`/admin/books/${book.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+      } else {
+        // Create new book
+        response = await fetch('/admin/books', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+      }
+
+      if (!response.ok) {
+        throw new Error(`Failed to save book (${response.status})`);
+      }
+
+      const savedBook = await response.json();
+      onSave(savedBook); // pass the saved book back to parent
       onClose();
     } catch (error) {
       console.error('Error saving book:', error);
+      alert('Something went wrong while saving the book.');
     } finally {
       setIsSubmitting(false);
     }
