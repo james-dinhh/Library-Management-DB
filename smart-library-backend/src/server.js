@@ -53,7 +53,7 @@ const swaggerOptions = {
     // By default, require Bearer auth. Clear it per-path in JSDoc with `security: []` if needed.
     security: [{ bearerAuth: [] }],
   },
-  apis: [routesGlob], // scan actual route files next to this server.js
+  apis: [routesGlob],
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
@@ -68,10 +68,8 @@ app.get('/health', async (req, res) => {
     const [rows] = await mysqlPool.query('SELECT 1 AS ok');
     const mysqlOk = rows?.[0]?.ok === 1;
 
-    // (Optional) Mongo ping — only if connectMongo ran at startup
     let mongoOk = true;
     try {
-      // If you exported getDb() you could ping here; we assume connectMongo() ran.
       mongoOk = true;
     } catch {
       mongoOk = false;
@@ -86,7 +84,7 @@ app.get('/health', async (req, res) => {
 // Public routes
 app.use('/auth', authRouter);
 
-// Make /books public read-only (you can protect it if you prefer)
+// Make /books public read-only
 app.use('/books', booksRouter);
 
 // Protected routes
@@ -104,7 +102,7 @@ const port = process.env.PORT || 4000;
 
 (async () => {
   try {
-    // Connect Mongo first (re-entrant safe in your mongo.js)
+    // Connect Mongo
     await connectMongo();
 
     // Verify MySQL connectivity once
