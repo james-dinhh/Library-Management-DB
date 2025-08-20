@@ -2,6 +2,30 @@ import { Router } from 'express';
 import { mysqlPool } from '../db/mysql.js';
 
 const router = Router();
+/**
+ * @openapi
+ * /library/borrow:
+ *   post:
+ *     tags:
+ *       - Library
+ *     summary: Borrow a book
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *               bookId:
+ *                 type: integer
+ *               days:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 
 // POST /library/borrow
 router.post('/borrow', async (req, res) => {
@@ -16,6 +40,26 @@ router.post('/borrow', async (req, res) => {
     res.status(400).json({ error: e.sqlMessage || e.message });
   }
 });
+/**
+ * @openapi
+ * /library/return:
+ *   post:
+ *     tags:
+ *       - Library
+ *     summary: Return a book
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               checkoutId:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 
 // POST /library/return
 router.post('/return', async (req, res) => {

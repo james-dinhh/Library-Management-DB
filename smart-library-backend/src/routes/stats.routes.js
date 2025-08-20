@@ -1,3 +1,52 @@
+/**
+ * @openapi
+ * /stats/is-available/{bookId}:
+ *   get:
+ *     tags:
+ *       - Stats
+ *     summary: Check if a book is available
+ *     parameters:
+ *       - in: path
+ *         name: bookId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Availability status
+ *
+ * /stats/return-on-time/{checkoutId}:
+ *   get:
+ *     tags:
+ *       - Stats
+ *     summary: Check if a return was on time
+ *     parameters:
+ *       - in: path
+ *         name: checkoutId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Return status
+ *
+ * /stats/borrow-count:
+ *   get:
+ *     tags:
+ *       - Stats
+ *     summary: Get borrow count in a date range
+ *     parameters:
+ *       - in: query
+ *         name: start
+ *         required: true
+ *         schema: { type: string, format: date-time }
+ *       - in: query
+ *         name: end
+ *         required: true
+ *         schema: { type: string, format: date-time }
+ *     responses:
+ *       200:
+ *         description: Borrow count
+ */
+
 import { Router } from 'express';
 import { mysqlPool } from '../db/mysql.js';
 
