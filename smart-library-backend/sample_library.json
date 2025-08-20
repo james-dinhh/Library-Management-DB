@@ -5,7 +5,7 @@
       "name": "Alice Nguyen",
       "email": "alice@example.com",
       "role": "reader",
-      "password": "hashed_pw_1",
+      "password": "$2a$12$X8T9GaJPsWCYs5VUmuc45u0S4w/X.i8dm5Ovi2TktzI4rp2ZvXiui",
       "registration_date": "2025-08-01"
     },
     {
@@ -13,7 +13,7 @@
       "name": "Bob Tran",
       "email": "bob@example.com",
       "role": "staff",
-      "password": "hashed_pw_2",
+      "password": "$2a$12$0RbYAwomzlnRkVJv73ErCOhiMLIO5hjr4Xn4vz/EXgF3MZPRKjDrm",
       "registration_date": "2025-08-01"
     },
     {
@@ -21,7 +21,7 @@
       "name": "Chi Le",
       "email": "chi@example.com",
       "role": "reader",
-      "password": "hashed_pw_3",
+      "password": "$2a$12$oHNtOffXec8Hq809QpF4oObdtGxZ0isCUl.HiniAEejJWhYcHgd7O",
       "registration_date": "2025-08-02"
     }
   ],
