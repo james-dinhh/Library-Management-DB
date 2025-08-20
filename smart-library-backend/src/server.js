@@ -7,6 +7,8 @@ import morgan from 'morgan';
 // Import MongoDB connection and analytics router
 import { connectMongo } from './db/mongo.js';
 import { mysqlPool } from './db/mysql.js';
+import { authenticate, authorizeRole } from './middleware/auth.js';
+import authRouter from './routes/auth.routes.js';
 import analyticsRouter from './routes/analytics.routes.js';
 import statsRouter from './routes/stats.routes.js';
 import libraryRouter from './routes/library.routes.js';
@@ -55,12 +57,17 @@ app.get('/', (req, res) => {
 });
 
 // Register routes
-app.use('/analytics', analyticsRouter);
-app.use('/stats', statsRouter);
-app.use('/library', libraryRouter);
-app.use('/admin', adminRouter);
-app.use('/reviews', reviewsRouter);
+app.use('/auth', authRouter);
+
+// Public endpoint
 app.use('/books', booksRouter);
+
+// Protected endpoints
+app.use('/library', authenticate, authorizeRole('reader', 'staff'), libraryRouter);
+app.use('/reviews', authenticate, authorizeRole('reader', 'staff'), reviewsRouter);
+app.use('/analytics', authenticate, authorizeRole('staff'), analyticsRouter);
+app.use('/admin', authenticate, authorizeRole('staff'), adminRouter);
+app.use('/stats', authenticate, authorizeRole('staff'), statsRouter);
 
 const port = process.env.PORT || 4000;
 
