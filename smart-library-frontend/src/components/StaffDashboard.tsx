@@ -20,14 +20,18 @@ async function fetchBooks() {
 }
 
 async function addBook(bookData: any) {
-  const res = await fetch(`${API_BASE}/admin`, { // POST /admin
+  const res = await fetch(`${API_BASE}/admin/books`, {  // endpoint must include /books
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}` // include token
+    },
     body: JSON.stringify(bookData)
   });
   if (!res.ok) throw new Error('Failed to add book');
   return res.json();
 }
+
 
 async function updateBookInventory(bookId: number, staffId: number, newTotal: number) {
   const res = await fetch(`${API_BASE}/admin`, { // PUT /admin
@@ -246,6 +250,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       </div>
 
       <BookForm
+        staffId={Number(currentUser.id)}
         book={selectedBook}
         isOpen={showBookForm}
         onClose={handleCloseForm}

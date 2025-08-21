@@ -76,15 +76,17 @@ const router = Router();
 // POST /admin/books (add)
 router.post('/books', async (req, res) => {
   const { staffId, title, genre, publisherId, copiesTotal, publishedYear, coverImageUrl } = req.body;
+  console.log(req.body);
   try {
     await mysqlPool.query('CALL sp_add_book(?,?,?,?,?,?,?)', [
       staffId, title, genre, publisherId, copiesTotal, publishedYear || null, coverImageUrl || null
     ]);
-    res.json({ ok: true });
+    res.json({ ok: true }); // just return ok:true
   } catch (e) {
     res.status(400).json({ error: e.sqlMessage || e.message });
   }
 });
+
 
 // PUT /admin/books/:id/inventory (update total)
 router.put('/books/:id/inventory', async (req, res) => {
