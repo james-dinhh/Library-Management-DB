@@ -4,11 +4,12 @@ import { User as UserType } from '../types';
 
 interface RegisterProps {
   onRegister: (user: UserType) => void;
+  onSwitchToLogin: () => void;
 }
 
 const API_BASE = "http://localhost:4000";
 
-const Register: React.FC<RegisterProps> = ({ onRegister }) => {
+const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -127,6 +128,18 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
             <User className="h-5 w-5" />
             <span>Register</span>
           </button>
+
+          <p className="mt-6 text-center text-sm text-gray-600">
+            Already have an account?{' '}
+            <button
+              type="button"
+              onClick={onSwitchToLogin}
+              className="text-blue-700 font-medium hover:underline"
+            >
+              Back to login
+            </button>
+          </p>
+
         </form>
       </div>
     </div>

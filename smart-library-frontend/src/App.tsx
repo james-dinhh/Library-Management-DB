@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "./components/Header";
 import Login from "./components/Login";
-import Register from "./components/Register"; // 👈 your new registration component
+import Register from "./components/Register"; 
 import BookSearch from "./components/BookSearch";
 import UserProfile from "./components/UserProfile";
 import StaffDashboard from "./components/StaffDashboard";
@@ -10,7 +10,7 @@ import { User, Book, BorrowRecord } from "./types";
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState("search");
-  const [authMode, setAuthMode] = useState<"login" | "register">("login"); // 👈 controls Login/Register
+  const [authMode, setAuthMode] = useState<"login" | "register">("login"); 
 
   const [books, setBooks] = useState<Book[]>([]);
   const [borrowRecords, setBorrowRecords] = useState<BorrowRecord[]>([]);
@@ -59,7 +59,7 @@ function App() {
   const handleLogout = () => {
     setCurrentUser(null);
     setActiveTab("search");
-    setAuthMode("login"); // 👈 reset to login on logout
+    setAuthMode("login"); 
   };
 
   const handleBorrow = async (book: Book) => {
