@@ -108,17 +108,21 @@ router.post('/register', async (req, res) => {
  */
 router.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body || {};
-        if (!email || !password) {
-            return res.status(400).json({ error: 'email and password are required' });
+        const { email, password, role } = req.body || {};
+        if (!email || !password || !role) {
+            return res.status(400).json({ error: 'email, password and role are required' });
         }
 
-        const [rows] = await mysqlPool.execute('SELECT * FROM users WHERE email = ?', [email]);
+        // enforce role in the query
+        const [rows] = await mysqlPool.execute(
+            'SELECT * FROM users WHERE email = ? AND role = ?',
+            [email, role]
+        );
         const user = rows[0];
-        if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+        if (!user) return res.status(401).json({ error: 'Invalid credentials or role' });
 
         const ok = await bcrypt.compare(password, user.password);
-        if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
+        if (!ok) return res.status(401).json({ error: 'Invalid credentials or role' });
 
         const token = signToken(user);
         return res.json({
@@ -129,6 +133,7 @@ router.post('/login', async (req, res) => {
         return res.status(500).json({ error: e.message });
     }
 });
+
 
 /**
  * GET /auth/me

@@ -22,7 +22,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, role: userType }),
       });
 
       if (!res.ok) {
