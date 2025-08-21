@@ -5,9 +5,9 @@ export interface Book {
   genre: string;
   isbn: string;
   description: string;
-  coverImage: string;
+  coverImageUrl: string;
   totalCopies: number;
-  availableCopies: number;
+  copiesAvailable: number;
   rating: number;
   reviewCount: number;
   publishedYear: number;

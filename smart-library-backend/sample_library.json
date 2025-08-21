@@ -1,0 +1,164 @@
+{
+  "users": [
+    {
+      "user_id": 1,
+      "name": "Alice Nguyen",
+      "email": "alice@example.com",
+      "role": "reader",
+      "password": "$2a$12$X8T9GaJPsWCYs5VUmuc45u0S4w/X.i8dm5Ovi2TktzI4rp2ZvXiui",
+      "registration_date": "2025-08-01"
+    },
+    {
+      "user_id": 2,
+      "name": "Bob Tran",
+      "email": "bob@example.com",
+      "role": "staff",
+      "password": "$2a$12$0RbYAwomzlnRkVJv73ErCOhiMLIO5hjr4Xn4vz/EXgF3MZPRKjDrm",
+      "registration_date": "2025-08-01"
+    },
+    {
+      "user_id": 3,
+      "name": "Chi Le",
+      "email": "chi@example.com",
+      "role": "reader",
+      "password": "$2a$12$oHNtOffXec8Hq809QpF4oObdtGxZ0isCUl.HiniAEejJWhYcHgd7O",
+      "registration_date": "2025-08-02"
+    }
+  ],
+  "publishers": [
+    {
+      "publisher_id": 1,
+      "name": "Lotus Books",
+      "address": "123 Flower St, HCMC"
+    },
+    {
+      "publisher_id": 2,
+      "name": "Dragon Press",
+      "address": "456 River Rd, Hanoi"
+    }
+  ],
+  "authors": [
+    {
+      "author_id": 1,
+      "name": "Minh Le",
+      "bio": "Vietnamese novelist and poet."
+    },
+    {
+      "author_id": 2,
+      "name": "Thao Vu",
+      "bio": "Children’s book author."
+    },
+    {
+      "author_id": 3,
+      "name": "Khoa Dang",
+      "bio": "Historian and essayist."
+    }
+  ],
+  "books": [
+    {
+      "book_id": 1,
+      "title": "The Bamboo Path",
+      "genre": "Fiction",
+      "published_year": 2020,
+      "publisher_id": 1,
+      "cover_image_url": "http://example.com/bamboo.jpg",
+      "copies_total": 5,
+      "copies_available": 3,
+      "status": "active",
+      "avg_rating": 4.5,
+      "ratings_count": 10
+    },
+    {
+      "book_id": 2,
+      "title": "River Tales",
+      "genre": "Children",
+      "published_year": 2018,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 3,
+      "copies_available": 0,
+      "status": "retired",
+      "avg_rating": null,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 3,
+      "title": "Echoes of the Past",
+      "genre": "History",
+      "published_year": 2015,
+      "publisher_id": 1,
+      "cover_image_url": "http://example.com/echoes.jpg",
+      "copies_total": 4,
+      "copies_available": 4,
+      "status": "active",
+      "avg_rating": 4.0,
+      "ratings_count": 5
+    }
+  ],
+  "book_authors": [
+    { "book_id": 1, "author_id": 1 },
+    { "book_id": 2, "author_id": 2 },
+    { "book_id": 3, "author_id": 3 }
+  ],
+  "checkouts": [
+    {
+      "checkout_id": 1,
+      "user_id": 1,
+      "book_id": 1,
+      "borrow_date": "2025-08-03",
+      "due_date": "2025-08-10",
+      "return_date": "2025-08-12",
+      "is_late": true
+    },
+    {
+      "checkout_id": 2,
+      "user_id": 3,
+      "book_id": 3,
+      "borrow_date": "2025-08-05",
+      "due_date": "2025-08-12",
+      "return_date": null,
+      "is_late": null
+    }
+  ],
+  "reviews": [
+    {
+      "review_id": 1,
+      "user_id": 1,
+      "book_id": 1,
+      "rating": 5,
+      "comment": "Loved the storytelling!",
+      "review_date": "2025-08-13"
+    },
+    {
+      "review_id": 2,
+      "user_id": 3,
+      "book_id": 3,
+      "rating": 4,
+      "comment": "Very informative and well-written.",
+      "review_date": "2025-08-13"
+    }
+  ],
+  "staff_logs": [
+    {
+      "log_id": 1,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 1,
+      "timestamp": "2025-08-01"
+    },
+    {
+      "log_id": 2,
+      "staff_id": 2,
+      "action_type": "retire_book",
+      "book_id": 2,
+      "timestamp": "2025-08-02"
+    },
+    {
+      "log_id": 3,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 3,
+      "timestamp": "2025-08-03"
+    }
+  ]
+}

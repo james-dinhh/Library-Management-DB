@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, Save, AlertCircle } from 'lucide-react';
+import { X, Save, AlertCircle } from 'lucide-react';
 import { Book } from '../types';
 
 interface BookFormProps {
@@ -16,9 +16,9 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
     genre: '',
     isbn: '',
     description: '',
-    coverImage: '',
+    coverImageUrl: '',
     totalCopies: 1,
-    availableCopies: 1,
+    copiesAvailable: 1,
     publishedYear: new Date().getFullYear(),
     rating: 0,
     reviewCount: 0
@@ -50,9 +50,9 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
         genre: book.genre,
         isbn: book.isbn,
         description: book.description,
-        coverImage: book.coverImage,
+        coverImageUrl: book.coverImageUrl,
         totalCopies: book.totalCopies,
-        availableCopies: book.availableCopies,
+        copiesAvailable: book.copiesAvailable,
         publishedYear: book.publishedYear,
         rating: book.rating,
         reviewCount: book.reviewCount
@@ -64,9 +64,9 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
         genre: '',
         isbn: '',
         description: '',
-        coverImage: stockImages[0],
+        coverImageUrl: stockImages[0],
         totalCopies: 1,
-        availableCopies: 1,
+        copiesAvailable: 1,
         publishedYear: new Date().getFullYear(),
         rating: 0,
         reviewCount: 0
@@ -84,9 +84,9 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
     if (!formData.isbn.trim()) newErrors.isbn = 'ISBN is required';
     if (!formData.description.trim()) newErrors.description = 'Description is required';
     if (formData.totalCopies < 1) newErrors.totalCopies = 'Total copies must be at least 1';
-    if (formData.availableCopies < 0) newErrors.availableCopies = 'Available copies cannot be negative';
-    if (formData.availableCopies > formData.totalCopies) {
-      newErrors.availableCopies = 'Available copies cannot exceed total copies';
+    if (formData.copiesAvailable < 0) newErrors.copiesAvailable = 'Available copies cannot be negative';
+    if (formData.copiesAvailable > formData.totalCopies) {
+      newErrors.copiesAvailable = 'Available copies cannot exceed total copies';
     }
     if (formData.publishedYear < 1000 || formData.publishedYear > new Date().getFullYear()) {
       newErrors.publishedYear = 'Please enter a valid publication year';
@@ -98,17 +98,40 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
-      onSave(formData);
+      let response;
+
+      if (book) {
+        // Update existing book
+        response = await fetch(`/admin/books/${book.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+      } else {
+        // Create new book
+        response = await fetch('/admin/books', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+      }
+
+      if (!response.ok) {
+        throw new Error(`Failed to save book (${response.status})`);
+      }
+
+      const savedBook = await response.json();
+      onSave(savedBook); // pass the saved book back to parent
       onClose();
     } catch (error) {
       console.error('Error saving book:', error);
+      alert('Something went wrong while saving the book.');
     } finally {
       setIsSubmitting(false);
     }
@@ -292,18 +315,18 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
                     </label>
                     <input
                       type="number"
-                      value={formData.availableCopies}
-                      onChange={(e) => handleInputChange('availableCopies', parseInt(e.target.value))}
+                      value={formData.copiesAvailable}
+                      onChange={(e) => handleInputChange('copiesAvailable', parseInt(e.target.value))}
                       className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                        errors.availableCopies ? 'border-red-300' : 'border-gray-300'
+                        errors.copiesAvailable ? 'border-red-300' : 'border-gray-300'
                       }`}
                       min="0"
                       max={formData.totalCopies}
                     />
-                    {errors.availableCopies && (
+                    {errors.copiesAvailable && (
                       <p className="mt-1 text-sm text-red-600 flex items-center">
                         <AlertCircle className="h-4 w-4 mr-1" />
-                        {errors.availableCopies}
+                        {errors.copiesAvailable}
                       </p>
                     )}
                   </div>
@@ -311,7 +334,7 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
 
                 <div className="mt-4 p-3 bg-blue-100 rounded-lg">
                   <p className="text-sm text-blue-800">
-                    <strong>Borrowed copies:</strong> {formData.totalCopies - formData.availableCopies}
+                    <strong>Borrowed copies:</strong> {formData.totalCopies - formData.copiesAvailable}
                   </p>
                 </div>
               </div>
@@ -326,7 +349,7 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
                 <div className="space-y-4">
                   <div className="flex justify-center">
                     <img
-                      src={formData.coverImage}
+                      src={formData.coverImageUrl}
                       alt="Book cover preview"
                       className="w-32 h-40 object-cover rounded-lg shadow-md"
                     />
@@ -338,8 +361,8 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
                     </label>
                     <input
                       type="url"
-                      value={formData.coverImage}
-                      onChange={(e) => handleInputChange('coverImage', e.target.value)}
+                      value={formData.coverImageUrl}
+                      onChange={(e) => handleInputChange('coverImageUrl', e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                       placeholder="https://example.com/image.jpg"
                     />
@@ -354,9 +377,9 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
                         <button
                           key={index}
                           type="button"
-                          onClick={() => handleInputChange('coverImage', image)}
+                          onClick={() => handleInputChange('coverImageUrl', image)}
                           className={`relative rounded-lg overflow-hidden border-2 transition-all ${
-                            formData.coverImage === image
+                            formData.coverImageUrl === image
                               ? 'border-blue-500 ring-2 ring-blue-200'
                               : 'border-gray-200 hover:border-gray-300'
                           }`}

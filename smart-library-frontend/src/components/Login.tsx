@@ -1,36 +1,43 @@
 import React, { useState } from 'react';
 import { BookOpen, User, Lock, Mail } from 'lucide-react';
-import { mockUsers } from '../utils/mockData';
 import { User as UserType } from '../types';
 
 interface LoginProps {
   onLogin: (user: UserType) => void;
+  onSwitchToRegister: () => void; // 🔹 new prop
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin }) => {
+const API_BASE = "http://localhost:4000"; 
+
+const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [userType, setUserType] = useState<'user' | 'staff'>('user');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Simple demo authentication
-    const user = mockUsers.find(u => u.email === email && u.role === userType);
-    
-    if (user) {
-      onLogin(user);
-    } else {
-      setError('Invalid credentials. Please try again.');
-    }
-  };
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, role: userType }),
+      });
 
-  const handleDemoLogin = (role: 'user' | 'staff') => {
-    const demoUser = mockUsers.find(u => u.role === role);
-    if (demoUser) {
-      onLogin(demoUser);
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Login failed');
+      }
+
+      const data = await res.json();
+
+      localStorage.setItem('token', data.token);
+      onLogin(data.user);
+
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
@@ -73,6 +80,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           </div>
         </div>
 
+        {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -125,27 +133,17 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <p className="text-sm text-gray-600 text-center mb-4">Demo Access:</p>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => handleDemoLogin('user')}
-              className="py-2 px-4 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200"
-            >
-              Demo User
-            </button>
-            <button
-              onClick={() => handleDemoLogin('staff')}
-              className="py-2 px-4 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-200"
-            >
-              Demo Staff
-            </button>
-          </div>
-          <div className="mt-4 text-xs text-gray-500 space-y-1">
-            <p>User: john.doe@email.com</p>
-            <p>Staff: sarah.johnson@library.com</p>
-          </div>
-        </div>
+        {/* 🔹 Registration Link */}
+        <p className="mt-6 text-center text-sm text-gray-600">
+          Don’t have an account?{' '}
+          <button
+            type="button"
+            onClick={onSwitchToRegister}
+            className="text-blue-700 font-medium hover:underline"
+          >
+            Sign up here
+          </button>
+        </p>
       </div>
     </div>
   );
