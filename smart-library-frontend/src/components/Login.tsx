@@ -12,7 +12,7 @@ const API_BASE = "http://localhost:4000";
 const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [userType, setUserType] = useState<'user' | 'staff'>('user');
+  const [userType, setUserType] = useState<'reader' | 'staff'>('reader');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,9 +57,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister }) => {
           <div className="flex rounded-lg bg-gray-100 p-1">
             <button
               type="button"
-              onClick={() => setUserType('user')}
+              onClick={() => setUserType('reader')}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
-                userType === 'user'
+                userType === 'reader'
                   ? 'bg-white text-blue-700 shadow-sm'
                   : 'text-gray-600 hover:text-gray-800'
               }`}

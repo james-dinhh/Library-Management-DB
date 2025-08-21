@@ -57,10 +57,12 @@ function App() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("token"); 
     setCurrentUser(null);
     setActiveTab("search");
     setAuthMode("login"); 
   };
+
 
   const handleBorrow = async (book: Book) => {
     if (!currentUser || book.copiesAvailable <= 0) return;
