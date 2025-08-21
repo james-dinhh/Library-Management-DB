@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "./components/Header";
 import Login from "./components/Login";
+import Register from "./components/Register"; // 👈 your new registration component
 import BookSearch from "./components/BookSearch";
 import UserProfile from "./components/UserProfile";
 import StaffDashboard from "./components/StaffDashboard";
@@ -9,6 +10,7 @@ import { User, Book, BorrowRecord } from "./types";
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState("search");
+  const [authMode, setAuthMode] = useState<"login" | "register">("login"); // 👈 controls Login/Register
 
   const [books, setBooks] = useState<Book[]>([]);
   const [borrowRecords, setBorrowRecords] = useState<BorrowRecord[]>([]);
@@ -24,19 +26,21 @@ function App() {
         const data = await res.json();
 
         const mappedBooks: Book[] = data.map((b: any) => ({
-                id: b.id,
-                title: b.title,
-                author: b.author || b.authors || "Unknown",
-                coverImageUrl: b.coverImageUrl || "https://images.pexels.com/photos/1029141/pexels-photo-1029141.jpeg",
-                publishedYear: b.publishedYear || "Unknown",
-                genre: b.genre || b.category || "Unknown",
-                isbn: b.isbn || "",
-                rating: b.rating || 0,
-                reviewCount: b.reviewCount || 0,
-                copiesAvailable: b.copiesAvailable ?? 0,
-                totalCopies: b.totalCopies ?? 0,
-                description: b.description || "",
-              }));
+          id: b.id,
+          title: b.title,
+          author: b.author || b.authors || "Unknown",
+          coverImageUrl:
+            b.coverImageUrl ||
+            "https://images.pexels.com/photos/1029141/pexels-photo-1029141.jpeg",
+          publishedYear: b.publishedYear || "Unknown",
+          genre: b.genre || b.category || "Unknown",
+          isbn: b.isbn || "",
+          rating: b.rating || 0,
+          reviewCount: b.reviewCount || 0,
+          copiesAvailable: b.copiesAvailable ?? 0,
+          totalCopies: b.totalCopies ?? 0,
+          description: b.description || "",
+        }));
 
         setBooks(mappedBooks);
       } catch (err) {
@@ -55,6 +59,7 @@ function App() {
   const handleLogout = () => {
     setCurrentUser(null);
     setActiveTab("search");
+    setAuthMode("login"); // 👈 reset to login on logout
   };
 
   const handleBorrow = async (book: Book) => {
@@ -63,7 +68,6 @@ function App() {
     const API_BASE = "http://localhost:4000";
 
     try {
-      // Call backend
       const res = await fetch(`${API_BASE}/library/borrow`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -78,7 +82,6 @@ function App() {
       const data = await res.json();
       console.log("Borrowed book checkout ID:", data.checkoutId);
 
-      // Update frontend state
       const newRecord: BorrowRecord = {
         id: `br${Date.now()}`,
         userId: currentUser.id,
@@ -98,28 +101,6 @@ function App() {
             : b
         )
       );
-
-      // 🔹 Temporary notification
-      const notification = document.createElement("div");
-      notification.className =
-        "fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300";
-      notification.innerHTML = `
-        <div class="flex items-center space-x-2">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-          </svg>
-          <span>Successfully borrowed "${book.title}"!</span>
-        </div>
-        <div class="text-sm mt-1">Due date: ${new Date(
-          newRecord.dueDate
-        ).toLocaleDateString()}</div>
-      `;
-      document.body.appendChild(notification);
-
-      setTimeout(() => {
-        notification.style.opacity = "0";
-        setTimeout(() => document.body.removeChild(notification), 300);
-      }, 3000);
     } catch (err) {
       console.error("❌ Error borrowing book:", err);
     }
@@ -142,8 +123,16 @@ function App() {
     }
   };
 
-  if (!currentUser) return <Login onLogin={handleLogin} />;
+  // 🔹 If no user logged in, show login or register
+  if (!currentUser) {
+    return authMode === "login" ? (
+      <Login onLogin={handleLogin} onSwitchToRegister={() => setAuthMode("register")} />
+    ) : (
+      <Register onRegister={handleLogin} onSwitchToLogin={() => setAuthMode("login")} />
+    );
+  }
 
+  // 🔹 If logged in, show app content
   const renderContent = () => {
     switch (activeTab) {
       case "search":
