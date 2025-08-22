@@ -59,7 +59,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, activeTab, onTab
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
               <img
-                src={currentUser.avatar}
+                src='avatar.jpg'
                 alt={currentUser.name}
                 className="h-8 w-8 rounded-full object-cover"
               />
