@@ -44,10 +44,13 @@ async function updateBookInventory(bookId: number, staffId: number, newTotal: nu
 }
 
 async function retireBook(bookId: number, staffId: number) {
-  const res = await fetch(`${API_BASE}/admin`, { // PUT /admin
+  const res = await fetch(`${API_BASE}/admin/books/${bookId}/retire`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ bookId, staffId, action: 'retire' })
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}` 
+    },
+    body: JSON.stringify({ staffId })
   });
   if (!res.ok) throw new Error('Failed to retire book');
   return res.json();
