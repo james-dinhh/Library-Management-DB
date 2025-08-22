@@ -160,6 +160,8 @@ BEGIN
   INSERT INTO staff_logs (staff_id, action_type, book_id, timestamp)
   VALUES (p_staff_id, 'add_book', v_book_id, NOW());
 
+  SELECT v_book_id AS bookId;
+
   COMMIT;
 END$$
 

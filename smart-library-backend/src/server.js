@@ -18,6 +18,8 @@ import reviewsRouter from './routes/reviews.routes.js';
 import analyticsRouter from './routes/analytics.routes.js';
 import adminRouter from './routes/admin.routes.js';
 import statsRouter from './routes/stats.routes.js';
+import publishersRouter from './routes/publishers.routes.js';
+import authorsRouter from './routes/authors.routes.js';
 
 // Swagger (OpenAPI)
 import swaggerUi from 'swagger-ui-express';
@@ -92,10 +94,12 @@ app.use('/books', booksRouter);
 app.use('/library', authenticate, authorizeRole('reader', 'staff'), libraryRouter);
 app.use('/reviews', authenticate, authorizeRole('reader', 'staff'), reviewsRouter);
 
-// Staff-only analytics, admin, stats
+// Staff-only analytics, admin, stats, management for publishers and authors
 app.use('/analytics', authenticate, authorizeRole('staff'), analyticsRouter);
 app.use('/admin', authenticate, authorizeRole('staff'), adminRouter);
 app.use('/stats', authenticate, authorizeRole('staff'), statsRouter);
+app.use('/publishers', authenticate, authorizeRole('staff'), publishersRouter);
+app.use('/authors', authenticate, authorizeRole('staff'), authorsRouter);
 
 // Startup
 const port = process.env.PORT || 4000;
