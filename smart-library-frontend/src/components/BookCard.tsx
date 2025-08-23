@@ -7,7 +7,7 @@ interface BookCardProps {
   book: Book;
   onViewDetails: (book: Book) => void;
   onBorrow?: (book: Book) => void;
-  userRole: 'user' | 'staff';
+  userRole: 'reader' | 'staff';
 }
 
 const BookCard: React.FC<BookCardProps> = ({ book, onViewDetails, onBorrow, userRole }) => {
@@ -75,19 +75,19 @@ const BookCard: React.FC<BookCardProps> = ({ book, onViewDetails, onBorrow, user
           </span>
         </div>
 
-        <div className="flex space-x-2">
+        <div className="flex flex-col space-y-2">
           <button
             onClick={() => onViewDetails(book)}
-            className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 text-sm font-medium flex items-center justify-center space-x-1"
+            className="w-full px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 text-sm font-medium flex items-center justify-center space-x-1"
           >
             <Eye className="h-4 w-4" />
             <span>View Details</span>
           </button>
 
-          {userRole === 'user' && availableCopies > 0 && onBorrow && (
+          {userRole === 'reader' && availableCopies > 0 && onBorrow && (
             <button
               onClick={() => onBorrow(book)}
-              className="flex-1 px-3 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors duration-200 text-sm font-medium"
+              className="w-full px-3 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors duration-200 text-sm font-medium"
             >
               Borrow
             </button>
