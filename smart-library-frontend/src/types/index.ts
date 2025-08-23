@@ -17,7 +17,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'user' | 'staff';
+  role: 'reader' | 'staff';
   membershipDate: string;
   avatar: string;
 }

@@ -131,7 +131,7 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
               <p className={`text-sm font-medium ${availability.color}`}>
                 {availability.status} - {book.copiesAvailable ?? 0} of {book.totalCopies ?? 0} copies available
               </p>
-              {currentUser.role === 'user' && (book.copiesAvailable ?? 0) > 0 && (
+              {currentUser.role === 'reader' && (book.copiesAvailable ?? 0) > 0 && (
                 <button
                   onClick={() => onBorrow(book)}
                   className="mt-2 px-6 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors duration-200"

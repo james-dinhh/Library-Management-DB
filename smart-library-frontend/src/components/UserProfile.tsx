@@ -6,9 +6,10 @@ import { formatDate, calculateDaysUntilDue } from '../utils/helpers';
 
 interface UserProfileProps {
   currentUser: UserType;
+  onReturn: (checkoutId: string) => void;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ currentUser }) => {
+const UserProfile: React.FC<UserProfileProps> = ({ currentUser, onReturn }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'reviews'>('overview');
   
   const userBorrowRecords = mockBorrowRecords.filter(record => record.userId === currentUser.id);
@@ -158,28 +159,36 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser }) => {
                       const isOverdue = daysUntilDue < 0;
                       
                       return (
-                        <div key={record.id} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
-                          <div className="flex space-x-3">
-                            <img
-                              src={book.coverImageUrl}
-                              alt={book.title}
-                              className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-gray-900 truncate">{book.title}</h3>
-                              <p className="text-sm text-gray-600 truncate">{book.author}</p>
-                              <div className="mt-2">
-                                <p className="text-xs text-gray-500">Due: {formatDate(record.dueDate)}</p>
-                                <p className={`text-xs font-medium ${
-                                  isOverdue ? 'text-red-600' : daysUntilDue <= 3 ? 'text-yellow-600' : 'text-green-600'
-                                }`}>
-                                  {isOverdue ? `${Math.abs(daysUntilDue)} days overdue` : 
-                                   daysUntilDue === 0 ? 'Due today' : 
-                                   `${daysUntilDue} days left`}
-                                </p>
+                        <div key={record.id} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow flex flex-col justify-between">
+                          <div>
+                            <div className="flex space-x-3">
+                              <img
+                                src={book.coverImageUrl}
+                                alt={book.title}
+                                className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-gray-900 truncate">{book.title}</h3>
+                                <p className="text-sm text-gray-600 truncate">{book.author}</p>
+                                <div className="mt-2">
+                                  <p className="text-xs text-gray-500">Due: {formatDate(record.dueDate)}</p>
+                                  <p className={`text-xs font-medium ${
+                                    isOverdue ? 'text-red-600' : daysUntilDue <= 3 ? 'text-yellow-600' : 'text-green-600'
+                                  }`}>
+                                    {isOverdue ? `${Math.abs(daysUntilDue)} days overdue` : 
+                                     daysUntilDue === 0 ? 'Due today' : 
+                                     `${daysUntilDue} days left`}
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
+                          <button
+                            onClick={() => onReturn(record.id)}
+                            className="mt-4 w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm"
+                          >
+                            Return Book
+                          </button>
                         </div>
                       );
                     })}

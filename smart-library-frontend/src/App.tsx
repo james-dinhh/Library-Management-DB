@@ -144,7 +144,7 @@ function App() {
           />
         );
       case "profile":
-        return <UserProfile currentUser={currentUser} />;
+        return <UserProfile currentUser={currentUser} onReturn={handleReturn} />;
       case "dashboard":
         return currentUser.role === "staff" ? (
           <StaffDashboard currentUser={currentUser} />
