@@ -5,7 +5,7 @@
       "name": "Alice Nguyen",
       "email": "alice@example.com",
       "role": "reader",
-      "password": "$2a$12$X8T9GaJPsWCYs5VUmuc45u0S4w/X.i8dm5Ovi2TktzI4rp2ZvXiui",
+      "password": "$2b$10$dYfUWWs9pWjMFU1DdAKxJOmRmsiF3/2Th/mZS4w.8IA9TyWgPWSl6",
       "registration_date": "2025-08-01"
     },
     {
@@ -13,7 +13,7 @@
       "name": "Bob Tran",
       "email": "bob@example.com",
       "role": "staff",
-      "password": "$2a$12$0RbYAwomzlnRkVJv73ErCOhiMLIO5hjr4Xn4vz/EXgF3MZPRKjDrm",
+      "password": "$2b$10$nu7wctVwDlQKZF.Sm7GV4eo1lcuTJD7zcvb6CB8m4z2MAEHOSWK7e",
       "registration_date": "2025-08-01"
     },
     {
@@ -21,7 +21,7 @@
       "name": "Chi Le",
       "email": "chi@example.com",
       "role": "reader",
-      "password": "$2a$12$oHNtOffXec8Hq809QpF4oObdtGxZ0isCUl.HiniAEejJWhYcHgd7O",
+      "password": "$2b$10$BUeWznvOJ7zuWfW0xBkavO1BTRrE3knTkMUvbyxhgBXd4ttEh46FC",
       "registration_date": "2025-08-02"
     }
   ],

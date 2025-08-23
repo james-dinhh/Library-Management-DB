@@ -9,9 +9,7 @@ DROP TRIGGER IF EXISTS trg_reviews_after_delete_avg;
 
 DELIMITER $$
 
-/* -----------------------------------------------------------
-   CHECKOUTS (validation only; procedures adjust stock)
-   ----------------------------------------------------------- */
+/* CHECKOUTS (validation only; procedures adjust stock) */
 CREATE TRIGGER trg_checkouts_before_insert_validate
 BEFORE INSERT ON checkouts
 FOR EACH ROW
@@ -47,9 +45,7 @@ BEGIN
   -- Stock changes are handled by stored procedures within transactions.
 END$$
 
-/* -----------------------------------------------------------
-   REVIEWS (maintain avg_rating + ratings_count)
-   ----------------------------------------------------------- */
+/* REVIEWS (maintain avg_rating + ratings_count) */
 
 -- INSERT review: initialize or update rolling average
 CREATE TRIGGER trg_reviews_after_insert_avg

@@ -163,6 +163,46 @@ router.put('/books/:id/retire', async (req, res) => {
 
 /**
  * @openapi
+ * /admin/books/{id}:
+ *   delete:
+ *     tags: [Admin]
+ *     summary: Delete a book
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200: { description: Deleted }
+ *       404: { description: Not found }
+ *       409: { description: Book is referenced by checkouts/reviews; retire instead }
+ */
+
+/**
+ * Delete book (staff)
+ * Body: { staffId }
+ */
+router.delete('/books/:id', async (req, res) => {
+  const bookId = Number(req.params.id);
+  if (!Number.isFinite(bookId)) {
+    return res.status(400).json({ error: 'Invalid book id' });
+  }
+  try {
+    const [r] = await mysqlPool.query('DELETE FROM books WHERE book_id = ?', [bookId]);
+    if (r.affectedRows === 0) return res.status(404).json({ error: 'Not found' });
+    res.json({ ok: true });
+  } catch (e) {
+    // FK restriction from checkouts/reviews will raise an error here
+    if (String(e.code) === 'ER_ROW_IS_REFERENCED_2') {
+      return res.status(409).json({ error: 'Book is referenced by checkouts or reviews; use retire instead' });
+    }
+    res.status(400).json({ error: e.sqlMessage || e.message });
+  }
+});
+
+/**
+ * @openapi
  * /admin/books/{id}/authors:
  *   post:
  *     tags: [Admin]
