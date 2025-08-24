@@ -57,6 +57,7 @@ function App() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
     setCurrentUser(null);
     setActiveTab("search");
     setAuthMode("login"); 
@@ -66,14 +67,18 @@ function App() {
     if (!currentUser || book.copiesAvailable <= 0) return;
 
     const API_BASE = "http://localhost:4001";
+    const token = localStorage.getItem('token');
 
     try {
       const res = await fetch(`${API_BASE}/library/borrow`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({
-          userId: currentUser.id,
-          bookId: book.id,
+          userId: Number(currentUser.id),
+          bookId: Number(book.id),
           days: 14,
         }),
       });
@@ -108,12 +113,16 @@ function App() {
 
   const handleReturn = async (checkoutId: string) => {
     const API_BASE = "http://localhost:4001";
+    const token = localStorage.getItem('token');
 
     try {
       const res = await fetch(`${API_BASE}/library/return`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ checkoutId }),
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ checkoutId: Number(checkoutId) }),
       });
 
       if (!res.ok) throw new Error("Failed to return book");

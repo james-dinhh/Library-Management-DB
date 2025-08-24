@@ -20,9 +20,13 @@ async function fetchBooks() {
 }
 
 async function addBook(bookData: any) {
+  const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE}/admin`, { // POST /admin
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
     body: JSON.stringify(bookData)
   });
   if (!res.ok) throw new Error('Failed to add book');
@@ -30,9 +34,13 @@ async function addBook(bookData: any) {
 }
 
 async function updateBookInventory(bookId: number, staffId: number, newTotal: number) {
+  const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE}/admin`, { // PUT /admin
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
     body: JSON.stringify({ bookId, staffId, newTotal, action: 'updateInventory' })
   });
   if (!res.ok) throw new Error('Failed to update inventory');
@@ -40,9 +48,13 @@ async function updateBookInventory(bookId: number, staffId: number, newTotal: nu
 }
 
 async function retireBook(bookId: number, staffId: number) {
+  const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE}/admin`, { // PUT /admin
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
     body: JSON.stringify({ bookId, staffId, action: 'retire' })
   });
   if (!res.ok) throw new Error('Failed to retire book');
