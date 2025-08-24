@@ -41,7 +41,16 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
       try {
         setLoadingReviews(true);
         if (!book?.id) return;
-        const response = await fetch(`${API_BASE}/reviews/book/${book.id}`);
+        
+        const token = localStorage.getItem('token');
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(`${API_BASE}/reviews/book/${book.id}`, {
+          headers
+        });
         if (!response.ok) throw new Error('Failed to fetch reviews');
         const data = await response.json();
         setBookReviews(Array.isArray(data) ? data : []);

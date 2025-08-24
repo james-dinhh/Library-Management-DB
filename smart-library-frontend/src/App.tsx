@@ -26,7 +26,7 @@ function App() {
         const data = await res.json();
 
         const mappedBooks: Book[] = data.map((b: any) => ({
-          id: b.id,
+          id: String(b.id), // Convert to string for consistency
           title: b.title,
           author: b.author || b.authors || "Unknown",
           coverImageUrl:
@@ -51,14 +51,93 @@ function App() {
     fetchBooks();
   }, []);
 
+  // Check for existing login on app load
+  useEffect(() => {
+    const validateToken = async () => {
+      const token = localStorage.getItem('token');
+      if (!token || currentUser) return;
+
+      try {
+        const API_BASE = "http://localhost:4001";
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!res.ok) {
+          // Token is invalid, remove it
+          localStorage.removeItem('token');
+          return;
+        }
+
+        const data = await res.json();
+        setCurrentUser({
+          ...data.user,
+          id: String(data.user.id) // Ensure id is stored as string
+        });
+        // Fetch user's borrowings after successful token validation
+        fetchUserBorrowings(String(data.user.id));
+        console.log("✅ Token validated, user logged in automatically");
+      } catch (err) {
+        console.error("❌ Token validation failed:", err);
+        localStorage.removeItem('token');
+      }
+    };
+
+    validateToken();
+  }, [currentUser]);
+
+  // Fetch user's borrowings from backend
+  const fetchUserBorrowings = async (userId: string) => {
+    const API_BASE = "http://localhost:4001";
+    const token = localStorage.getItem('token');
+    
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/library/user/${userId}/borrowings`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!res.ok) throw new Error("Failed to fetch borrowings");
+      const data = await res.json();
+
+      // Map database records to frontend BorrowRecord format
+      const mappedRecords: BorrowRecord[] = data.map((record: any) => ({
+        id: `br${record.checkout_id}`,
+        checkoutId: record.checkout_id,
+        userId: String(record.user_id),
+        bookId: String(record.book_id), // Ensure consistent string type
+        borrowDate: record.borrow_date?.split('T')[0] || record.borrow_date,
+        dueDate: record.due_date?.split('T')[0] || record.due_date,
+        status: record.return_date ? "returned" : "borrowed",
+      }));
+
+      setBorrowRecords(mappedRecords);
+      console.log("✅ Fetched borrowings:", mappedRecords.length, "records");
+    } catch (err) {
+      console.error("❌ Error fetching borrowings:", err);
+    }
+  };
+
   const handleLogin = (user: User) => {
-    setCurrentUser(user);
+    const normalizedUser = {
+      ...user,
+      id: String(user.id) // Ensure id is stored as string
+    };
+    setCurrentUser(normalizedUser);
     setActiveTab("search");
+    // Fetch user's borrowings when they log in
+    fetchUserBorrowings(String(user.id));
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     setCurrentUser(null);
+    setBorrowRecords([]); // Clear borrowings on logout
     setActiveTab("search");
     setAuthMode("login"); 
   };
