@@ -51,6 +51,7 @@ CREATE TABLE books (
   status ENUM('active','retired') NOT NULL DEFAULT 'active',
   avg_rating DECIMAL(3,2) NULL,
   ratings_count INT NOT NULL DEFAULT 0,
+
   CONSTRAINT fk_books_publisher
     FOREIGN KEY (publisher_id) REFERENCES publishers(publisher_id)
     ON UPDATE CASCADE
@@ -60,7 +61,7 @@ CREATE TABLE books (
   CONSTRAINT chk_copies_nonneg CHECK (copies_total >= 0 AND copies_available >= 0),
   CONSTRAINT chk_copies_le_total CHECK (copies_available <= copies_total),
   CONSTRAINT chk_published_year CHECK (
-    published_year IS NULL OR published_year >= 1000
+    published_year IS NULL OR (published_year BETWEEN 1000 AND 9999)
   )
 ) ENGINE=InnoDB;
 
@@ -98,6 +99,7 @@ CREATE TABLE checkouts (
   borrow_date DATETIME NOT NULL,
   due_date DATETIME NOT NULL,
   return_date DATETIME NULL,
+
   -- Generated column: NULL if not returned; 1 if late; 0 if on-time
   is_late TINYINT(1)
     GENERATED ALWAYS AS (
@@ -106,6 +108,7 @@ CREATE TABLE checkouts (
         ELSE (return_date > due_date)
       END
     ) STORED,
+
   CONSTRAINT fk_co_user
     FOREIGN KEY (user_id) REFERENCES users(user_id)
     ON UPDATE CASCADE
@@ -114,11 +117,12 @@ CREATE TABLE checkouts (
     FOREIGN KEY (book_id) REFERENCES books(book_id)
     ON UPDATE CASCADE
     ON DELETE RESTRICT,
+
   CONSTRAINT chk_due_after_borrow CHECK (due_date >= borrow_date),
   CONSTRAINT chk_return_after_borrow CHECK (return_date IS NULL OR return_date >= borrow_date)
 ) ENGINE=InnoDB;
 
--- Reviews
+-- Reviews (one review per (user, book))
 CREATE TABLE reviews (
   review_id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
@@ -134,7 +138,8 @@ CREATE TABLE reviews (
     FOREIGN KEY (book_id) REFERENCES books(book_id)
     ON UPDATE CASCADE
     ON DELETE RESTRICT,
-  CONSTRAINT chk_rating_range CHECK (rating BETWEEN 1 AND 5)
+  CONSTRAINT chk_rating_range CHECK (rating BETWEEN 1 AND 5),
+  UNIQUE KEY uq_review_user_book (user_id, book_id)
 ) ENGINE=InnoDB;
 
 -- Staff logs (admin actions)
@@ -169,6 +174,6 @@ CREATE INDEX idx_authors_name ON authors (name);
 -- Reports
 CREATE INDEX idx_checkouts_borrow_date ON checkouts (borrow_date);
 CREATE INDEX idx_checkouts_due_date ON checkouts (due_date);
-CREATE INDEX idx_checkouts_is_late ON checkouts (is_late);  -- new
+CREATE INDEX idx_checkouts_is_late ON checkouts (is_late);
 CREATE INDEX idx_reviews_book ON reviews (book_id);
 CREATE INDEX idx_stafflogs_staff_time ON staff_logs (staff_id, timestamp);

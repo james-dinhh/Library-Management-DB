@@ -1,3 +1,34 @@
+/**
+ * @openapi
+ * /books:
+ *   get:
+ *     tags:
+ *       - Books
+ *     summary: List all books
+ *     description: Returns a list of books with optional filters.
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Search text (title, genre, publisher)
+ *       - in: query
+ *         name: genre
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, retired]
+ *       - in: query
+ *         name: publisherId
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of books
+ */
 import { Router } from 'express';
 import { mysqlPool } from '../db/mysql.js';
 

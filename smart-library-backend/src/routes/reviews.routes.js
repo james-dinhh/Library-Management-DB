@@ -1,3 +1,39 @@
+/**
+ * @openapi
+ * /reviews:
+ *   post:
+ *     tags:
+ *       - Reviews
+ *     summary: Create or update a review
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId: { type: integer }
+ *               bookId: { type: integer }
+ *               rating: { type: integer }
+ *               comment: { type: string }
+ *     responses:
+ *       200:
+ *         description: Review created/updated
+ *
+ * /reviews/book/{bookId}:
+ *   get:
+ *     tags:
+ *       - Reviews
+ *     summary: List reviews for a book
+ *     parameters:
+ *       - in: path
+ *         name: bookId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: List of reviews
+ */
 import { Router } from 'express';
 import { mysqlPool } from '../db/mysql.js';
 
