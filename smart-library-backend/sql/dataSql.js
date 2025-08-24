@@ -25,7 +25,7 @@ async function seedMySQLFromJson() {
     await connection.beginTransaction();
 
     // Clear existing data (in reverse order due to foreign keys)
-    await connection.execute('DELETE FROM staff_logs');
+    // await connection.execute('DELETE FROM staff_logs');
     await connection.execute('DELETE FROM reviews');
     await connection.execute('DELETE FROM checkouts');
     await connection.execute('DELETE FROM book_authors');
@@ -152,21 +152,21 @@ async function seedMySQLFromJson() {
     }
     console.log(`Inserted ${data.reviews.length} reviews`);
 
-    // Insert staff_logs
-    console.log('Inserting staff logs...');
-    for (const log of data.staff_logs) {
-      await connection.execute(
-        'INSERT INTO staff_logs (log_id, staff_id, action_type, book_id, timestamp) VALUES (?, ?, ?, ?, ?)',
-        [
-          log.log_id,
-          log.staff_id,
-          log.action_type,
-          log.book_id,
-          log.timestamp
-        ]
-      );
-    }
-    console.log(` Inserted ${data.staff_logs.length} staff logs`);
+    // // Insert staff_logs
+    // console.log('Inserting staff logs...');
+    // for (const log of data.staff_logs) {
+    //   await connection.execute(
+    //     'INSERT INTO staff_logs (log_id, staff_id, action_type, book_id, timestamp) VALUES (?, ?, ?, ?, ?)',
+    //     [
+    //       log.log_id,
+    //       log.staff_id,
+    //       log.action_type,
+    //       log.book_id,
+    //       log.timestamp
+    //     ]
+    //   );
+    // }
+    // console.log(` Inserted ${data.staff_logs.length} staff logs`);
 
     // Commit transaction
     await connection.commit();
