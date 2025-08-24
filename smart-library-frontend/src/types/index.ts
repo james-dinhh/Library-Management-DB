@@ -24,6 +24,7 @@ export interface User {
 
 export interface BorrowRecord {
   id: string;
+  checkoutId: number; // Real database checkout ID
   userId: string;
   bookId: string;
   borrowDate: string;

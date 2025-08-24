@@ -195,7 +195,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
                             </div>
                           </div>
                           <button
-                            onClick={() => onReturn(record.id)}
+                            onClick={() => onReturn(record.checkoutId.toString())}
                             className="mt-4 w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm"
                           >
                             Return Book

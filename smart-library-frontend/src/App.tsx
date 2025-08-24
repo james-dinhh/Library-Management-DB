@@ -89,6 +89,7 @@ function App() {
 
       const newRecord: BorrowRecord = {
         id: `br${Date.now()}`,
+        checkoutId: data.checkoutId, // Store the real database checkout ID
         userId: currentUser.id,
         bookId: book.id,
         borrowDate: new Date().toISOString().split("T")[0],
@@ -127,6 +128,24 @@ function App() {
 
       if (!res.ok) throw new Error("Failed to return book");
       console.log("Book returned successfully");
+      
+      // Update the UI state to reflect the returned book
+      const checkoutIdNum = Number(checkoutId);
+      setBorrowRecords(borrowRecords.map(record => 
+        record.checkoutId === checkoutIdNum 
+          ? { ...record, status: 'returned' as const, returnDate: new Date().toISOString().split("T")[0] }
+          : record
+      ));
+      
+      // Find the book and increment available copies
+      const returnedRecord = borrowRecords.find(record => record.checkoutId === checkoutIdNum);
+      if (returnedRecord) {
+        setBooks(books.map(book => 
+          book.id === returnedRecord.bookId 
+            ? { ...book, copiesAvailable: book.copiesAvailable + 1 }
+            : book
+        ));
+      }
     } catch (err) {
       console.error("❌ Error returning book:", err);
     }
