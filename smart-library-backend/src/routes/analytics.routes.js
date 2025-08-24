@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { client } from '../db/mongo.js';
+import { connectMongo, ReadingSession } from '../db/mongo.js';
 
 const router = Router();
 
@@ -21,11 +21,9 @@ function dateMatch(start, end) {
 // GET /analytics/avg-session-time-per-user?start=&end=&limit=
 router.get('/avg-session-time-per-user', async (req, res) => {
   try {
+    await connectMongo();
     const { start, end } = req.query;
     const limit = Math.min(parseInt(req.query.limit ?? '100', 10), 1000);
-
-    const db = client.db(process.env.MONGO_DB || 'smart_library');
-    const col = db.collection('reading_sessions');
 
     const pipeline = [
       Object.keys(dateMatch(start, end)).length ? { $match: dateMatch(start, end) } : null,
@@ -59,7 +57,7 @@ router.get('/avg-session-time-per-user', async (req, res) => {
       { $limit: limit }
     ].filter(Boolean);
 
-    const docs = await col.aggregate(pipeline).toArray();
+    const docs = await ReadingSession.aggregate(pipeline);
     res.json({ start, end, count: docs.length, results: docs });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -69,11 +67,9 @@ router.get('/avg-session-time-per-user', async (req, res) => {
 // GET /analytics/most-highlighted-books?start=&end=&limit=
 router.get('/most-highlighted-books', async (req, res) => {
   try {
+    await connectMongo();
     const { start, end } = req.query;
     const limit = Math.min(parseInt(req.query.limit ?? '10', 10), 100);
-
-    const db = client.db(process.env.MONGO_DB || 'smart_library');
-    const col = db.collection('reading_sessions');
 
     const pipeline = [
       Object.keys(dateMatch(start, end)).length ? { $match: dateMatch(start, end) } : null,
@@ -94,7 +90,7 @@ router.get('/most-highlighted-books', async (req, res) => {
       { $limit: limit }
     ].filter(Boolean);
 
-    const docs = await col.aggregate(pipeline).toArray();
+    const docs = await ReadingSession.aggregate(pipeline);
     res.json({ start, end, count: docs.length, results: docs });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -104,11 +100,9 @@ router.get('/most-highlighted-books', async (req, res) => {
 // GET /analytics/top-books-by-reading-time?start=&end=&limit=
 router.get('/top-books-by-reading-time', async (req, res) => {
   try {
+    await connectMongo();
     const { start, end } = req.query;
     const limit = Math.min(parseInt(req.query.limit ?? '10', 10), 100);
-
-    const db = client.db(process.env.MONGO_DB || 'smart_library');
-    const col = db.collection('reading_sessions');
 
     const pipeline = [
       Object.keys(dateMatch(start, end)).length ? { $match: dateMatch(start, end) } : null,
@@ -136,11 +130,11 @@ router.get('/top-books-by-reading-time', async (req, res) => {
       { $limit: limit }
     ].filter(Boolean);
 
-    const docs = await col.aggregate(pipeline).toArray();
+    const docs = await ReadingSession.aggregate(pipeline);
     res.json({ start, end, count: docs.length, results: docs });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
-export default router; 
+export default router;

@@ -4,29 +4,20 @@ import mongoose from 'mongoose';
 dotenv.config();
 const uri = process.env.MONGODB_URI;
 
-// Reading Sessions Schema 
+// Reading Sessions Schema - Updated field names
 const readingSessionSchema = new mongoose.Schema({
-  user_id: { type: Number, required: true }, // Reference to SQL users table
-  book_id: { type: Number, required: true }, // Reference to SQL books table
-  session_start: { type: Date, required: true },
-  session_end: { type: Date },
-  device: { type: String, required: true }, 
+  userId: { type: Number, required: true }, 
+  bookId: { type: Number, required: true }, 
+  startTime: { type: Date, required: true }, 
+  endTime: { type: Date }, 
+  device: { type: String, required: true },
   pages_read: { type: Number, default: 0 },
   highlights: [{
     page: { type: Number, required: true },
     text: { type: String, required: true },
     timestamp: { type: Date, default: Date.now }
   }],
-  total_time_minutes: { type: Number }, // Calculated field
   created_at: { type: Date, default: Date.now }
-});
-
-// Calculate total time before saving
-readingSessionSchema.pre('save', function(next) {
-  if (this.session_start && this.session_end) {
-    this.total_time_minutes = Math.round((this.session_end - this.session_start) / (1000 * 60));
-  }
-  next();
 });
 
 export const ReadingSession = mongoose.model('ReadingSession', readingSessionSchema);
@@ -41,4 +32,3 @@ export async function connectMongo() {
     throw err;
   }
 }
-
