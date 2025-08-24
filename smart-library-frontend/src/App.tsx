@@ -17,7 +17,7 @@ function App() {
 
   // Fetch books from backend
   useEffect(() => {
-    const API_BASE = "http://localhost:4000";
+    const API_BASE = "http://localhost:4001";
 
     const fetchBooks = async () => {
       try {
@@ -65,7 +65,7 @@ function App() {
   const handleBorrow = async (book: Book) => {
     if (!currentUser || book.copiesAvailable <= 0) return;
 
-    const API_BASE = "http://localhost:4000";
+    const API_BASE = "http://localhost:4001";
 
     try {
       const res = await fetch(`${API_BASE}/library/borrow`, {
@@ -107,7 +107,7 @@ function App() {
   };
 
   const handleReturn = async (checkoutId: string) => {
-    const API_BASE = "http://localhost:4000";
+    const API_BASE = "http://localhost:4001";
 
     try {
       const res = await fetch(`${API_BASE}/library/return`, {

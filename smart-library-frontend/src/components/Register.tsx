@@ -7,7 +7,7 @@ interface RegisterProps {
   onSwitchToLogin: () => void;
 }
 
-const API_BASE = "http://localhost:4000";
+const API_BASE = "http://localhost:4001";
 
 const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
   const [name, setName] = useState('');
