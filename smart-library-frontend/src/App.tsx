@@ -17,7 +17,7 @@ function App() {
 
   // Fetch books from backend
   useEffect(() => {
-    const API_BASE = "http://localhost:4000";
+    const API_BASE = "http://localhost:4001";
 
     const fetchBooks = async () => {
       try {
@@ -26,7 +26,7 @@ function App() {
         const data = await res.json();
 
         const mappedBooks: Book[] = data.map((b: any) => ({
-          id: b.id,
+          id: String(b.id), // Convert to string for consistency
           title: b.title,
           author: b.author || b.authors || "Unknown",
           coverImageUrl:
@@ -51,31 +51,113 @@ function App() {
     fetchBooks();
   }, []);
 
+  // Check for existing login on app load
+  useEffect(() => {
+    const validateToken = async () => {
+      const token = localStorage.getItem('token');
+      if (!token || currentUser) return;
+
+      try {
+        const API_BASE = "http://localhost:4001";
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!res.ok) {
+          // Token is invalid, remove it
+          localStorage.removeItem('token');
+          return;
+        }
+
+        const data = await res.json();
+        setCurrentUser({
+          ...data.user,
+          id: String(data.user.id) // Ensure id is stored as string
+        });
+        // Fetch user's borrowings after successful token validation
+        fetchUserBorrowings(String(data.user.id));
+        console.log("✅ Token validated, user logged in automatically");
+      } catch (err) {
+        console.error("❌ Token validation failed:", err);
+        localStorage.removeItem('token');
+      }
+    };
+
+    validateToken();
+  }, [currentUser]);
+
+  // Fetch user's borrowings from backend
+  const fetchUserBorrowings = async (userId: string) => {
+    const API_BASE = "http://localhost:4001";
+    const token = localStorage.getItem('token');
+    
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/library/user/${userId}/borrowings`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!res.ok) throw new Error("Failed to fetch borrowings");
+      const data = await res.json();
+
+      // Map database records to frontend BorrowRecord format
+      const mappedRecords: BorrowRecord[] = data.map((record: any) => ({
+        id: `br${record.checkout_id}`,
+        checkoutId: record.checkout_id,
+        userId: String(record.user_id),
+        bookId: String(record.book_id), // Ensure consistent string type
+        borrowDate: record.borrow_date?.split('T')[0] || record.borrow_date,
+        dueDate: record.due_date?.split('T')[0] || record.due_date,
+        status: record.return_date ? "returned" : "borrowed",
+      }));
+
+      setBorrowRecords(mappedRecords);
+      console.log("✅ Fetched borrowings:", mappedRecords.length, "records");
+    } catch (err) {
+      console.error("❌ Error fetching borrowings:", err);
+    }
+  };
+
   const handleLogin = (user: User) => {
-    setCurrentUser(user);
+    const normalizedUser = {
+      ...user,
+      id: String(user.id) // Ensure id is stored as string
+    };
+    setCurrentUser(normalizedUser);
     setActiveTab("search");
+    // Fetch user's borrowings when they log in
+    fetchUserBorrowings(String(user.id));
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); 
+    localStorage.removeItem('token');
     setCurrentUser(null);
+    setBorrowRecords([]); // Clear borrowings on logout
     setActiveTab("search");
     setAuthMode("login"); 
   };
 
-
   const handleBorrow = async (book: Book) => {
     if (!currentUser || book.copiesAvailable <= 0) return;
 
-    const API_BASE = "http://localhost:4000";
+    const API_BASE = "http://localhost:4001";
+    const token = localStorage.getItem('token');
 
     try {
       const res = await fetch(`${API_BASE}/library/borrow`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({
-          userId: currentUser.id,
-          bookId: book.id,
+          userId: Number(currentUser.id),
+          bookId: Number(book.id),
           days: 14,
         }),
       });
@@ -86,6 +168,7 @@ function App() {
 
       const newRecord: BorrowRecord = {
         id: `br${Date.now()}`,
+        checkoutId: data.checkoutId, // Store the real database checkout ID
         userId: currentUser.id,
         bookId: book.id,
         borrowDate: new Date().toISOString().split("T")[0],
@@ -109,17 +192,39 @@ function App() {
   };
 
   const handleReturn = async (checkoutId: string) => {
-    const API_BASE = "http://localhost:4000";
+    const API_BASE = "http://localhost:4001";
+    const token = localStorage.getItem('token');
 
     try {
       const res = await fetch(`${API_BASE}/library/return`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ checkoutId }),
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ checkoutId: Number(checkoutId) }),
       });
 
       if (!res.ok) throw new Error("Failed to return book");
       console.log("Book returned successfully");
+      
+      // Update the UI state to reflect the returned book
+      const checkoutIdNum = Number(checkoutId);
+      setBorrowRecords(borrowRecords.map(record => 
+        record.checkoutId === checkoutIdNum 
+          ? { ...record, status: 'returned' as const, returnDate: new Date().toISOString().split("T")[0] }
+          : record
+      ));
+      
+      // Find the book and increment available copies
+      const returnedRecord = borrowRecords.find(record => record.checkoutId === checkoutIdNum);
+      if (returnedRecord) {
+        setBooks(books.map(book => 
+          book.id === returnedRecord.bookId 
+            ? { ...book, copiesAvailable: book.copiesAvailable + 1 }
+            : book
+        ));
+      }
     } catch (err) {
       console.error("❌ Error returning book:", err);
     }
@@ -146,7 +251,12 @@ function App() {
           />
         );
       case "profile":
-        return <UserProfile currentUser={currentUser} />;
+        return <UserProfile 
+          currentUser={currentUser} 
+          borrowRecords={borrowRecords}
+          books={books}
+          onReturn={handleReturn} 
+        />;
       case "dashboard":
         return currentUser.role === "staff" ? (
           <StaffDashboard currentUser={currentUser} />

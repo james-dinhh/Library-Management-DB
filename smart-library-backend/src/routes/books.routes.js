@@ -77,6 +77,7 @@ router.get('/', async (req, res) => {
       b.published_year,
       p.name                   AS publisher,
       b.cover_image_url,
+      b.copies_total,
       b.copies_available,
       b.status,
       b.avg_rating,
@@ -116,6 +117,7 @@ router.get('/', async (req, res) => {
       genre: r.genre,
       publishedYear: r.published_year ?? null,
       coverImageUrl: r.cover_image_url ?? null,
+      totalCopies: r.copies_total,
       copiesAvailable: r.copies_available,
       status: r.status,                    // 'active' | 'retired'
       rating: r.avg_rating,                // number | null

@@ -35,6 +35,16 @@
       "publisher_id": 2,
       "name": "Dragon Press",
       "address": "456 River Rd, Hanoi"
+    },
+    {
+      "publisher_id": 3,
+      "name": "Sunrise Publishing",
+      "address": "789 Sunshine Ave, Da Nang"
+    },
+    {
+      "publisher_id": 4,
+      "name": "Wanderlust Press",
+      "address": "101 Adventure Rd, Phu Quoc"
     }
   ],
   "authors": [
@@ -52,6 +62,26 @@
       "author_id": 3,
       "name": "Khoa Dang",
       "bio": "Historian and essayist."
+    },
+    {
+      "author_id": 4,
+      "name": "Anh Tran",
+      "bio": "Modern fiction writer."
+    },
+    {
+      "author_id": 5,
+      "name": "Bao Pham",
+      "bio": "Expert in historical non-fiction."
+    },
+    {
+      "author_id": 6,
+      "name": "Linh Nguyen",
+      "bio": "Poet and translator."
+    },
+    {
+      "author_id": 7,
+      "name": "Duc Hoang",
+      "bio": "Travel writer and photographer."
     }
   ],
   "books": [
@@ -93,12 +123,152 @@
       "status": "active",
       "avg_rating": 4.0,
       "ratings_count": 5
+    },
+    {
+      "book_id": 4,
+      "title": "The Crimson Silk",
+      "genre": "Historical Fiction",
+      "published_year": 2021,
+      "publisher_id": 3,
+      "cover_image_url": "http://example.com/crimson.jpg",
+      "copies_total": 4,
+      "copies_available": 4,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 5,
+      "title": "A Dragon's Lullaby",
+      "genre": "Fantasy",
+      "published_year": 2022,
+      "publisher_id": 2,
+      "cover_image_url": "http://example.com/dragon.jpg",
+      "copies_total": 6,
+      "copies_available": 6,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 6,
+      "title": "Saigon Street Food",
+      "genre": "Cookbook",
+      "published_year": 2019,
+      "publisher_id": 1,
+      "cover_image_url": "http://example.com/saigon.jpg",
+      "copies_total": 8,
+      "copies_available": 8,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 7,
+      "title": "Whispers of the Mekong",
+      "genre": "Poetry",
+      "published_year": 2023,
+      "publisher_id": 3,
+      "cover_image_url": "http://example.com/mekong.jpg",
+      "copies_total": 3,
+      "copies_available": 3,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 8,
+      "title": "The Last Emperor's Seal",
+      "genre": "History",
+      "published_year": 2017,
+      "publisher_id": 4,
+      "cover_image_url": "http://example.com/seal.jpg",
+      "copies_total": 2,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 9,
+      "title": "Journey to Ha Long Bay",
+      "genre": "Travel",
+      "published_year": 2022,
+      "publisher_id": 4,
+      "cover_image_url": "http://example.com/halong.jpg",
+      "copies_total": 5,
+      "copies_available": 5,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 10,
+      "title": "City of Ghosts",
+      "genre": "Thriller",
+      "published_year": 2021,
+      "publisher_id": 2,
+      "cover_image_url": "http://example.com/ghosts.jpg",
+      "copies_total": 7,
+      "copies_available": 7,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 11,
+      "title": "The Art of Water Puppetry",
+      "genre": "Art",
+      "published_year": 2016,
+      "publisher_id": 1,
+      "cover_image_url": "http://example.com/puppetry.jpg",
+      "copies_total": 3,
+      "copies_available": 3,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 12,
+      "title": "Beneath the Banyan Tree",
+      "genre": "Fiction",
+      "published_year": 2019,
+      "publisher_id": 3,
+      "cover_image_url": "http://example.com/banyan.jpg",
+      "copies_total": 5,
+      "copies_available": 5,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 13,
+      "title": "Vietnamese Legends",
+      "genre": "Folklore",
+      "published_year": 2018,
+      "publisher_id": 4,
+      "cover_image_url": "http://example.com/legends.jpg",
+      "copies_total": 4,
+      "copies_available": 4,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
     }
   ],
   "book_authors": [
     { "book_id": 1, "author_id": 1 },
     { "book_id": 2, "author_id": 2 },
-    { "book_id": 3, "author_id": 3 }
+    { "book_id": 3, "author_id": 3 },
+    { "book_id": 4, "author_id": 4 },
+    { "book_id": 5, "author_id": 1 },
+    { "book_id": 6, "author_id": 2 },
+    { "book_id": 7, "author_id": 6 },
+    { "book_id": 8, "author_id": 5 },
+    { "book_id": 9, "author_id": 7 },
+    { "book_id": 10, "author_id": 4 },
+    { "book_id": 11, "author_id": 3 },
+    { "book_id": 12, "author_id": 1 },
+    { "book_id": 13, "author_id": 5 }
   ],
   "checkouts": [
     {

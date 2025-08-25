@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Calendar, MessageCircle, User, Heart, Share2 } from 'lucide-react';
+import { ArrowLeft, Calendar, MessageCircle, User } from 'lucide-react';
 import { Book, User as UserType } from '../types';
 import { formatDate, getAvailabilityStatus } from '../utils/helpers';
 
-const API_BASE = "http://localhost:4000";
+const API_BASE = "http://localhost:4001";
 
 interface BookDetailsProps {
   book?: Book | null;
@@ -41,7 +41,16 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
       try {
         setLoadingReviews(true);
         if (!book?.id) return;
-        const response = await fetch(`${API_BASE}/reviews/book/${book.id}`);
+        
+        const token = localStorage.getItem('token');
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(`${API_BASE}/reviews/book/${book.id}`, {
+          headers
+        });
         if (!response.ok) throw new Error('Failed to fetch reviews');
         const data = await response.json();
         setBookReviews(Array.isArray(data) ? data : []);
@@ -58,10 +67,10 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
 
   // Submit new review
   const handleSubmitReview = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // TEMP: User functionality not ready, skip submitting review
-  console.log("Submit review skipped: user functionality not implemented yet.");
+    // TEMP: User functionality not ready, skip submitting review
+    console.log("Submit review skipped: user functionality not implemented yet.");
 
   // Optionally, clear the form and hide it
   setShowReviewForm(false);
@@ -131,7 +140,7 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
               <p className={`text-sm font-medium ${availability.color}`}>
                 {availability.status} - {book.copiesAvailable ?? 0} of {book.totalCopies ?? 0} copies available
               </p>
-              {currentUser.role === 'user' && (book.copiesAvailable ?? 0) > 0 && (
+              {currentUser.role === 'reader' && (book.copiesAvailable ?? 0) > 0 && (
                 <button
                   onClick={() => onBorrow(book)}
                   className="mt-2 px-6 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors duration-200"
@@ -147,7 +156,7 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
         <div className="border-t border-gray-200 p-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Reviews & Ratings</h2>
-            {currentUser.role === 'user' && (
+            {currentUser.role === 'reader' && (
               <button
                 onClick={() => setShowReviewForm(!showReviewForm)}
                 className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors duration-200 flex items-center space-x-2"
@@ -158,7 +167,7 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
             )}
           </div>
 
-          {showReviewForm && currentUser.role === 'user' && (
+          {showReviewForm && currentUser.role === 'reader' && (
             <div className="bg-gray-50 rounded-xl p-6 mb-6">
               <form onSubmit={handleSubmitReview}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>

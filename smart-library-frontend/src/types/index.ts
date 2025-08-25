@@ -18,13 +18,14 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'user' | 'staff';
+  role: 'reader' | 'staff';
   membershipDate: string;
   avatar: string;
 }
 
 export interface BorrowRecord {
   id: string;
+  checkoutId: number; // Real database checkout ID
   userId: string;
   bookId: string;
   borrowDate: string;

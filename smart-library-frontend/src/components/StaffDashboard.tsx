@@ -4,7 +4,7 @@ import { Book, User } from '../types';
 import BookForm from './BookForm';
 
 // Backend API base
-const API_BASE = "http://localhost:4000";
+const API_BASE = "http://localhost:4001";
 
 // --- API helper functions ---
 
@@ -20,11 +20,12 @@ async function fetchBooks() {
 }
 
 async function addBook(bookData: any) {
-  const res = await fetch(`${API_BASE}/admin/books`, {  // endpoint must include /books
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}/admin`, { // POST /admin
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('token')}` // include token
+      'Authorization': `Bearer ${token}`
     },
     body: JSON.stringify(bookData)
   });
@@ -32,11 +33,14 @@ async function addBook(bookData: any) {
   return res.json();
 }
 
-
 async function updateBookInventory(bookId: number, staffId: number, newTotal: number) {
+  const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE}/admin`, { // PUT /admin
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
     body: JSON.stringify({ bookId, staffId, newTotal, action: 'updateInventory' })
   });
   if (!res.ok) throw new Error('Failed to update inventory');
@@ -44,13 +48,14 @@ async function updateBookInventory(bookId: number, staffId: number, newTotal: nu
 }
 
 async function retireBook(bookId: number, staffId: number) {
-  const res = await fetch(`${API_BASE}/admin/books/${bookId}/retire`, {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}/admin`, { // PUT /admin
     method: 'PUT',
     headers: { 
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('token')}` 
+      'Authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({ staffId })
+    body: JSON.stringify({ bookId, staffId, action: 'retire' })
   });
   if (!res.ok) throw new Error('Failed to retire book');
   return res.json();
@@ -253,7 +258,6 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       </div>
 
       <BookForm
-        staffId={Number(currentUser.id)}
         book={selectedBook}
         isOpen={showBookForm}
         onClose={handleCloseForm}

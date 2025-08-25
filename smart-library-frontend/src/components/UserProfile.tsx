@@ -1,29 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { User, Calendar, BookOpen, Star, ChevronRight, Award, TrendingUp } from 'lucide-react';
-import { User as UserType, BorrowRecord } from '../types';
-import { mockBorrowRecords, mockBooks, mockReviews } from '../utils/mockData';
+import { User as UserType, BorrowRecord, Book, Review } from '../types';
 import { formatDate, calculateDaysUntilDue } from '../utils/helpers';
 
 interface UserProfileProps {
   currentUser: UserType;
+  borrowRecords: BorrowRecord[];
+  books: Book[];
+  onReturn: (checkoutId: string) => void;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ currentUser }) => {
+const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, books, onReturn }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'reviews'>('overview');
   
-  const userBorrowRecords = mockBorrowRecords.filter(record => record.userId === currentUser.id);
-  const userReviews = mockReviews.filter(review => review.userId === currentUser.id);
-  const activeBorrowings = userBorrowRecords.filter(record => record.status === 'borrowed');
+  const userReviews: Review[] = []; // Replace with actual review data if available
+
+  const userBorrowRecords = useMemo(() => 
+    borrowRecords.filter(record => record.userId === currentUser.id),
+    [borrowRecords, currentUser.id]
+  );
+
+  const activeBorrowings = useMemo(() =>
+    userBorrowRecords.filter(record => record.status === 'borrowed'),
+    [userBorrowRecords]
+  );
   
   const getBooksWithRecords = (records: BorrowRecord[]) => {
-    return records.map(record => ({
-      record,
-      book: mockBooks.find(book => book.id === record.bookId)!
-    }));
+    return records.map(record => {
+      const book = books.find(book => book.id === record.bookId);
+      return { record, book: book! };
+    }).filter(({ book }) => book);
   };
 
-  const activeBooksWithRecords = getBooksWithRecords(activeBorrowings);
-  const allBooksWithRecords = getBooksWithRecords(userBorrowRecords);
+  const activeBooksWithRecords = useMemo(() => getBooksWithRecords(activeBorrowings), [activeBorrowings, books]);
+  const allBooksWithRecords = useMemo(() => getBooksWithRecords(userBorrowRecords), [userBorrowRecords, books]);
+
+
 
   const stats = {
     totalBorrowed: userBorrowRecords.length,
@@ -158,28 +170,36 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser }) => {
                       const isOverdue = daysUntilDue < 0;
                       
                       return (
-                        <div key={record.id} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
-                          <div className="flex space-x-3">
-                            <img
-                              src={book.coverImageUrl}
-                              alt={book.title}
-                              className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-gray-900 truncate">{book.title}</h3>
-                              <p className="text-sm text-gray-600 truncate">{book.author}</p>
-                              <div className="mt-2">
-                                <p className="text-xs text-gray-500">Due: {formatDate(record.dueDate)}</p>
-                                <p className={`text-xs font-medium ${
-                                  isOverdue ? 'text-red-600' : daysUntilDue <= 3 ? 'text-yellow-600' : 'text-green-600'
-                                }`}>
-                                  {isOverdue ? `${Math.abs(daysUntilDue)} days overdue` : 
-                                   daysUntilDue === 0 ? 'Due today' : 
-                                   `${daysUntilDue} days left`}
-                                </p>
+                        <div key={record.id} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow flex flex-col justify-between">
+                          <div>
+                            <div className="flex space-x-3">
+                              <img
+                                src={book.coverImageUrl}
+                                alt={book.title}
+                                className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-gray-900 truncate">{book.title}</h3>
+                                <p className="text-sm text-gray-600 truncate">{book.author}</p>
+                                <div className="mt-2">
+                                  <p className="text-xs text-gray-500">Due: {formatDate(record.dueDate)}</p>
+                                  <p className={`text-xs font-medium ${
+                                    isOverdue ? 'text-red-600' : daysUntilDue <= 3 ? 'text-yellow-600' : 'text-green-600'
+                                  }`}>
+                                    {isOverdue ? `${Math.abs(daysUntilDue)} days overdue` : 
+                                     daysUntilDue === 0 ? 'Due today' : 
+                                     `${daysUntilDue} days left`}
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
+                          <button
+                            onClick={() => onReturn(record.checkoutId.toString())}
+                            className="mt-4 w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm"
+                          >
+                            Return Book
+                          </button>
                         </div>
                       );
                     })}
@@ -242,7 +262,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser }) => {
               <h2 className="text-xl font-bold text-gray-900 mb-6">My Reviews</h2>
               <div className="space-y-6">
                 {userReviews.map((review) => {
-                  const book = mockBooks.find(b => b.id === review.bookId);
+                  const book = books.find(b => b.id === review.bookId);
                   return (
                     <div key={review.id} className="border border-gray-200 rounded-xl p-6">
                       <div className="flex items-start space-x-4">

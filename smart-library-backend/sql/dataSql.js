@@ -84,6 +84,15 @@ async function seedMySQLFromJson() {
     // Insert books
     console.log('Inserting books...');
     for (const book of data.books) {
+      // Ensure copies_available never exceeds copies_total
+      let copiesTotal = book.copies_total || 0;
+      let copiesAvailable = book.copies_available || 0;
+      
+      // If copies_available is greater than copies_total, set copies_total to match
+      if (copiesAvailable > copiesTotal) {
+        copiesTotal = copiesAvailable;
+      }
+      
       await connection.execute(
         `INSERT INTO books (
           book_id, title, genre, published_year, publisher_id, cover_image_url, copies_total, copies_available, status, avg_rating, ratings_count
@@ -95,8 +104,8 @@ async function seedMySQLFromJson() {
           book.published_year || null,
           book.publisher_id,
           book.cover_image_url || null,
-          book.copies_total,
-          book.copies_available,
+          copiesTotal,
+          copiesAvailable,
           book.status || 'active',
           book.avg_rating || null,
           book.ratings_count || 0

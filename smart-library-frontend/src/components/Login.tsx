@@ -7,7 +7,7 @@ interface LoginProps {
   onSwitchToRegister: () => void; // 🔹 new prop
 }
 
-const API_BASE = "http://localhost:4000"; 
+const API_BASE = "http://localhost:4001"; 
 
 const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister }) => {
   const [email, setEmail] = useState('');
