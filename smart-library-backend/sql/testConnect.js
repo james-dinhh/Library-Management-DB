@@ -2,7 +2,7 @@ import { mysqlPool } from '../src/db/mysql.js';
 
 async function testConnection() {
   try {
-    console.log('Testing MySQL connection...');
+    console.log('Testing MySQL connection');
     
     // Test the connection
     const connection = await mysqlPool.getConnection();

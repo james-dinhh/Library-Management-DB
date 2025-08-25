@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
 dotenv.config();
-const uri = process.env.MONGODB_URI;
+const uri = process.env.MONGO_URI;
 
 // Reading Sessions Schema - Updated field names
 const readingSessionSchema = new mongoose.Schema({
