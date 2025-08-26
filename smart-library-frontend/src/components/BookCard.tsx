@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Eye, Heart } from 'lucide-react';
+import { Calendar, Eye } from 'lucide-react';
 import { Book } from '../types';
 import { getAvailabilityStatus } from '../utils/helpers';
 
@@ -41,9 +41,6 @@ const BookCard: React.FC<BookCardProps> = ({ book, onViewDetails, onBorrow, user
           alt={title}
           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <Heart className="h-4 w-4 text-gray-600 hover:text-red-500 cursor-pointer transition-colors" />
-        </div>
         <div
           className={`absolute bottom-3 left-3 px-3 py-1 rounded-full text-xs font-medium text-white ${
             availableCopies > 0 ? 'bg-green-600' : 'bg-red-600'
