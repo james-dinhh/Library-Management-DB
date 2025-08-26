@@ -168,7 +168,7 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
         <div className="border-t border-gray-200 p-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Reviews & Ratings</h2>
-            {currentUser.role === 'reader' && (
+            {(currentUser.role === 'reader' || currentUser.role === 'staff') && (
               <button
                 onClick={() => {
                   setShowReviewForm(!showReviewForm);
@@ -182,7 +182,7 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
             )}
           </div>
 
-          {showReviewForm && currentUser.role === 'reader' && (
+          {showReviewForm && (currentUser.role === 'reader' || currentUser.role === 'staff') && (
             <div className="bg-gray-50 rounded-xl p-6 mb-6">
               <form onSubmit={handleSubmitReview}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
