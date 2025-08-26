@@ -39,7 +39,7 @@ async function updateBookInventory(bookId: number, staffId: number, newTotal: nu
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
     },
-    body: JSON.stringify({ staffId, newTotal }), // bookId comes from URL, so not in body
+    body: JSON.stringify({ staffId, newTotal }),   // bookId comes from URL, so not in body
   });
 
   if (!res.ok) throw new Error('Failed to update inventory');
@@ -55,7 +55,7 @@ async function retireBook(bookId: number, staffId: number) {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
     },
-    body: JSON.stringify({ staffId }), // bookId is in URL, not body
+    body: JSON.stringify({ staffId }),   // bookId is in URL, not body
   });
 
   if (!res.ok) throw new Error('Failed to retire book');
@@ -63,24 +63,48 @@ async function retireBook(bookId: number, staffId: number) {
 }
 
 
-// --- NEW: Report fetchers ---
+// ---  Report fetchers -- adding on the token for staff verify-
 async function fetchMostBorrowed(start: string, end: string) {
-  // GET /reports/most-borrowed?start=...&end=...
-  const res = await fetch(`${API_BASE}/reports/most-borrowed?start=${start}&end=${end}`);
+  const token = localStorage.getItem('token');
+  const res = await fetch(
+    `${API_BASE}/reports/most-borrowed?start=${start}&end=${end}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
   if (!res.ok) throw new Error('Failed to fetch most borrowed report');
   return res.json();
 }
 
 async function fetchTopReaders() {
-  // GET /reports/top-readers
-  const res = await fetch(`${API_BASE}/reports/top-readers`);
+  const token = localStorage.getItem('token');
+  const res = await fetch(
+    `${API_BASE}/reports/top-readers`,
+    {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
   if (!res.ok) throw new Error('Failed to fetch top readers report');
   return res.json();
 }
 
 async function fetchLowAvailability() {
-  // GET /reports/low-availability
-  const res = await fetch(`${API_BASE}/reports/low-availability`);
+  const token = localStorage.getItem('token');
+  const res = await fetch(
+    `${API_BASE}/reports/low-availability`,
+    {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
   if (!res.ok) throw new Error('Failed to fetch low availability report');
   return res.json();
 }

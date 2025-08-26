@@ -18,6 +18,9 @@ import reviewsRouter from './routes/reviews.routes.js';
 import analyticsRouter from './routes/analytics.routes.js';
 import adminRouter from './routes/admin.routes.js';
 import statsRouter from './routes/stats.routes.js';
+//reprot routers
+import reportsRouter from './routes/reports.routes.js';
+
 
 // Swagger (OpenAPI)
 import swaggerUi from 'swagger-ui-express';
@@ -96,9 +99,10 @@ app.use('/reviews', authenticate, authorizeRole('reader', 'staff'), reviewsRoute
 app.use('/analytics', authenticate, authorizeRole('staff'), analyticsRouter);
 app.use('/admin', authenticate, authorizeRole('staff'), adminRouter);
 app.use('/stats', authenticate, authorizeRole('staff'), statsRouter);
+app.use('/reports', authenticate, authorizeRole('staff'), reportsRouter);
 
 // Startup
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 4001;
 
 (async () => {
   try {
