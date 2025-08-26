@@ -92,9 +92,27 @@ async function fetchLowAvailability() {
    Each session contains: userId, bookId, startTime, endTime, device, pagesRead, highlights[]
 */
 async function fetchAverageSessionTime() {
-  // GET /analytics/average-session-time
-  const res = await fetch(`${API_BASE}/analytics/average-session-time`);
-  if (!res.ok) throw new Error('Failed to fetch average session time per user');
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("No auth token found, please log in again.");
+  }
+
+  const url = `${API_BASE}/analytics/avg-session-time-per-user?limit=100`;
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(
+      `Failed to fetch average session time per user (status ${res.status}): ${text}`
+    );
+  }
+
   return res.json();
 }
 
@@ -290,8 +308,8 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   // NEW: Analytics handlers
   const handleGenerateAverageSessionTime = async () => {
     try {
-      const data = await fetchAverageSessionTime(); // GET /analytics/average-session-time
-      setAverageSessionTime(data);
+      const data = await fetchAverageSessionTime();
+      setAverageSessionTime(data.results); // 👈 use .results
     } catch (err) {
       console.error(err);
     }
@@ -535,7 +553,9 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
 
             {/* Average Session Time per User */}
             <div className="border rounded-lg p-4">
-              <h3 className="font-semibold text-gray-800 mb-2">Average Session Time per User</h3>
+              <h3 className="font-semibold text-gray-800 mb-2">
+                Average Session Time per User
+              </h3>
               <button
                 onClick={handleGenerateAverageSessionTime}
                 className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 mb-2"
@@ -545,7 +565,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
               <ul className="list-decimal pl-5">
                 {averageSessionTime.map((u, i) => (
                   <li key={i}>
-                    {(u.userName ?? u.userId) } — {u.avgSessionMinutes ?? u.avgMinutes} min/session
+                    User {u.userId} — {u.avgSessionMinutes} min/session ({u.sessions} sessions)
                   </li>
                 ))}
               </ul>
