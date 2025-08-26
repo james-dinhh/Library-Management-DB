@@ -33,17 +33,19 @@ async function addBook(bookData: any) {
 
 async function updateBookInventory(bookId: number, staffId: number, newTotal: number) {
   const token = localStorage.getItem('token');
-  const res = await fetch(`${API_BASE}/admin`, { // PUT /admin
+  const res = await fetch(`${API_BASE}/admin/books/${bookId}/inventory`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
     },
-    body: JSON.stringify({ bookId, staffId, newTotal, action: 'updateInventory' })
+    body: JSON.stringify({ staffId, newTotal }), // bookId comes from URL, so not in body
   });
+
   if (!res.ok) throw new Error('Failed to update inventory');
   return res.json();
 }
+
 
 async function retireBook(bookId: number, staffId: number) {
   const token = localStorage.getItem('token');
@@ -178,10 +180,16 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     }
   };
 
-  const handleEditBook = (book: Book) => {
-    setSelectedBook(book);
-    setShowBookForm(true);
-  };
+// const handleEditBook = async (book: Book, staffId: number, newTotal: number) => {
+//     try {
+//       await updateBookInventory(Number(book.id), staffId, newTotal);
+//       // Optionally refresh the book list here
+//       console.log('Inventory updated successfully');
+//     } catch (e) {
+//       console.error(e);
+//       alert('Failed to update book inventory');
+//     }
+//   };
 
   const handleDeleteBook = async (bookId: number) => {
     if (!window.confirm('Are you sure you want to retire this book?')) return;
