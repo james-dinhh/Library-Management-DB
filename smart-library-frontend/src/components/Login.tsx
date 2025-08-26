@@ -4,7 +4,7 @@ import { User as UserType } from '../types';
 
 interface LoginProps {
   onLogin: (user: UserType) => void;
-  onSwitchToRegister: () => void; // 🔹 new prop
+  onSwitchToRegister: () => void; 
 }
 
 const API_BASE = "http://localhost:4001"; 

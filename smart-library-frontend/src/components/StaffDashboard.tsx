@@ -106,11 +106,30 @@ async function fetchMostHighlightedBooks() {
 }
 
 async function fetchTopBooksByReadingTime() {
-  // GET /analytics/top-books-reading-time?limit=10
-  const res = await fetch(`${API_BASE}/analytics/top-books-reading-time?limit=10`);
-  if (!res.ok) throw new Error('Failed to fetch top books by total reading time');
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("No auth token found, please log in again.");
+  }
+
+  const url = `${API_BASE}/analytics/top-books-by-reading-time?limit=10`;
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(
+      `Failed to fetch top books by total reading time (status ${res.status}): ${text}`
+    );
+  }
+
   return res.json();
 }
+
 
 // --- Component ---
 interface StaffDashboardProps {
@@ -270,8 +289,8 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
 
   const handleGenerateTopReadingTime = async () => {
     try {
-      const data = await fetchTopBooksByReadingTime(); // GET /analytics/top-books-reading-time?limit=10
-      setTopReadingTime(data);
+      const data = await fetchTopBooksByReadingTime();
+      setTopReadingTime(data.results);
     } catch (err) {
       console.error(err);
     }
@@ -539,7 +558,9 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
               </button>
               <ul className="list-decimal pl-5">
                 {topReadingTime.map((b, i) => (
-                  <li key={i}>{b.title} — {b.totalMinutes ?? b.totalReadingMinutes} minutes read</li>
+                  <li key={i}>
+                    Book {b.bookId} — {b.totalReadingHours} hours read ({b.sessions} sessions)
+                  </li>
                 ))}
               </ul>
             </div>
