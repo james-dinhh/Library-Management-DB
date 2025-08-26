@@ -3,10 +3,19 @@ import axios from 'axios';
 import { Book, User, Review } from '../types';
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4001',
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+// Add token to requests if available
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 // ---------- User API ----------
@@ -40,6 +49,19 @@ const borrowBook = async (bookId: number): Promise<Book> => {
   return res.data;
 };
 
+const createBook = async (bookData: {
+  staffId: number;
+  title: string;
+  genre: string;
+  publisherId: number;
+  copiesTotal: number;
+  publishedYear?: number;
+  coverImageUrl?: string;
+}): Promise<any> => {
+  const res = await API.post('/admin/books', bookData);
+  return res.data;
+};
+
 // ---------- Reviews API ----------
 const getBookReviews = async (bookId: number): Promise<Review[]> => {
   const res = await API.get(`/reviews/book/${bookId}`);
@@ -64,6 +86,7 @@ export default {
   getBooks,
   getBookById,
   borrowBook,
+  createBook,
   getBookReviews,
   submitBookReview,
 };
