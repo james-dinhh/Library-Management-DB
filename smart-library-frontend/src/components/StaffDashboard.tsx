@@ -99,11 +99,30 @@ async function fetchAverageSessionTime() {
 }
 
 async function fetchMostHighlightedBooks() {
-  // GET /analytics/most-highlighted
-  const res = await fetch(`${API_BASE}/analytics/most-highlighted`);
-  if (!res.ok) throw new Error('Failed to fetch most highlighted books');
+  const token = localStorage.getItem("token"); 
+  if (!token) {
+    throw new Error("No auth token found, please log in again.");
+  }
+
+  const url = `${API_BASE}/analytics/most-highlighted-books?limit=10`;
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(
+      `Failed to fetch most highlighted books (status ${res.status}): ${text}`
+    );
+  }
+
   return res.json();
 }
+
 
 async function fetchTopBooksByReadingTime() {
   const token = localStorage.getItem("token");
@@ -280,8 +299,9 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
 
   const handleGenerateMostHighlighted = async () => {
     try {
-      const data = await fetchMostHighlightedBooks(); // GET /analytics/most-highlighted
-      setMostHighlighted(data);
+      const data = await fetchMostHighlightedBooks();
+      // backend returns { start, end, count, results: [...] }
+      setMostHighlighted(data.results);
     } catch (err) {
       console.error(err);
     }
@@ -542,10 +562,13 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
               </button>
               <ul className="list-decimal pl-5">
                 {mostHighlighted.map((b, i) => (
-                  <li key={i}>{b.title} — {b.highlights} highlights</li>
+                  <li key={i}>
+                    Book {b.bookId} — {b.totalHighlights} highlights
+                  </li>
                 ))}
               </ul>
             </div>
+
 
             {/* Top 10 Books by Total Reading Time */}
             <div className="border rounded-lg p-4">
