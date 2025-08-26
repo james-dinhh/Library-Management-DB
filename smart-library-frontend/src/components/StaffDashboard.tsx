@@ -81,13 +81,40 @@ async function fetchLowAvailability() {
   return res.json();
 }
 
+/* ===========================
+   NEW: Analytics fetchers
+   ===========================
+   These endpoints analyze MongoDB reading session logs:
+   Each session contains: userId, bookId, startTime, endTime, device, pagesRead, highlights[]
+*/
+async function fetchAverageSessionTime() {
+  // GET /analytics/average-session-time
+  const res = await fetch(`${API_BASE}/analytics/average-session-time`);
+  if (!res.ok) throw new Error('Failed to fetch average session time per user');
+  return res.json();
+}
+
+async function fetchMostHighlightedBooks() {
+  // GET /analytics/most-highlighted
+  const res = await fetch(`${API_BASE}/analytics/most-highlighted`);
+  if (!res.ok) throw new Error('Failed to fetch most highlighted books');
+  return res.json();
+}
+
+async function fetchTopBooksByReadingTime() {
+  // GET /analytics/top-books-reading-time?limit=10
+  const res = await fetch(`${API_BASE}/analytics/top-books-reading-time?limit=10`);
+  if (!res.ok) throw new Error('Failed to fetch top books by total reading time');
+  return res.json();
+}
+
 // --- Component ---
 interface StaffDashboardProps {
   currentUser: User;
 }
 
 const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
-  const [activeTab, setActiveTab] = useState<'inventory' | 'reports'>('inventory');
+  const [activeTab, setActiveTab] = useState<'inventory' | 'reports' | 'analytics'>('inventory');
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [showBookForm, setShowBookForm] = useState(false);
@@ -100,6 +127,11 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   const [topReaders, setTopReaders] = useState<any[]>([]);
   const [lowAvailability, setLowAvailability] = useState<any[]>([]);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
+
+  // NEW: Analytics state
+  const [averageSessionTime, setAverageSessionTime] = useState<any[]>([]);
+  const [mostHighlighted, setMostHighlighted] = useState<any[]>([]);
+  const [topReadingTime, setTopReadingTime] = useState<any[]>([]);
 
   // Fetch books on load
   useEffect(() => {
@@ -207,6 +239,34 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     }
   };
 
+  // NEW: Analytics handlers
+  const handleGenerateAverageSessionTime = async () => {
+    try {
+      const data = await fetchAverageSessionTime(); // GET /analytics/average-session-time
+      setAverageSessionTime(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleGenerateMostHighlighted = async () => {
+    try {
+      const data = await fetchMostHighlightedBooks(); // GET /analytics/most-highlighted
+      setMostHighlighted(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleGenerateTopReadingTime = async () => {
+    try {
+      const data = await fetchTopBooksByReadingTime(); // GET /analytics/top-books-reading-time?limit=10
+      setTopReadingTime(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
@@ -239,6 +299,19 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
             >
               <BarChart3 className="h-4 w-4" />
               <span>Reports</span>
+            </button>
+
+            {/* NEW: Analytics tab button */}
+            <button
+              onClick={() => setActiveTab('analytics')}
+              className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors duration-200 ${
+                activeTab === 'analytics'
+                  ? 'border-blue-700 text-blue-700'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span>Analytics</span>
             </button>
           </nav>
         </div>
@@ -400,6 +473,63 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
               <ul className="list-disc pl-5">
                 {lowAvailability.map((b, i) => (
                   <li key={i}>{b.title} — {b.copiesAvailable} copies left</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {/* --- NEW: Analytics Tab --- */}
+        {activeTab === 'analytics' && (
+          <div className="p-8 space-y-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Analytics</h2>
+
+            {/* Average Session Time per User */}
+            <div className="border rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-2">Average Session Time per User</h3>
+              <button
+                onClick={handleGenerateAverageSessionTime}
+                className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 mb-2"
+              >
+                Generate
+              </button>
+              <ul className="list-decimal pl-5">
+                {averageSessionTime.map((u, i) => (
+                  <li key={i}>
+                    {(u.userName ?? u.userId) } — {u.avgSessionMinutes ?? u.avgMinutes} min/session
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Most Highlighted Books */}
+            <div className="border rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-2">Most Highlighted Books</h3>
+              <button
+                onClick={handleGenerateMostHighlighted}
+                className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 mb-2"
+              >
+                Generate
+              </button>
+              <ul className="list-decimal pl-5">
+                {mostHighlighted.map((b, i) => (
+                  <li key={i}>{b.title} — {b.highlights} highlights</li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Top 10 Books by Total Reading Time */}
+            <div className="border rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-2">Top 10 Books by Total Reading Time</h3>
+              <button
+                onClick={handleGenerateTopReadingTime}
+                className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 mb-2"
+              >
+                Generate
+              </button>
+              <ul className="list-decimal pl-5">
+                {topReadingTime.map((b, i) => (
+                  <li key={i}>{b.title} — {b.totalMinutes ?? b.totalReadingMinutes} minutes read</li>
                 ))}
               </ul>
             </div>
