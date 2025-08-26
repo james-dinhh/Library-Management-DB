@@ -22,13 +22,13 @@ const BookCard: React.FC<BookCardProps> = ({ book, onViewDetails, onBorrow, user
   const genre = book.genre ?? 'Unknown';
   const title = book.title ?? 'Untitled';
   const author = book.author ?? 'Unknown';
-  const coverImageUrl = book.coverImageUrl ?? 'https://via.placeholder.com/150';
+  //const coverImageUrl = book.coverImageUrl ?? 'https://via.placeholder.com/150';
 
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden group">
       <div className="relative">
         <img
-          src={coverImageUrl}
+          src="/book.jpg"
           alt={title}
           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
         />
