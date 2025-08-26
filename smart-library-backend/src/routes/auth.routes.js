@@ -143,12 +143,20 @@ router.get('/me', async (req, res) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         // Optionally refresh user data from DB:
         const [rows] = await mysqlPool.execute(
-            'SELECT user_id, name, email, role FROM users WHERE user_id = ?',
+            'SELECT user_id, name, email, role, registration_date FROM users WHERE user_id = ?',
             [decoded.id]
         );
         const user = rows[0];
         if (!user) return res.status(401).json({ error: 'User no longer exists' });
-        return res.json({ user: { id: user.user_id, name: user.name, email: user.email, role: user.role } });
+        return res.json({
+            user: {
+                id: user.user_id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                registrationDate: user.registration_date ? new Date(user.registration_date).toISOString() : null
+            }
+        });
     } catch (e) {
         return res.status(401).json({ error: 'Invalid or expired token' });
     }
