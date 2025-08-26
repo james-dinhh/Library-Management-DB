@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Plus } from 'lucide-react';
+import { BookOpen, BarChart3, Plus } from 'lucide-react';
 import { Book, User } from '../types';
 import BookForm from './BookForm';
 
@@ -7,12 +7,10 @@ import BookForm from './BookForm';
 const API_BASE = "http://localhost:4001";
 
 // --- API helper functions ---
-
 async function fetchBooks() {
   const res = await fetch(`${API_BASE}/books`); // GET /books
   if (!res.ok) throw new Error('Failed to fetch books');
   const rawData = await res.json();
-  // Map authors array to single string for each book
   return rawData.map((r: any) => ({
     ...r,
     author: r.authors?.length ? r.authors.join(', ') : '',
@@ -23,7 +21,7 @@ async function addBook(bookData: any) {
   const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE}/admin`, { // POST /admin
     method: 'POST',
-    headers: { 
+    headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
@@ -37,7 +35,7 @@ async function updateBookInventory(bookId: number, staffId: number, newTotal: nu
   const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE}/admin`, { // PUT /admin
     method: 'PUT',
-    headers: { 
+    headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
@@ -51,7 +49,7 @@ async function retireBook(bookId: number, staffId: number) {
   const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE}/admin`, { // PUT /admin
     method: 'PUT',
-    headers: { 
+    headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
@@ -61,19 +59,47 @@ async function retireBook(bookId: number, staffId: number) {
   return res.json();
 }
 
+// --- NEW: Report fetchers ---
+async function fetchMostBorrowed(start: string, end: string) {
+  // GET /reports/most-borrowed?start=...&end=...
+  const res = await fetch(`${API_BASE}/reports/most-borrowed?start=${start}&end=${end}`);
+  if (!res.ok) throw new Error('Failed to fetch most borrowed report');
+  return res.json();
+}
+
+async function fetchTopReaders() {
+  // GET /reports/top-readers
+  const res = await fetch(`${API_BASE}/reports/top-readers`);
+  if (!res.ok) throw new Error('Failed to fetch top readers report');
+  return res.json();
+}
+
+async function fetchLowAvailability() {
+  // GET /reports/low-availability
+  const res = await fetch(`${API_BASE}/reports/low-availability`);
+  if (!res.ok) throw new Error('Failed to fetch low availability report');
+  return res.json();
+}
+
 // --- Component ---
 interface StaffDashboardProps {
   currentUser: User;
 }
 
 const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
-  const [activeTab, setActiveTab] = useState<'inventory' | 'overview'>('inventory');
+  const [activeTab, setActiveTab] = useState<'inventory' | 'reports'>('inventory');
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [showBookForm, setShowBookForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterGenre, setFilterGenre] = useState('');
   const [sortBy, setSortBy] = useState('title');
+
+  // Reports state
+  const [mostBorrowed, setMostBorrowed] = useState<any[]>([]);
+  const [topReaders, setTopReaders] = useState<any[]>([]);
+  const [lowAvailability, setLowAvailability] = useState<any[]>([]);
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
   // Fetch books on load
   useEffect(() => {
@@ -89,20 +115,22 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   }, []);
 
   const genres = [...new Set(books.map(book => book.genre))].sort();
-
-  const filteredBooks = books.filter(book => {
-    const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          book.author.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesGenre = !filterGenre || book.genre === filterGenre;
-    return matchesSearch && matchesGenre;
-  }).sort((a, b) => {
-    switch (sortBy) {
-      case 'title': return a.title.localeCompare(b.title);
-      case 'author': return a.author.localeCompare(b.author);
-      case 'availability': return (b.copiesAvailable || 0) - (a.copiesAvailable || 0);
-      default: return 0;
-    }
-  });
+  const filteredBooks = books
+    .filter(book => {
+      const matchesSearch =
+        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.author.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesGenre = !filterGenre || book.genre === filterGenre;
+      return matchesSearch && matchesGenre;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'title': return a.title.localeCompare(b.title);
+        case 'author': return a.author.localeCompare(b.author);
+        case 'availability': return (b.copiesAvailable || 0) - (a.copiesAvailable || 0);
+        default: return 0;
+      }
+    });
 
   // --- Handlers ---
   const handleSaveBook = async (bookData: Omit<Book, 'id'>) => {
@@ -151,6 +179,34 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     setSelectedBook(null);
   };
 
+  // Report handlers
+  const handleGenerateMostBorrowed = async () => {
+    try {
+      const data = await fetchMostBorrowed(dateRange.start, dateRange.end);
+      setMostBorrowed(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleGenerateTopReaders = async () => {
+    try {
+      const data = await fetchTopReaders();
+      setTopReaders(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleGenerateLowAvailability = async () => {
+    try {
+      const data = await fetchLowAvailability();
+      setLowAvailability(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
@@ -164,22 +220,40 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
             <button
               onClick={() => setActiveTab('inventory')}
               className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors duration-200 ${
-                activeTab === 'inventory' ? 'border-blue-700 text-blue-700' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                activeTab === 'inventory'
+                  ? 'border-blue-700 text-blue-700'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
               <BookOpen className="h-4 w-4" />
               <span>Book Inventory</span>
             </button>
+
+            <button
+              onClick={() => setActiveTab('reports')}
+              className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors duration-200 ${
+                activeTab === 'reports'
+                  ? 'border-blue-700 text-blue-700'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span>Reports</span>
+            </button>
           </nav>
         </div>
 
+        {/* --- Inventory Tab --- */}
         {activeTab === 'inventory' && (
           <div className="p-8 space-y-6">
             {/* Header */}
             <div className="flex justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">Book Inventory Management</h2>
               <button
-                onClick={() => { setSelectedBook(null); setShowBookForm(true); }}
+                onClick={() => {
+                  setSelectedBook(null);
+                  setShowBookForm(true);
+                }}
                 className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors flex items-center space-x-2"
               >
                 <Plus className="h-4 w-4" />
@@ -237,7 +311,9 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
                         {book.copiesAvailable}/{book.totalCopies || book.copiesAvailable}
                         <button
                           onClick={() => {
-                            const newTotal = parseInt(prompt("Enter new total copies", String(book.totalCopies || book.copiesAvailable)) || "0");
+                            const newTotal = parseInt(
+                              prompt("Enter new total copies", String(book.totalCopies || book.copiesAvailable)) || "0"
+                            );
                             if (newTotal > 0) handleInventoryUpdate(Number(book.id), newTotal);
                           }}
                           className="ml-2 text-blue-600"
@@ -246,12 +322,86 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
                         </button>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <button onClick={() => handleDeleteBook(Number(book.id))} className="text-red-600">Retire</button>
+                        <button
+                          onClick={() => handleDeleteBook(Number(book.id))}
+                          className="text-red-600"
+                        >
+                          Retire
+                        </button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* --- Reports Tab --- */}
+        {activeTab === 'reports' && (
+          <div className="p-8 space-y-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Reports</h2>
+
+            {/* Most Borrowed */}
+            <div className="border rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-2">Most Borrowed Books</h3>
+              <div className="flex space-x-2 mb-2">
+                <input
+                  type="date"
+                  value={dateRange.start}
+                  onChange={e => setDateRange({ ...dateRange, start: e.target.value })}
+                  className="border rounded px-2 py-1"
+                />
+                <input
+                  type="date"
+                  value={dateRange.end}
+                  onChange={e => setDateRange({ ...dateRange, end: e.target.value })}
+                  className="border rounded px-2 py-1"
+                />
+                <button
+                  onClick={handleGenerateMostBorrowed}
+                  className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Generate
+                </button>
+              </div>
+              <ul className="list-disc pl-5">
+                {mostBorrowed.map((b, i) => (
+                  <li key={i}>{b.title} — {b.count} checkouts</li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Top Readers */}
+            <div className="border rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-2">Top Active Readers</h3>
+              <button
+                onClick={handleGenerateTopReaders}
+                className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 mb-2"
+              >
+                Generate
+              </button>
+              <ul className="list-decimal pl-5">
+                {topReaders.map((r, i) => (
+                  <li key={i}>{r.name} — {r.checkouts} checkouts</li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Low Availability */}
+            <div className="border rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-2">Books with Low Availability</h3>
+              <button
+                onClick={handleGenerateLowAvailability}
+                className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 mb-2"
+              >
+                Generate
+              </button>
+              <ul className="list-disc pl-5">
+                {lowAvailability.map((b, i) => (
+                  <li key={i}>{b.title} — {b.copiesAvailable} copies left</li>
+                ))}
+              </ul>
             </div>
           </div>
         )}
