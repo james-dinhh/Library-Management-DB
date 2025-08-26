@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import Login from "./components/Login";
 import Register from "./components/Register"; 
@@ -9,7 +9,15 @@ import { User, Book, BorrowRecord, Review } from "./types";
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState("search");
+  // Load last tab from localStorage or default to "search"
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem("activeTab") || "search";
+  });
+
+  // Whenever activeTab changes, save it
+  useEffect(() => {
+    localStorage.setItem("activeTab", activeTab);
+  }, [activeTab]);
   const [authMode, setAuthMode] = useState<"login" | "register">("login"); 
 
   const [books, setBooks] = useState<Book[]>([]);
