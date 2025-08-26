@@ -32,6 +32,7 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
 
   const availability = getAvailabilityStatus(book.copiesAvailable ?? 0);
 
@@ -113,7 +114,7 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
     } catch (err) {
       console.error('Error submitting review:', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      alert(`Failed to submit review: ${errorMessage}`);
+      setReviewError(`Failed to submit review: ${errorMessage}`);
     }
   };
 
@@ -169,7 +170,10 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
             <h2 className="text-2xl font-bold text-gray-900">Reviews & Ratings</h2>
             {currentUser.role === 'reader' && (
               <button
-                onClick={() => setShowReviewForm(!showReviewForm)}
+                onClick={() => {
+                  setShowReviewForm(!showReviewForm);
+                  setReviewError(null);
+                }}
                 className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors duration-200 flex items-center space-x-2"
               >
                 <MessageCircle className="h-4 w-4" />
@@ -207,11 +211,20 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
                   required
                 />
 
+                {reviewError && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span className="block sm:inline">{reviewError}</span>
+                  </div>
+                )}
+
                 <div className="flex space-x-3">
                   <button type="submit" className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors duration-200">
                     Submit Review
                   </button>
-                  <button type="button" onClick={() => setShowReviewForm(false)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                  <button type="button" onClick={() => {
+                    setShowReviewForm(false);
+                    setReviewError(null);
+                  }} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200">
                     Cancel
                   </button>
                 </div>
