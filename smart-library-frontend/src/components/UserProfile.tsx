@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { User, Calendar, BookOpen, Star, ChevronRight, Award, TrendingUp } from 'lucide-react';
 import { User as UserType, BorrowRecord, Book, Review } from '../types';
-import { formatDate, calculateDaysUntilDue } from '../utils/helpers';
+import { formatDate as rawFormatDate, calculateDaysUntilDue } from '../utils/helpers';
 
 interface UserProfileProps {
   currentUser: UserType;
@@ -11,9 +11,16 @@ interface UserProfileProps {
   onReturn: (checkoutId: string) => void;
 }
 
+// Safe formatDate wrapper
+const formatDate = (date?: string | Date) => {
+  if (!date) return '';
+  const d = new Date(date);
+  return isNaN(d.getTime()) ? '' : rawFormatDate(String(d));
+};
+
 const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, books, onReturn, userReviews }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'reviews'>('overview');
-  
+
   const userBorrowRecords = useMemo(() => 
     borrowRecords.filter(record => record.userId === currentUser.id),
     [borrowRecords, currentUser.id]
@@ -34,8 +41,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
   const activeBooksWithRecords = useMemo(() => getBooksWithRecords(activeBorrowings), [activeBorrowings, books]);
   const allBooksWithRecords = useMemo(() => getBooksWithRecords(userBorrowRecords), [userBorrowRecords, books]);
 
-
-
   const stats = {
     totalBorrowed: userBorrowRecords.length,
     currentlyBorrowed: activeBorrowings.length,
@@ -46,7 +51,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-opacity duration-300 opacity-100">
       {/* Profile Header */}
       <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
         <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
@@ -61,7 +66,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
             <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm text-gray-600">
               <div className="flex items-center space-x-1">
                 <Calendar className="h-4 w-4" />
-                <span>Member since {formatDate(currentUser.membershipDate)}</span>
+                <span>Member</span>
               </div>
               <div className="flex items-center space-x-1">
                 <Award className="h-4 w-4" />
