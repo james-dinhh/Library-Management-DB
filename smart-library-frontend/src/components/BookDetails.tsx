@@ -69,42 +69,53 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // TEMP: User functionality not ready, skip submitting review
-    console.log("Submit review skipped: user functionality not implemented yet.");
+    if (!book?.id || !currentUser?.id) {
+      console.error('Missing book ID or user ID');
+      return;
+    }
 
-  // Optionally, clear the form and hide it
-  setShowReviewForm(false);
-  setNewReview({ rating: 5, comment: '' });
+    try {
+      const token = localStorage.getItem('token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
 
-  // ❌ Comment out the real POST request until userId is available
-  /*
-  if (!book?.id || !currentUser?.id) return;
+      const response = await fetch(`${API_BASE}/reviews`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          userId: currentUser.id,
+          bookId: book.id,
+          rating: newReview.rating,
+          comment: newReview.comment,
+        }),
+      });
 
-  try {
-    const response = await fetch(`${API_BASE}/reviews`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: currentUser.id,
-        bookId: book.id,
-        rating: newReview.rating,
-        comment: newReview.comment,
-      }),
-    });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit review');
+      }
 
-    if (!response.ok) throw new Error('Failed to submit review');
+      // Refresh reviews after successful submission
+      const refreshed = await fetch(`${API_BASE}/reviews/book/${book.id}`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      const data = await refreshed.json();
+      setBookReviews(Array.isArray(data) ? data : []);
 
-    const refreshed = await fetch(`${API_BASE}/reviews/book/${book.id}`);
-    const data = await refreshed.json();
-    setBookReviews(Array.isArray(data) ? data : []);
-
-    setShowReviewForm(false);
-    setNewReview({ rating: 5, comment: '' });
-  } catch (err) {
-    console.error(err);
-  }
-  */
-};
+      setShowReviewForm(false);
+      setNewReview({ rating: 5, comment: '' });
+      
+      console.log('Review submitted successfully!');
+    } catch (err) {
+      console.error('Error submitting review:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      alert(`Failed to submit review: ${errorMessage}`);
+    }
+  };
 
 
   return (
