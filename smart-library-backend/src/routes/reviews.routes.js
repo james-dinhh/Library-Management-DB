@@ -50,6 +50,7 @@
  */
 import { Router } from 'express';
 import { mysqlPool } from '../db/mysql.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -88,17 +89,24 @@ router.get('/book/:bookId', async (req, res) => {
 
 // List reviews for a user
 // GET /reviews/user/:userId
-router.get('/user/:userId', async (req, res) => {
+router.get('/user/:userId', authenticate, async (req, res) => {
   const userId = Number(req.params.userId);
+  // Ensure the authenticated user is requesting their own reviews
+  if (req.user.id !== userId) {
+    return res.status(403).json({ error: 'Forbidden: You can only access your own reviews.' });
+  }
   try {
     const [rows] = await mysqlPool.query(
-      `SELECT r.review_id AS id, r.book_id as bookId, r.rating, r.comment, r.review_date AS date
+      `SELECT r.review_id AS id, r.book_id as bookId, b.title, r.rating, r.comment, r.review_date AS date
        FROM reviews r
-       WHERE r.user_id = ? ORDER BY r.review_date DESC`,
+       JOIN books b ON r.book_id = b.book_id
+       WHERE r.user_id = ? 
+       ORDER BY r.review_date DESC`,
       [userId]
     );
     res.json(rows);
   } catch (e) {
+    console.error('Error fetching user reviews:', e);
     res.status(500).json({ error: e.message });
   }
 });

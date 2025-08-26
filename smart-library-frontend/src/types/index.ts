@@ -42,6 +42,7 @@ export interface Review {
   rating: number;
   comment: string;
   date: string;
+  bookTitle?: string;
 }
 
 export interface Analytics {

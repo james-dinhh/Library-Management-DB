@@ -257,20 +257,17 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-6">My Reviews</h2>
               <div className="space-y-6">
-                {userReviews.map((review) => {
-                  const book = books.find(b => b.id === review.bookId);
-                  return (
+                {userReviews.map((review) => (
                     <div key={review.id} className="border border-gray-200 rounded-xl p-6">
                       <div className="flex items-start space-x-4">
-                        {book && (
-                          <img
-                            src='/book.jpg'
-                            className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
-                          />
-                        )}
+                        <img
+                          src='/book.jpg'
+                          alt={review.bookTitle}
+                          className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
+                        />
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900">{book?.title}</h3>
+                            <h3 className="text-lg font-semibold text-gray-900">{review.bookTitle}</h3>
                             <span className="text-sm text-gray-500">{formatDate(review.date)}</span>
                           </div>
                           <div className="flex items-center space-x-2 mb-3">
@@ -284,8 +281,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
                         </div>
                       </div>
                     </div>
-                  );
-                })}
+                ))}
                 
                 {userReviews.length === 0 && (
                   <div className="text-center py-12 text-gray-500">

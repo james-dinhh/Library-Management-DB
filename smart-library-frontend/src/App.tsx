@@ -116,6 +116,7 @@ function App() {
         rating: review.rating,
         comment: review.comment,
         date: review.date,
+        bookTitle: review.title,
       }));
 
       setUserReviews(mappedReviews);
