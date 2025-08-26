@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { User, Calendar, BookOpen, Star, ChevronRight, Award, TrendingUp } from 'lucide-react';
 import { User as UserType, BorrowRecord, Book, Review } from '../types';
 import { formatDate as rawFormatDate, calculateDaysUntilDue } from '../utils/helpers';
@@ -20,13 +20,6 @@ const formatDate = (date?: string | Date) => {
 
 const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, books, onReturn, userReviews }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'reviews'>('overview');
-  const [loading, setLoading] = useState(true);
-
-  // Tiny delay before rendering the profile
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 200); // 200ms delay
-    return () => clearTimeout(timer);
-  }, []);
 
   const userBorrowRecords = useMemo(() => 
     borrowRecords.filter(record => record.userId === currentUser.id),
@@ -57,14 +50,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
       : '0'
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-20 text-gray-500">
-        Loading profile...
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-opacity duration-300 opacity-100">
       {/* Profile Header */}
@@ -81,7 +66,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
             <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm text-gray-600">
               <div className="flex items-center space-x-1">
                 <Calendar className="h-4 w-4" />
-                <span>Member since {formatDate(currentUser.membershipDate)}</span>
+                <span>Member</span>
               </div>
               <div className="flex items-center space-x-1">
                 <Award className="h-4 w-4" />
