@@ -36,19 +36,12 @@ const router = Router();
  *                 ok: { type: boolean }
  *                 bookId: { type: integer }
  */
-
-/**
- * Create a book (staff)
- * Body: { staffId, title, genre, publisherId, copiesTotal, publishedYear?, coverImageUrl? }
- * Returns: { ok: true, bookId }
- */
 router.post('/books', async (req, res) => {
   const { staffId, title, genre, publisherId, copiesTotal, publishedYear, coverImageUrl } = req.body || {};
   if (!staffId || !title || !genre || !publisherId || copiesTotal == null) {
     return res.status(400).json({ error: 'staffId, title, genre, publisherId, copiesTotal are required' });
   }
   try {
-    // CALL sp_add_book(staffId, title, genre, publisherId, copiesTotal, publishedYear, coverImageUrl)
     const [procResult] = await mysqlPool.query(
       'CALL sp_add_book(?,?,?,?,?,?,?)',
       [staffId, title, genre, Number(publisherId), Number(copiesTotal), publishedYear ?? null, coverImageUrl ?? null]
@@ -62,7 +55,6 @@ router.post('/books', async (req, res) => {
       }
     } catch {}
 
-    // Fallback: rely on LAST_INSERT_ID() in the same connection
     if (!bookId) {
       const [[row]] = await mysqlPool.query('SELECT LAST_INSERT_ID() AS bookId');
       bookId = row?.bookId ? Number(row.bookId) : null;
@@ -98,11 +90,6 @@ router.post('/books', async (req, res) => {
  *               newTotal: { type: integer, example: 10 }
  *     responses:
  *       200: { description: Inventory updated }
- */
-
-/**
- * Update inventory (staff)
- * Body: { staffId, newTotal }
  */
 router.put('/books/:id/inventory', async (req, res) => {
   const bookId = Number(req.params.id);
@@ -142,11 +129,6 @@ router.put('/books/:id/inventory', async (req, res) => {
  *     responses:
  *       200: { description: Book retired }
  */
-
-/**
- * Retire book (staff)
- * Body: { staffId }
- */
 router.put('/books/:id/retire', async (req, res) => {
   const bookId = Number(req.params.id);
   const { staffId } = req.body || {};
@@ -155,6 +137,44 @@ router.put('/books/:id/retire', async (req, res) => {
   }
   try {
     await mysqlPool.query('CALL sp_retire_book(?,?)', [staffId, bookId]);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(400).json({ error: e.sqlMessage || e.message });
+  }
+});
+
+/**
+ * @openapi
+ * /admin/books/{id}/unretire:
+ *   put:
+ *     tags: [Admin]
+ *     summary: Unretire a book (make active again)
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [staffId]
+ *             properties:
+ *               staffId: { type: integer, example: 2 }
+ *     responses:
+ *       200: { description: Book unretired }
+ */
+router.put('/books/:id/unretire', async (req, res) => {
+  const bookId = Number(req.params.id);
+  const { staffId } = req.body || {};
+  if (!staffId || !Number.isFinite(bookId)) {
+    return res.status(400).json({ error: 'staffId and valid bookId are required' });
+  }
+  try {
+    await mysqlPool.query('CALL sp_unretire_book(?,?)', [staffId, bookId]);
     res.json({ ok: true });
   } catch (e) {
     res.status(400).json({ error: e.sqlMessage || e.message });
@@ -178,11 +198,6 @@ router.put('/books/:id/retire', async (req, res) => {
  *       404: { description: Not found }
  *       409: { description: Book is referenced by checkouts/reviews; retire instead }
  */
-
-/**
- * Delete book (staff)
- * Body: { staffId }
- */
 router.delete('/books/:id', async (req, res) => {
   const bookId = Number(req.params.id);
   if (!Number.isFinite(bookId)) {
@@ -193,7 +208,6 @@ router.delete('/books/:id', async (req, res) => {
     if (r.affectedRows === 0) return res.status(404).json({ error: 'Not found' });
     res.json({ ok: true });
   } catch (e) {
-    // FK restriction from checkouts/reviews will raise an error here
     if (String(e.code) === 'ER_ROW_IS_REFERENCED_2') {
       return res.status(409).json({ error: 'Book is referenced by checkouts or reviews; use retire instead' });
     }
@@ -228,11 +242,6 @@ router.delete('/books/:id', async (req, res) => {
  *     responses:
  *       200: { description: Authors attached }
  */
-
-/**
- * Attach authors to a book (staff)
- * Body: { authorIds: number[] }
- */
 router.post('/books/:id/authors', async (req, res) => {
   const bookId = Number(req.params.id);
   const { authorIds } = req.body || {};
@@ -247,7 +256,6 @@ router.post('/books/:id/authors', async (req, res) => {
     const ids = [...new Set(authorIds.map(Number))].filter(n => Number.isFinite(n));
     if (!ids.length) return res.status(400).json({ error: 'No valid authorIds' });
 
-    // Verify authors exist
     const [rows] = await mysqlPool.query(
       `SELECT author_id FROM authors WHERE author_id IN (${ids.map(() => '?').join(',')})`,
       ids
