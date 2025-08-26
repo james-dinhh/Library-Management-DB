@@ -46,7 +46,7 @@ const swaggerOptions = {
       version: '1.0.0',
       description: 'API documentation for the Smart Library platform',
     },
-    servers: [{ url: `http://localhost:${process.env.PORT || 4000}` }],
+    servers: [{ url: `http://localhost:${process.env.PORT || 4001}` }],
     components: {
       securitySchemes: {
         bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
