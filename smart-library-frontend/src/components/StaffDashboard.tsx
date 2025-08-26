@@ -49,17 +49,19 @@ async function updateBookInventory(bookId: number, staffId: number, newTotal: nu
 
 async function retireBook(bookId: number, staffId: number) {
   const token = localStorage.getItem('token');
-  const res = await fetch(`${API_BASE}/admin`, { // PUT /admin
+  const res = await fetch(`${API_BASE}/admin/books/${bookId}/retire`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
     },
-    body: JSON.stringify({ bookId, staffId, action: 'retire' })
+    body: JSON.stringify({ staffId }), // bookId is in URL, not body
   });
+
   if (!res.ok) throw new Error('Failed to retire book');
   return res.json();
 }
+
 
 // --- NEW: Report fetchers ---
 async function fetchMostBorrowed(start: string, end: string) {
