@@ -52,8 +52,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
       <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
         <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
           <img
-            src={currentUser.avatar}
-            alt={currentUser.name}
+            src='/profile.png'
             className="w-24 h-24 rounded-full object-cover shadow-lg"
           />
           
@@ -174,8 +173,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
                           <div>
                             <div className="flex space-x-3">
                               <img
-                                src={book.coverImageUrl}
-                                alt={book.title}
+                                src='/book.jpg'
                                 className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
                               />
                               <div className="flex-1 min-w-0">
@@ -216,8 +214,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
                 {allBooksWithRecords.map(({ book, record }) => (
                   <div key={record.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
                     <img
-                      src={book.coverImageUrl}
-                      alt={book.title}
+                      src='/book.jpg'
                       className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
                     />
                     
@@ -268,8 +265,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
                       <div className="flex items-start space-x-4">
                         {book && (
                           <img
-                            src={book.coverImageUrl}
-                            alt={book.title}
+                            src='/book.jpg'
                             className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
                           />
                         )}

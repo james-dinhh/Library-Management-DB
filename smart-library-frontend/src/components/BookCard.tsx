@@ -84,7 +84,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, onViewDetails, onBorrow, user
             <span>View Details</span>
           </button>
 
-          {userRole === 'reader' && availableCopies > 0 && onBorrow && (
+          {(userRole === 'reader' || userRole === 'staff') && availableCopies > 0 && onBorrow && (
             <button
               onClick={() => onBorrow(book)}
               className="w-full px-3 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors duration-200 text-sm font-medium"
