@@ -148,7 +148,8 @@ function App() {
         const data = await res.json();
         setCurrentUser({
           ...data.user,
-          id: String(data.user.id) // Ensure id is stored as string
+          id: String(data.user.id),
+          membershipDate: data.user.registrationDate, // Ensure id is stored as string
         });
         // Fetch user's borrowings after successful token validation
         fetchUserBorrowings(String(data.user.id));
