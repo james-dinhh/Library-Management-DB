@@ -26,24 +26,57 @@ function App() {
         if (!res.ok) throw new Error("Failed to fetch books");
         const data = await res.json();
 
-        const mappedBooks: Book[] = data.map((b: any) => ({
-          id: String(b.id), // Convert to string for consistency
-          title: b.title,
-          author: b.author || b.authors || "Unknown",
-          coverImageUrl:
-            b.coverImageUrl ||
-            "https://images.pexels.com/photos/1029141/pexels-photo-1029141.jpeg",
-          publishedYear: b.publishedYear || "Unknown",
-          genre: b.genre || b.category || "Unknown",
-          isbn: b.isbn || "",
-          rating: b.rating || 0,
-          reviewCount: b.reviewCount || 0,
-          copiesAvailable: b.copiesAvailable ?? 0,
-          totalCopies: b.totalCopies ?? 0,
-          description: b.description || "",
-        }));
+        const booksWithReviews = await Promise.all(data.map(async (b: any) => {
+          const token = localStorage.getItem('token');
+          const headers: { [key: string]: string } = {};
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
 
-        setBooks(mappedBooks);
+          try {
+            const reviewsRes = await fetch(`${API_BASE}/reviews/book/${b.id}`, { headers });
+            const reviews = reviewsRes.ok ? await reviewsRes.json() : [];
+
+            return {
+              id: String(b.id),
+              title: b.title,
+              author: b.author || b.authors || "Unknown",
+              coverImageUrl:
+                b.coverImageUrl ||
+                "https://images.pexels.com/photos/1029141/pexels-photo-1029141.jpeg",
+              publishedYear: b.publishedYear || "Unknown",
+              genre: b.genre || b.category || "Unknown",
+              isbn: b.isbn || "",
+              rating: b.rating || 0,
+              reviewCount: b.reviewCount || 0,
+              copiesAvailable: b.copiesAvailable ?? 0,
+              totalCopies: b.totalCopies ?? 0,
+              description: b.description || "",
+              reviews: reviews,
+            };
+          } catch (error) {
+            console.error(`Failed to fetch reviews for book ${b.id}`, error);
+            return { // Return book data even if reviews fail
+              id: String(b.id),
+              title: b.title,
+              author: b.author || b.authors || "Unknown",
+              coverImageUrl:
+                b.coverImageUrl ||
+                "https://images.pexels.com/photos/1029141/pexels-photo-1029141.jpeg",
+              publishedYear: b.publishedYear || "Unknown",
+              genre: b.genre || b.category || "Unknown",
+              isbn: b.isbn || "",
+              rating: b.rating || 0,
+              reviewCount: b.reviewCount || 0,
+              copiesAvailable: b.copiesAvailable ?? 0,
+              totalCopies: b.totalCopies ?? 0,
+              description: b.description || "",
+              reviews: [],
+            };
+          }
+      }));
+
+        setBooks(booksWithReviews);
       } catch (err) {
         console.error("❌ Error fetching books:", err);
       }

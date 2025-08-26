@@ -11,6 +11,7 @@ export interface Book {
   rating: number;
   reviewCount: number;
   publishedYear: number;
+  reviews?: Review[];
 }
 
 export interface User {

@@ -13,9 +13,18 @@ interface BookCardProps {
 const BookCard: React.FC<BookCardProps> = ({ book, onViewDetails, onBorrow, userRole }) => {
   const availability = getAvailabilityStatus(book.copiesAvailable ?? 0);
 
-  // Ensure rating and reviewCount are numbers
-  const rating = typeof book.rating === 'number' ? book.rating : 0;
-  const reviewCount = typeof book.reviewCount === 'number' ? book.reviewCount : 0;
+  // Calculate average rating from reviews if available
+  const calculateAverageRating = () => {
+    if (book.reviews && book.reviews.length > 0) {
+      const totalRating = book.reviews.reduce((sum, review) => sum + review.rating, 0);
+      return totalRating / book.reviews.length;
+    }
+    return book.rating ?? 0;
+  };
+
+  const rating = calculateAverageRating();
+  const reviewCount = book.reviews?.length ?? book.reviewCount ?? 0;
+
   const availableCopies = typeof book.copiesAvailable === 'number' ? book.copiesAvailable : 0;
   const totalCopies = typeof book.totalCopies === 'number' ? book.totalCopies : 0;
   const publishedYear = book.publishedYear ?? 'Unknown';
