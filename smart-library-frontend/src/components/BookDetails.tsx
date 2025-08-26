@@ -56,7 +56,6 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
         const data = await response.json();
         setBookReviews(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error(err);
         setBookReviews([]);
       } finally {
         setLoadingReviews(false);
@@ -71,7 +70,6 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
     e.preventDefault();
 
     if (!book?.id || !currentUser?.id) {
-      console.error('Missing book ID or user ID');
       return;
     }
 
@@ -110,9 +108,7 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
       setShowReviewForm(false);
       setNewReview({ rating: 5, comment: '' });
       
-      console.log('Review submitted successfully!');
     } catch (err) {
-      console.error('Error submitting review:', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setReviewError(`Failed to submit review: ${errorMessage}`);
     }

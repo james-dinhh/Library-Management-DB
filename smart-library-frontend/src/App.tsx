@@ -63,7 +63,6 @@ function App() {
               reviews: reviews,
             };
           } catch (error) {
-            console.error(`Failed to fetch reviews for book ${b.id}`, error);
             return { // Return book data even if reviews fail
               id: String(b.id),
               title: b.title,
@@ -86,7 +85,7 @@ function App() {
 
         setBooks(booksWithReviews);
       } catch (err) {
-        console.error("❌ Error fetching books:", err);
+        // Error fetching books - could be handled by setting an error state if needed
       }
     };
 
@@ -120,9 +119,8 @@ function App() {
       }));
 
       setUserReviews(mappedReviews);
-      console.log("✅ Fetched reviews:", mappedReviews.length, "reviews");
     } catch (err) {
-      console.error("❌ Error fetching reviews:", err);
+      // Error fetching reviews - could be handled by setting an error state if needed
     }
   };
 
@@ -155,9 +153,7 @@ function App() {
         // Fetch user's borrowings after successful token validation
         fetchUserBorrowings(String(data.user.id));
         fetchUserReviews(String(data.user.id));
-        console.log("✅ Token validated, user logged in automatically");
       } catch (err) {
-        console.error("❌ Token validation failed:", err);
         localStorage.removeItem('token');
       }
     };
@@ -194,9 +190,8 @@ function App() {
       }));
 
       setBorrowRecords(mappedRecords);
-      console.log("✅ Fetched borrowings:", mappedRecords.length, "records");
     } catch (err) {
-      console.error("❌ Error fetching borrowings:", err);
+      // Error fetching borrowings - could be handled by setting an error state if needed
     }
   };
 
@@ -243,7 +238,6 @@ function App() {
 
       if (!res.ok) throw new Error("Failed to borrow book");
       const data = await res.json();
-      console.log("Borrowed book checkout ID:", data.checkoutId);
 
       const newRecord: BorrowRecord = {
         id: `br${Date.now()}`,
@@ -285,7 +279,6 @@ function App() {
       });
 
       if (!res.ok) throw new Error("Failed to return book");
-      console.log("Book returned successfully");
       
       // Update the UI state to reflect the returned book
       const checkoutIdNum = Number(checkoutId);
@@ -305,7 +298,7 @@ function App() {
         ));
       }
     } catch (err) {
-      console.error("❌ Error returning book:", err);
+      // Error returning book - could be handled by showing error to user
     }
   };
 

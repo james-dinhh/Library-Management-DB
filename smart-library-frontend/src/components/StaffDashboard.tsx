@@ -17,20 +17,6 @@ async function fetchBooks() {
   }));
 }
 
-async function addBook(bookData: any) {
-  const token = localStorage.getItem('token');
-  const res = await fetch(`${API_BASE}/admin`, { // POST /admin
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(bookData)
-  });
-  if (!res.ok) throw new Error('Failed to add book');
-  return res.json();
-}
-
 async function updateBookInventory(bookId: number, staffId: number, newTotal: number) {
   const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE}/admin/books/${bookId}/inventory`, {
@@ -200,7 +186,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
         const data = await fetchBooks();
         setBooks(data);
       } catch (err) {
-        console.error(err);
+        // Error loading books - could be handled by setting an error state if needed
       }
     };
     loadBooks();
@@ -225,29 +211,18 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     });
 
   // --- Handlers ---
-  const handleSaveBook = async (bookData: Omit<Book, 'id'>) => {
+  const handleSaveBook = async (savedBook: any) => {
     try {
-      await addBook({ staffId: Number(currentUser.id), ...bookData });
+      // The BookForm has already successfully created the book
+      // Just refresh the books list to show the new book
       const updatedBooks = await fetchBooks();
       setBooks(updatedBooks);
       setShowBookForm(false);
       setSelectedBook(null);
     } catch (err) {
-      console.error('Error saving book:', err);
-      alert('Failed to save book');
+      alert('Failed to refresh book list');
     }
   };
-
-// const handleEditBook = async (book: Book, staffId: number, newTotal: number) => {
-//     try {
-//       await updateBookInventory(Number(book.id), staffId, newTotal);
-//       // Optionally refresh the book list here
-//       console.log('Inventory updated successfully');
-//     } catch (e) {
-//       console.error(e);
-//       alert('Failed to update book inventory');
-//     }
-//   };
 
   const handleDeleteBook = async (bookId: number) => {
     if (!window.confirm('Are you sure you want to retire this book?')) return;
@@ -256,7 +231,6 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       const updatedBooks = await fetchBooks();
       setBooks(updatedBooks);
     } catch (err) {
-      console.error(err);
       alert('Failed to retire book');
     }
   };
@@ -267,7 +241,6 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       const updatedBooks = await fetchBooks();
       setBooks(updatedBooks);
     } catch (err) {
-      console.error(err);
       alert('Failed to update inventory');
     }
   };
@@ -283,7 +256,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       const data = await fetchMostBorrowed(dateRange.start, dateRange.end);
       setMostBorrowed(data);
     } catch (err) {
-      console.error(err);
+      // Error handling could be implemented by showing error to user
     }
   };
 
@@ -292,7 +265,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       const data = await fetchTopReaders();
       setTopReaders(data);
     } catch (err) {
-      console.error(err);
+      // Error handling could be implemented by showing error to user
     }
   };
 
@@ -301,7 +274,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       const data = await fetchLowAvailability();
       setLowAvailability(data);
     } catch (err) {
-      console.error(err);
+      // Error handling could be implemented by showing error to user
     }
   };
 
@@ -311,7 +284,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       const data = await fetchAverageSessionTime();
       setAverageSessionTime(data.results); // 👈 use .results
     } catch (err) {
-      console.error(err);
+      // Error handling could be implemented by showing error to user
     }
   };
 
@@ -321,7 +294,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       // backend returns { start, end, count, results: [...] }
       setMostHighlighted(data.results);
     } catch (err) {
-      console.error(err);
+      // Error handling could be implemented by showing error to user
     }
   };
 
@@ -330,7 +303,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       const data = await fetchTopBooksByReadingTime();
       setTopReadingTime(data.results);
     } catch (err) {
-      console.error(err);
+      // Error handling could be implemented by showing error to user
     }
   };
 

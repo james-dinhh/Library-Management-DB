@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, AlertCircle } from 'lucide-react';
 import { Book } from '../types';
+import API from '../services/api';
 
 interface BookFormProps {
   book?: Book | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (book: Omit<Book, 'id'>) => void;
+  onSave: (book: any) => void; // Changed to accept the saved book from API
 }
 
 const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) => {
@@ -21,7 +22,8 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
     copiesAvailable: 1,
     publishedYear: new Date().getFullYear(),
     rating: 0,
-    reviewCount: 0
+    reviewCount: 0,
+    publisherId: 1 // Default to first publisher
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -32,6 +34,13 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
     'Fantasy', 'Biography', 'History', 'Self-Help', 'Business',
     'Classic Literature', 'Dystopian Fiction', 'Coming-of-age',
     'Thriller', 'Horror', 'Poetry', 'Drama', 'Adventure'
+  ];
+
+  const publishers = [
+    { id: 1, name: 'Lotus Books' },
+    { id: 2, name: 'Dragon Press' },
+    { id: 3, name: 'Sunrise Publishing' },
+    { id: 4, name: 'Wanderlust Press' }
   ];
 
   const stockImages = [
@@ -55,7 +64,8 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
         copiesAvailable: book.copiesAvailable,
         publishedYear: book.publishedYear,
         rating: book.rating,
-        reviewCount: book.reviewCount
+        reviewCount: book.reviewCount,
+        publisherId: 1 // Default for existing books
       });
     } else {
       setFormData({
@@ -69,7 +79,8 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
         copiesAvailable: 1,
         publishedYear: new Date().getFullYear(),
         rating: 0,
-        reviewCount: 0
+        reviewCount: 0,
+        publisherId: 1 // Default to first publisher
       });
     }
     setErrors({});
@@ -81,6 +92,7 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
     if (!formData.title.trim()) newErrors.title = 'Title is required';
     if (!formData.author.trim()) newErrors.author = 'Author is required';
     if (!formData.genre) newErrors.genre = 'Genre is required';
+    if (!formData.publisherId) newErrors.publisherId = 'Publisher is required';
     if (!formData.isbn.trim()) newErrors.isbn = 'ISBN is required';
     if (!formData.description.trim()) newErrors.description = 'Description is required';
     if (formData.totalCopies < 1) newErrors.totalCopies = 'Total copies must be at least 1';
@@ -104,34 +116,54 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
     setIsSubmitting(true);
 
     try {
-      let response;
+      let savedBook;
 
       if (book) {
-        // Update existing book
-        response = await fetch(`/admin/books/${book.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-        });
+        // Update existing book - TODO: implement update endpoint
+        throw new Error('Book update not implemented yet');
       } else {
         // Create new book
-        response = await fetch('/admin/books', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-        });
+        // Get the current user (staff member) from localStorage or context
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const staffId = currentUser.id || 2; // Default to Bob's ID if not found
+        
+        const bookData = {
+          staffId: Number(staffId), // Ensure it's a number
+          title: formData.title,
+          genre: formData.genre,
+          publisherId: Number(formData.publisherId), // Ensure it's a number
+          copiesTotal: Number(formData.totalCopies), // Ensure it's a number
+          publishedYear: formData.publishedYear ? Number(formData.publishedYear) : undefined,
+          coverImageUrl: formData.coverImageUrl || undefined
+        };
+
+        savedBook = await API.createBook(bookData);
       }
 
-      if (!response.ok) {
-        throw new Error(`Failed to save book (${response.status})`);
-      }
-
-      const savedBook = await response.json();
       onSave(savedBook); // pass the saved book back to parent
       onClose();
     } catch (error) {
-      console.error('Error saving book:', error);
-      alert('Something went wrong while saving the book.');
+      // Extract more detailed error information
+      let errorMessage = 'Something went wrong while saving the book.';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // If it's an axios error, try to get the response data
+        if (error.message.includes('400') || error.message.includes('500')) {
+          try {
+            // Try to parse additional error info from axios error
+            const axiosError = error as any;
+            if (axiosError.response?.data?.error) {
+              errorMessage = `Server Error: ${axiosError.response.data.error}`;
+            }
+          } catch (parseError) {
+            // Fallback to original error message
+          }
+        }
+      }
+      
+      alert(`Failed to save book: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -239,25 +271,49 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Publication Year *
+                        Publisher *
                       </label>
-                      <input
-                        type="number"
-                        value={formData.publishedYear}
-                        onChange={(e) => handleInputChange('publishedYear', parseInt(e.target.value))}
+                      <select
+                        value={formData.publisherId}
+                        onChange={(e) => handleInputChange('publisherId', parseInt(e.target.value))}
                         className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                          errors.publishedYear ? 'border-red-300' : 'border-gray-300'
+                          errors.publisherId ? 'border-red-300' : 'border-gray-300'
                         }`}
-                        min="1000"
-                        max={new Date().getFullYear()}
-                      />
-                      {errors.publishedYear && (
+                      >
+                        <option value="">Select publisher</option>
+                        {publishers.map(publisher => (
+                          <option key={publisher.id} value={publisher.id}>{publisher.name}</option>
+                        ))}
+                      </select>
+                      {errors.publisherId && (
                         <p className="mt-1 text-sm text-red-600 flex items-center">
                           <AlertCircle className="h-4 w-4 mr-1" />
-                          {errors.publishedYear}
+                          {errors.publisherId}
                         </p>
                       )}
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Publication Year *
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.publishedYear}
+                      onChange={(e) => handleInputChange('publishedYear', parseInt(e.target.value))}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                        errors.publishedYear ? 'border-red-300' : 'border-gray-300'
+                      }`}
+                      min="1000"
+                      max={new Date().getFullYear()}
+                    />
+                    {errors.publishedYear && (
+                      <p className="mt-1 text-sm text-red-600 flex items-center">
+                        <AlertCircle className="h-4 w-4 mr-1" />
+                        {errors.publishedYear}
+                      </p>
+                    )}
                   </div>
 
                   <div>

@@ -108,7 +108,7 @@ const port = process.env.PORT || 4000;
     // Verify MySQL connectivity once
     await mysqlPool.query('SELECT 1');
 
-    app.listen(port, () => {
+    app.listen(port, '0.0.0.0', () => {
       console.log(`Server running on http://localhost:${port}`);
       console.log(`Swagger UI at http://localhost:${port}/api-docs`);
     });
