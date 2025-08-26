@@ -7,14 +7,13 @@ interface UserProfileProps {
   currentUser: UserType;
   borrowRecords: BorrowRecord[];
   books: Book[];
+  userReviews: Review[];
   onReturn: (checkoutId: string) => void;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, books, onReturn }) => {
+const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, books, onReturn, userReviews }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'reviews'>('overview');
   
-  const userReviews: Review[] = []; // Replace with actual review data if available
-
   const userBorrowRecords = useMemo(() => 
     borrowRecords.filter(record => record.userId === currentUser.id),
     [borrowRecords, currentUser.id]

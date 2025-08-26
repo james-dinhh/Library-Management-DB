@@ -33,6 +33,20 @@
  *     responses:
  *       200:
  *         description: List of reviews
+ *
+ * /reviews/user/{userId}:
+ *   get:
+ *     tags:
+ *       - Reviews
+ *     summary: List reviews by a user
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: List of reviews
  */
 import { Router } from 'express';
 import { mysqlPool } from '../db/mysql.js';
@@ -65,6 +79,23 @@ router.get('/book/:bookId', async (req, res) => {
        FROM reviews r JOIN users u ON u.user_id = r.user_id
        WHERE r.book_id = ? ORDER BY r.review_date DESC`,
       [bookId]
+    );
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// List reviews for a user
+// GET /reviews/user/:userId
+router.get('/user/:userId', async (req, res) => {
+  const userId = Number(req.params.userId);
+  try {
+    const [rows] = await mysqlPool.query(
+      `SELECT r.review_id AS id, r.book_id as bookId, r.rating, r.comment, r.review_date AS date
+       FROM reviews r
+       WHERE r.user_id = ? ORDER BY r.review_date DESC`,
+      [userId]
     );
     res.json(rows);
   } catch (e) {

@@ -5,7 +5,7 @@ import Register from "./components/Register";
 import BookSearch from "./components/BookSearch";
 import UserProfile from "./components/UserProfile";
 import StaffDashboard from "./components/StaffDashboard";
-import { User, Book, BorrowRecord } from "./types";
+import { User, Book, BorrowRecord, Review } from "./types";
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -14,6 +14,7 @@ function App() {
 
   const [books, setBooks] = useState<Book[]>([]);
   const [borrowRecords, setBorrowRecords] = useState<BorrowRecord[]>([]);
+  const [userReviews, setUserReviews] = useState<Review[]>([]);
 
   // Fetch books from backend
   useEffect(() => {
@@ -51,6 +52,38 @@ function App() {
     fetchBooks();
   }, []);
 
+  // Fetch user's reviews from backend
+  const fetchUserReviews = async (userId: string) => {
+    const API_BASE = "http://localhost:4001";
+    const token = localStorage.getItem('token');
+    
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/reviews/user/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!res.ok) throw new Error("Failed to fetch reviews");
+      const data = await res.json();
+
+      const mappedReviews: Review[] = data.map((review: any) => ({
+        id: review.id,
+        bookId: review.bookId,
+        rating: review.rating,
+        comment: review.comment,
+        date: review.date,
+      }));
+
+      setUserReviews(mappedReviews);
+      console.log("✅ Fetched reviews:", mappedReviews.length, "reviews");
+    } catch (err) {
+      console.error("❌ Error fetching reviews:", err);
+    }
+  };
+
   // Check for existing login on app load
   useEffect(() => {
     const validateToken = async () => {
@@ -78,6 +111,7 @@ function App() {
         });
         // Fetch user's borrowings after successful token validation
         fetchUserBorrowings(String(data.user.id));
+        fetchUserReviews(String(data.user.id));
         console.log("✅ Token validated, user logged in automatically");
       } catch (err) {
         console.error("❌ Token validation failed:", err);
@@ -132,12 +166,14 @@ function App() {
     setActiveTab("search");
     // Fetch user's borrowings when they log in
     fetchUserBorrowings(String(user.id));
+    fetchUserReviews(String(user.id));
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     setCurrentUser(null);
     setBorrowRecords([]); // Clear borrowings on logout
+    setUserReviews([]); // Clear reviews on logout
     setActiveTab("search");
     setAuthMode("login"); 
   };
@@ -255,6 +291,7 @@ function App() {
           currentUser={currentUser} 
           borrowRecords={borrowRecords}
           books={books}
+          userReviews={userReviews}
           onReturn={handleReturn} 
         />;
       case "dashboard":
