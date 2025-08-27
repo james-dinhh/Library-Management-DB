@@ -273,48 +273,50 @@ CREATE PROCEDURE sp_unretire_book (
   IN p_book_id INT
 )
 BEGIN
-  DECLARE v_status ENUM('active','retired');
-  DECLARE v_total INT;
-  DECLARE v_available INT;
-  DECLARE v_borrowed INT;
+  main: BEGIN
+    DECLARE v_status ENUM('active','retired');
+    DECLARE v_total INT;
+    DECLARE v_available INT;
+    DECLARE v_borrowed INT;
 
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
-  BEGIN
-    ROLLBACK;
-    RESIGNAL;
-  END;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+      ROLLBACK;
+      RESIGNAL;
+    END;
 
-  START TRANSACTION;
+    START TRANSACTION;
 
-  SELECT status, copies_total, copies_available
-    INTO v_status, v_total, v_available
-  FROM books
-  WHERE book_id = p_book_id
-  FOR UPDATE;
+    SELECT status, copies_total, copies_available
+      INTO v_status, v_total, v_available
+    FROM books
+    WHERE book_id = p_book_id
+    FOR UPDATE;
 
-  IF v_status IS NULL THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Book not found';
-  END IF;
+    IF v_status IS NULL THEN
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Book not found';
+    END IF;
 
-  IF v_status = 'active' THEN
-    -- already active; just log as update
+    IF v_status = 'active' THEN
+      -- already active; just log as update
+      INSERT INTO staff_logs (staff_id, action_type, book_id, timestamp)
+      VALUES (p_staff_id, 'update_book', p_book_id, NOW());
+      COMMIT;
+      LEAVE main;
+    END IF;
+
+    -- recompute available from borrowed
+    SET v_borrowed = v_total - v_available;
+    UPDATE books
+      SET status = 'active',
+          copies_available = GREATEST(v_total - v_borrowed, 0)
+    WHERE book_id = p_book_id;
+
     INSERT INTO staff_logs (staff_id, action_type, book_id, timestamp)
     VALUES (p_staff_id, 'update_book', p_book_id, NOW());
+
     COMMIT;
-    LEAVE;
-  END IF;
-
-  -- recompute available from borrowed
-  SET v_borrowed = v_total - v_available;
-  UPDATE books
-    SET status = 'active',
-        copies_available = GREATEST(v_total - v_borrowed, 0)
-  WHERE book_id = p_book_id;
-
-  INSERT INTO staff_logs (staff_id, action_type, book_id, timestamp)
-  VALUES (p_staff_id, 'update_book', p_book_id, NOW());
-
-  COMMIT;
+  END main;
 END$$
 
 -- sp_review_book: validate + upsert review
