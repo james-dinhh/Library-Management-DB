@@ -80,8 +80,8 @@ const BookForm: React.FC<BookFormProps> = ({ staffId, book, isOpen, onClose, onS
     if (!formData.title.trim()) newErrors.title = 'Title is required';
     if (!formData.genre) newErrors.genre = 'Genre is required';
     if (!formData.publisherId) newErrors.publisherId = 'Publisher is required';
-    if (!formData.isbn.trim()) newErrors.isbn = 'ISBN is required';
-    if (!formData.description.trim()) newErrors.description = 'Description is required';
+    // if (!formData.isbn.trim()) newErrors.isbn = 'ISBN is required'; 
+    // if (!formData.description.trim()) newErrors.description = 'Description is required';
     if (formData.totalCopies < 1) newErrors.totalCopies = 'Total copies must be at least 1';
     if (formData.copiesAvailable < 0) newErrors.copiesAvailable = 'Available copies cannot be negative';
     if (formData.copiesAvailable > formData.totalCopies) {
