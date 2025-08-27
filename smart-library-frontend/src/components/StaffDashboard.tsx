@@ -17,21 +17,6 @@ async function fetchBooks() {
   }));
 }
 
-async function updateBookInventory(bookId: number, staffId: number, newTotal: number) {
-  const token = localStorage.getItem('token');
-  const res = await fetch(`${API_BASE}/admin/books/${bookId}/inventory`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify({ staffId, newTotal }),   // bookId comes from URL, so not in body
-  });
-
-  if (!res.ok) throw new Error('Failed to update inventory');
-  return res.json();
-}
-
 
 async function retireBook(bookId: number, staffId: number) {
   const token = localStorage.getItem('token');
@@ -290,16 +275,6 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     }
   };
 
-  const handleInventoryUpdate = async (bookId: number, newTotal: number) => {
-    try {
-      await updateBookInventory(Number(bookId), Number(currentUser.id), newTotal);
-      const updatedBooks = await fetchBooks();
-      setBooks(updatedBooks);
-    } catch (err) {
-      alert('Failed to update inventory');
-    }
-  };
-
   const handleCloseForm = () => {
     setShowBookForm(false);
     setSelectedBook(null);
@@ -505,19 +480,6 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
                       </td>
                       <td className={`px-6 py-4 whitespace-nowrap ${book.status === 'retired' ? 'text-gray-500' : ''}`}>
                         {book.copiesAvailable}/{book.totalCopies || book.copiesAvailable}
-                        {book.status !== 'retired' && (
-                          <button
-                            onClick={() => {
-                              const newTotal = parseInt(
-                                prompt("Enter new total copies", String(book.totalCopies || book.copiesAvailable)) || "0"
-                              );
-                              if (newTotal > 0) handleInventoryUpdate(Number(book.id), newTotal);
-                            }}
-                            className="ml-2 text-blue-600"
-                          >
-                            Update
-                          </button>
-                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {book.status === 'retired' ? (
