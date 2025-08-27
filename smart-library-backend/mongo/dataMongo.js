@@ -3,9 +3,31 @@ import { MongoClient } from 'mongodb';
 
 dotenv.config();
 
-const uri = process.env.MONGODB_URI;
+const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
-
+const sampleBooks = [
+  {
+    bookId: 1,
+    title: "Bamboo Memories",
+    author: "Li Wei",
+    genre: "Historical Fiction",
+    publishedYear: 2022
+  },
+  {
+    bookId: 2,
+    title: "Digital Dawn",
+    author: "Sara Kim",
+    genre: "Science Fiction",
+    publishedYear: 2024
+  },
+  {
+    bookId: 3,
+    title: "Echoes of the Past",
+    author: "John Smith",
+    genre: "Non-Fiction",
+    publishedYear: 2021
+  }
+];
 const sampleReadingSessions = [
   {
     userId: 1, 
@@ -69,29 +91,38 @@ async function insertSampleData() {
   try {
     await client.connect();
     console.log('Connected to MongoDB for Analytics!');
-    
-    // MongoDB path setting
+
     const db = client.db(process.env.MONGO_DB || 'smart_library');
-    const col = db.collection('reading_sessions'); 
-    
-    // Clear existing data, can remove later for production
-    await col.deleteMany({});
-    console.log('Cleared existing reading sessions');
-    
-    // Insert sample data
-    await col.insertMany(sampleReadingSessions);
+
+    // --- Seed book list ---
+    const booksCol = db.collection('ebooks');
+    await booksCol.deleteMany({});
+    await booksCol.insertMany(sampleBooks);
+    console.log('Sample eBook list inserted successfully!');
+
+    // --- Seed reading sessions ---
+    const sessionsCol = db.collection('reading_sessions');
+    await sessionsCol.deleteMany({});
+    await sessionsCol.insertMany(sampleReadingSessions);
     console.log('Sample reading sessions inserted successfully!');
-    
-    // Display inserted data
-    const sessions = await col.find({}).sort({ startTime: 1 }).toArray();
+
+    // Display inserted books
+    const books = await booksCol.find({}).sort({ bookId: 1 }).toArray();
+    console.log('\nInserted Books:');
+    books.forEach(book => {
+      console.log(`- Book ${book.bookId}: "${book.title}" by ${book.author} (${book.genre}, ${book.publishedYear})`);
+    });
+
+    // Display inserted sessions
+    const sessions = await sessionsCol.find({}).sort({ startTime: 1 }).toArray();
     console.log('\nInserted Sessions:');
     sessions.forEach(session => {
-      const timeInfo = session.endTime ? 
-        `${Math.round((session.endTime - session.startTime) / (1000 * 60))} min` : 
+      const timeInfo = session.endTime ?
+        `${Math.round((session.endTime - session.startTime) / (1000 * 60))} min` :
         'ongoing';
       console.log(`- User ${session.userId}, Book ${session.bookId}: ${session.pages_read} pages, ${session.highlights.length} highlights, ${timeInfo}`);
     });
-    
+
   } catch (error) {
     console.error('Error inserting sample data:', error);
   } finally {

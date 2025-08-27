@@ -17,27 +17,15 @@ async function fetchBooks() {
   }));
 }
 
-async function updateBookInventory(bookId: number, staffId: number, newTotal: number) {
-  const token = localStorage.getItem('token');
-  const res = await fetch(`${API_BASE}/admin/books/${bookId}/inventory`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify({ staffId, newTotal }),   // bookId comes from URL, so not in body
-  });
 
-  if (!res.ok) throw new Error('Failed to update inventory');
-  return res.json();
-}
 
 
 async function retireBook(bookId: number, staffId: number) {
   const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE}/admin/books/${bookId}/retire`, {
     method: 'PUT',
-    headers: {
+    headers:
+     {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
     },
@@ -203,6 +191,9 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   const [mostHighlighted, setMostHighlighted] = useState<any[]>([]);
   const [topReadingTime, setTopReadingTime] = useState<any[]>([]);
 
+  // Add state for MongoDB eBooks
+  const [mongoBooks, setMongoBooks] = useState<any[]>([]);
+
   // Fetch books on load
   useEffect(() => {
     const loadBooks = async () => {
@@ -214,6 +205,13 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       }
     };
     loadBooks();
+  }, []);
+
+  // Fetch MongoDB eBooks on mount
+  useEffect(() => {
+    fetch("http://localhost:4001/ebooks/mongo-ebooks")
+      .then(res => res.json())
+      .then(setMongoBooks);
   }, []);
 
   const genres = [...new Set(books.map(book => book.genre))].sort();
@@ -259,15 +257,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     }
   };
 
-  const handleInventoryUpdate = async (bookId: number, newTotal: number) => {
-    try {
-      await updateBookInventory(Number(bookId), Number(currentUser.id), newTotal);
-      const updatedBooks = await fetchBooks();
-      setBooks(updatedBooks);
-    } catch (err) {
-      alert('Failed to update inventory');
-    }
-  };
+ 
 
   const handleCloseForm = () => {
     setShowBookForm(false);
@@ -330,6 +320,11 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       // Error handling could be implemented by showing error to user
     }
   };
+
+  function getMongoBookTitle(bookId: number) {
+    const book = mongoBooks.find(b => b.bookId === bookId);
+    return book ? `${book.title} by ${book.author}` : `Book ${bookId}`;
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -446,17 +441,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
                       <td className="px-6 py-4 whitespace-nowrap">{book.genre}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {book.copiesAvailable}/{book.totalCopies || book.copiesAvailable}
-                        <button
-                          onClick={() => {
-                            const newTotal = parseInt(
-                              prompt("Enter new total copies", String(book.totalCopies || book.copiesAvailable)) || "0"
-                            );
-                            if (newTotal > 0) handleInventoryUpdate(Number(book.id), newTotal);
-                          }}
-                          className="ml-2 text-blue-600"
-                        >
-                          Update
-                        </button>
+                        {/* Removed the Update button for retired books */}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
@@ -580,7 +565,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
               <ul className="list-decimal pl-5">
                 {mostHighlighted.map((b, i) => (
                   <li key={i}>
-                    Book {b.bookId} — {b.totalHighlights} highlights
+                    {getMongoBookTitle(b.bookId)} — {b.totalHighlights} highlights
                   </li>
                 ))}
               </ul>
@@ -599,7 +584,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
               <ul className="list-decimal pl-5">
                 {topReadingTime.map((b, i) => (
                   <li key={i}>
-                    Book {b.bookId} — {b.totalReadingHours} hours read ({b.sessions} sessions)
+                    {getMongoBookTitle(b.bookId)} — {b.totalReadingHours} hours read ({b.sessions} sessions)
                   </li>
                 ))}
               </ul>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, LogOut, Book, BarChart3 } from 'lucide-react';
+import { User, LogOut, Book, BarChart3, BookOpen } from 'lucide-react';
 import { User as UserType } from '../types';
 
 interface HeaderProps {
@@ -14,13 +14,15 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, activeTab, onTab
 
   const userTabs = [
     { id: 'search', label: 'Search Books', icon: Book },
-    { id: 'profile', label: 'My Profile', icon: User }
+    { id: 'profile', label: 'My Profile', icon: User },
+    { id: 'ebooks', label: 'eBooks', icon: BookOpen }
   ];
 
   const staffTabs = [
     { id: 'search', label: 'Book Catalog', icon: Book },
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-    { id: 'profile', label: 'Profile', icon: User }
+    { id: 'profile', label: 'Profile', icon: User },
+    { id: 'ebooks', label: 'eBooks', icon: BookOpen }
   ];
 
   const tabs = currentUser.role === 'staff' ? staffTabs : userTabs;
