@@ -5,7 +5,7 @@ import Register from "./components/Register";
 import BookSearch from "./components/BookSearch";
 import UserProfile from "./components/UserProfile";
 import StaffDashboard from "./components/StaffDashboard";
-import EbooksApp from "./components/Ebook"; // <-- Import EbooksApp
+import EbooksApp from "./components/Ebook";
 import { User, Book, BorrowRecord, Review } from "./types";
 
 function App() {
@@ -337,8 +337,8 @@ function App() {
         return currentUser.role === "staff" ? (
           <StaffDashboard currentUser={currentUser} />
         ) : null;
-      case "ebooks": // <-- Add this case
-        return <EbooksApp />;
+      case "ebooks":
+  return <EbooksApp userId={Number(currentUser?.id)} userName={currentUser?.name ?? ""} />;
       default:
         return (
           <BookSearch

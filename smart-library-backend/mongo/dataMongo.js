@@ -69,7 +69,7 @@ const sampleReadingSessions = [
     userId: 3, 
     bookId: 1, 
     startTime: new Date('2025-08-06T16:00:00Z'),
-    endTime: null, 
+    endTime: new Date('2025-08-07T16:00:00Z'), 
     device: 'mobile',
     pages_read: 15,
     highlights: [] 
