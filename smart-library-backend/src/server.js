@@ -24,6 +24,8 @@ import authorsRouter from './routes/authors.routes.js';
 import reportsRouter from './routes/reports.routes.js';
 //ebook routes
 import ebookRoutes from "./routes/ebook.routes.js";
+//user id
+import userRoutes from "./routes/users.routes.js";
 
 // Swagger (OpenAPI)
 import swaggerUi from 'swagger-ui-express';
@@ -107,7 +109,8 @@ app.use('/authors', authenticate, authorizeRole('staff'), authorsRouter);
 app.use('/reports', authenticate, authorizeRole('staff'), reportsRouter);
 //ebook
 app.use("/ebooks", ebookRoutes);
-
+//user id
+app.use("/", userRoutes);
 // Startup
 const port = process.env.PORT || 4001;
 

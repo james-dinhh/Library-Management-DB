@@ -120,13 +120,29 @@ function Reader({ book, userId, onSessionEnd }) {
 function SessionsList({ userId }) {
   const [sessions, setSessions] = useState([]);
   const [ebooks, setEbooks] = useState([]);
+  const [users, setUsers] = useState({});
+
   useEffect(() => {
     fetch("http://localhost:4001/ebooks/mongo-ebooks")
       .then(res => res.json())
       .then(setEbooks);
+
     fetch(`http://localhost:4001/ebooks/sessions/${userId}`)
       .then(res => res.json())
-      .then(setSessions);
+      .then(async (sessions) => {
+        setSessions(sessions);
+        // Fetch user info for each session
+        const userIds = [...new Set(sessions.map(s => s.userId))];
+        const userMap = {};
+        for (const id of userIds) {
+          const res = await fetch(`http://localhost:4001/user/${id}`);
+          if (res.ok) {
+            const user = await res.json();
+            userMap[id] = user.name;
+          }
+        }
+        setUsers(userMap);
+      });
   }, [userId]);
 
   function getBookInfo(bookId) {
@@ -139,14 +155,14 @@ function SessionsList({ userId }) {
       <h2 className="text-xl font-bold mb-4">Your Reading Sessions</h2>
       <ul className="space-y-2">
         {sessions.map(s => (
-          <li
-            key={s._id}
-            className="bg-gray-50 rounded p-3 shadow flex flex-col"
-          >
+          <li key={s._id} className="bg-gray-50 rounded p-3 shadow flex flex-col">
             <div>
               <span className="font-semibold">{getBookInfo(s.bookId)}</span>
               <span className="ml-2 text-gray-600">
                 {s.startTime ? new Date(s.startTime).toLocaleString() : "?"} - {s.endTime ? new Date(s.endTime).toLocaleString() : "?"}
+              </span>
+              <span className="ml-2 text-blue-700">
+                {users[s.userId] ? `by ${users[s.userId]}` : `User ${s.userId}`}
               </span>
             </div>
             <div className="text-sm mt-1">

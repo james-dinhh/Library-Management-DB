@@ -208,6 +208,9 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   // Add state for MongoDB eBooks
   const [mongoBooks, setMongoBooks] = useState<any[]>([]);
 
+  // Add state for user names
+  const [userNames, setUserNames] = useState<{[id: number]: string}>({});
+
   // Fetch books on load
   useEffect(() => {
     const loadBooks = async () => {
@@ -227,6 +230,23 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       .then(res => res.json())
       .then(setMongoBooks);
   }, []);
+
+  // Fetch user names when analytics data changes
+  useEffect(() => {
+    async function loadUserNames() {
+      const ids = averageSessionTime.map(u => u.userId);
+      const names: {[id: number]: string} = {};
+      for (const id of ids) {
+        const res = await fetch(`http://localhost:4001/user/${id}`);
+        if (res.ok) {
+          const user = await res.json();
+          names[id] = user.name;
+        }
+      }
+      setUserNames(names);
+    }
+    if (averageSessionTime.length) loadUserNames();
+  }, [averageSessionTime]);
 
   const genres = [...new Set(books.map(book => book.genre))].sort();
   const filteredBooks = books
@@ -610,7 +630,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
               <ul className="list-decimal pl-5">
                 {averageSessionTime.map((u, i) => (
                   <li key={i}>
-                    User {u.userId} — {u.avgSessionMinutes} min/session ({u.sessions} sessions)
+                    {userNames[u.userId] || `User ${u.userId}`} — {u.avgSessionMinutes} min/session ({u.sessions} sessions)
                   </li>
                 ))}
               </ul>
