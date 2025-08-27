@@ -18,8 +18,6 @@ async function fetchBooks() {
 }
 
 
-
-
 async function retireBook(bookId: number, staffId: number) {
   const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE}/admin/books/${bookId}/retire`, {
@@ -33,6 +31,21 @@ async function retireBook(bookId: number, staffId: number) {
   });
 
   if (!res.ok) throw new Error('Failed to retire book');
+  return res.json();
+}
+
+async function unretireBook(bookId: number, staffId: number) {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}/admin/books/${bookId}/unretire`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ staffId }),   // bookId is in URL, not body
+  });
+
+  if (!res.ok) throw new Error('Failed to unretire book');
   return res.json();
 }
 
@@ -178,6 +191,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   const [showBookForm, setShowBookForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterGenre, setFilterGenre] = useState('');
+  const [filterStatus, setFilterStatus] = useState(''); // 'active', 'retired', or '' for all
   const [sortBy, setSortBy] = useState('title');
 
   // Reports state
@@ -221,7 +235,8 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
         book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         book.author.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesGenre = !filterGenre || book.genre === filterGenre;
-      return matchesSearch && matchesGenre;
+      const matchesStatus = !filterStatus || book.status === filterStatus;
+      return matchesSearch && matchesGenre && matchesStatus;
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -233,7 +248,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     });
 
   // --- Handlers ---
-  const handleSaveBook = async (savedBook: any) => {
+  const handleSaveBook = async (_savedBook: any) => {
     try {
       // The BookForm has already successfully created the book
       // Just refresh the books list to show the new book
@@ -257,7 +272,19 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     }
   };
 
- 
+  const handleUnretireBook = async (bookId: number) => {
+    if (!window.confirm('Are you sure you want to unretire this book and make it active again?')) return;
+    try {
+      console.log('Unretiring book:', bookId, 'Staff ID:', currentUser.id);
+      await unretireBook(Number(bookId), Number(currentUser.id));
+      const updatedBooks = await fetchBooks();
+      setBooks(updatedBooks);
+      alert('Book unretired successfully!');
+    } catch (err) {
+      console.error('Unretire book error:', err);
+      alert(`Failed to unretire book: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
 
   const handleCloseForm = () => {
     setShowBookForm(false);
@@ -394,7 +421,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
             </div>
 
             {/* Search / Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
               <input
                 type="text"
                 placeholder="Search by title or author..."
@@ -409,6 +436,15 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
               >
                 <option value="">All Genres</option>
                 {genres.map(g => <option key={g} value={g}>{g}</option>)}
+              </select>
+              <select
+                value={filterStatus}
+                onChange={e => setFilterStatus(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              >
+                <option value="">All Books</option>
+                <option value="active">Active Books</option>
+                <option value="retired">Retired Books</option>
               </select>
               <select
                 value={sortBy}
@@ -429,27 +465,54 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Book</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Genre</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inventory</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredBooks.map(book => (
-                    <tr key={book.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">{book.title}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{book.author}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{book.genre}</td>
+                    <tr key={book.id} className={`hover:bg-gray-50 ${book.status === 'retired' ? 'bg-gray-50 opacity-75' : ''}`}>
                       <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <span className={book.status === 'retired' ? 'text-gray-500 line-through' : ''}>{book.title}</span>
+                          {book.status === 'retired' && (
+                            <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                              Retired
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className={`px-6 py-4 whitespace-nowrap ${book.status === 'retired' ? 'text-gray-500' : ''}`}>{book.author}</td>
+                      <td className={`px-6 py-4 whitespace-nowrap ${book.status === 'retired' ? 'text-gray-500' : ''}`}>{book.genre}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          book.status === 'retired' 
+                            ? 'bg-red-100 text-red-800' 
+                            : 'bg-green-100 text-green-800'
+                        }`}>
+                          {book.status === 'retired' ? 'Retired' : 'Active'}
+                        </span>
+                      </td>
+                      <td className={`px-6 py-4 whitespace-nowrap ${book.status === 'retired' ? 'text-gray-500' : ''}`}>
                         {book.copiesAvailable}/{book.totalCopies || book.copiesAvailable}
-                        {/* Removed the Update button for retired books */}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          onClick={() => handleDeleteBook(Number(book.id))}
-                          className="text-red-600"
-                        >
-                          Retire
-                        </button>
+                        {book.status === 'retired' ? (
+                          <button
+                            onClick={() => handleUnretireBook(Number(book.id))}
+                            className="text-green-600 hover:text-green-800"
+                          >
+                            Unretire
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleDeleteBook(Number(book.id))}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            Retire
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -594,6 +657,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       </div>
 
       <BookForm
+        staffId={Number(currentUser.id)}
         book={selectedBook}
         isOpen={showBookForm}
         onClose={handleCloseForm}

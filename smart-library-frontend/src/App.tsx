@@ -61,6 +61,7 @@ function App() {
               copiesAvailable: b.copiesAvailable ?? 0,
               totalCopies: b.totalCopies ?? 0,
               description: b.description || "",
+              status: b.status || "active",
               reviews: reviews,
             };
           } catch (error) {
@@ -79,6 +80,7 @@ function App() {
               copiesAvailable: b.copiesAvailable ?? 0,
               totalCopies: b.totalCopies ?? 0,
               description: b.description || "",
+              status: b.status || "active",
               reviews: [],
             };
           }

@@ -11,7 +11,7 @@ interface BookCardProps {
 }
 
 const BookCard: React.FC<BookCardProps> = ({ book, onViewDetails, onBorrow, userRole }) => {
-  const availability = getAvailabilityStatus(book.copiesAvailable ?? 0);
+  const availability = getAvailabilityStatus(book.copiesAvailable ?? 0, book.status);
 
   // Calculate average rating from reviews if available
   const calculateAverageRating = () => {
@@ -33,6 +33,9 @@ const BookCard: React.FC<BookCardProps> = ({ book, onViewDetails, onBorrow, user
   const author = book.author ?? 'Unknown';
   //const coverImageUrl = book.coverImageUrl ?? 'https://via.placeholder.com/150';
 
+  // Determine if book is borrowable: must be active status AND have available copies
+  const isBorrowable = book.status === 'active' && availableCopies > 0;
+
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden group">
       <div className="relative">
@@ -43,7 +46,11 @@ const BookCard: React.FC<BookCardProps> = ({ book, onViewDetails, onBorrow, user
         />
         <div
           className={`absolute bottom-3 left-3 px-3 py-1 rounded-full text-xs font-medium text-white ${
-            availableCopies > 0 ? 'bg-green-600' : 'bg-red-600'
+            book.status === 'retired' 
+              ? 'bg-gray-600' 
+              : availableCopies > 0 
+                ? 'bg-green-600' 
+                : 'bg-red-600'
           }`}
         >
           {availability.status}
@@ -90,12 +97,23 @@ const BookCard: React.FC<BookCardProps> = ({ book, onViewDetails, onBorrow, user
             <span>View Details</span>
           </button>
 
-          {(userRole === 'reader' || userRole === 'staff') && availableCopies > 0 && onBorrow && (
+          {(userRole === 'reader' || userRole === 'staff') && isBorrowable && onBorrow && (
             <button
               onClick={() => onBorrow(book)}
               className="w-full px-3 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors duration-200 text-sm font-medium"
             >
               Borrow
+            </button>
+          )}
+
+          {/* Show disabled button with explanation for non-borrowable books */}
+          {(userRole === 'reader' || userRole === 'staff') && !isBorrowable && onBorrow && (
+            <button
+              disabled
+              className="w-full px-3 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed text-sm font-medium"
+              title={book.status === 'retired' ? 'This book has been retired' : 'Currently out of stock'}
+            >
+              {book.status === 'retired' ? 'Retired' : 'Out of Stock'}
             </button>
           )}
         </div>

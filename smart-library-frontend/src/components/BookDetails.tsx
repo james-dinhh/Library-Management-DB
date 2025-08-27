@@ -34,7 +34,7 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
 
-  const availability = getAvailabilityStatus(book.copiesAvailable ?? 0);
+  const availability = getAvailabilityStatus(book.copiesAvailable ?? 0, book.status);
 
   // Fetch reviews from backend
   useEffect(() => {
@@ -147,12 +147,21 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
               <p className={`text-sm font-medium ${availability.color}`}>
                 {availability.status} - {book.copiesAvailable ?? 0} of {book.totalCopies ?? 0} copies available
               </p>
-              {currentUser.role === 'reader' && (book.copiesAvailable ?? 0) > 0 && (
+              {currentUser.role === 'reader' && book.status === 'active' && (book.copiesAvailable ?? 0) > 0 && (
                 <button
                   onClick={() => onBorrow(book)}
                   className="mt-2 px-6 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors duration-200"
                 >
                   Borrow Book
+                </button>
+              )}
+              {currentUser.role === 'reader' && (book.status === 'retired' || (book.copiesAvailable ?? 0) === 0) && (
+                <button
+                  disabled
+                  className="mt-2 px-6 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
+                  title={book.status === 'retired' ? 'This book has been retired' : 'Currently out of stock'}
+                >
+                  {book.status === 'retired' ? 'Book Retired' : 'Out of Stock'}
                 </button>
               )}
             </div>
