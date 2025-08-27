@@ -107,33 +107,28 @@ router.post('/register', async (req, res) => {
  * body: { email, password }
  */
 router.post('/login', async (req, res) => {
-    try {
-        const { email, password, role } = req.body || {};
-        if (!email || !password || !role) {
-            return res.status(400).json({ error: 'email, password and role are required' });
-        }
-
-        // enforce role in the query
-        const [rows] = await mysqlPool.execute(
-            'SELECT * FROM users WHERE email = ? AND role = ?',
-            [email, role]
-        );
-        const user = rows[0];
-        if (!user) return res.status(401).json({ error: 'Invalid credentials or role' });
-
-        const ok = await bcrypt.compare(password, user.password);
-        if (!ok) return res.status(401).json({ error: 'Invalid credentials or role' });
-
-        const token = signToken(user);
-        return res.json({
-            token,
-            user: { id: user.user_id, name: user.name, email: user.email, role: user.role }
-        });
-    } catch (e) {
-        return res.status(500).json({ error: e.message });
+  try {
+    const { email, password } = req.body || {};
+    if (!email || !password) {
+      return res.status(400).json({ error: 'email and password are required' });
     }
-});
 
+    const [rows] = await mysqlPool.execute('SELECT * FROM users WHERE email = ?', [email]);
+    const user = rows[0];
+    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
+
+    const token = signToken(user); // role comes from DB
+    return res.json({
+      token,
+      user: { id: user.user_id, name: user.name, email: user.email, role: user.role }
+    });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
 
 /**
  * GET /auth/me

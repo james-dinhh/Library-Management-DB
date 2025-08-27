@@ -24,6 +24,9 @@ async function seedMySQLFromJson() {
     // Start transaction
     await connection.beginTransaction();
 
+  // Temporarily disable FK checks to allow clean wipes in any order
+  await connection.execute('SET FOREIGN_KEY_CHECKS = 0');
+
     // Clear existing data (in reverse order due to foreign keys)
     await connection.execute('DELETE FROM staff_logs');
     await connection.execute('DELETE FROM reviews');
@@ -35,6 +38,9 @@ async function seedMySQLFromJson() {
     await connection.execute('DELETE FROM users');
 
     console.log('Existing data cleared\n');
+
+  // Re-enable FK checks before inserting fresh data
+  await connection.execute('SET FOREIGN_KEY_CHECKS = 1');
 
     // Insert users
     console.log('Inserting users...');
@@ -194,6 +200,10 @@ async function seedMySQLFromJson() {
     console.log('\nMySQL database seeding completed successfully!');
 
   } catch (error) {
+    try {
+      // Ensure FK checks are turned back on before bubbling error
+      await connection.execute('SET FOREIGN_KEY_CHECKS = 1');
+    } catch {}
     await connection.rollback();
     console.error('Error seeding database:', error);
     throw error;
