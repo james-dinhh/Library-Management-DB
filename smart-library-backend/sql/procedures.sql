@@ -7,6 +7,7 @@ DROP PROCEDURE IF EXISTS sp_return_book;
 DROP PROCEDURE IF EXISTS sp_add_book;
 DROP PROCEDURE IF EXISTS sp_update_inventory;
 DROP PROCEDURE IF EXISTS sp_retire_book;
+DROP PROCEDURE IF EXISTS sp_unretire_book;
 DROP PROCEDURE IF EXISTS sp_review_book;
 
 DELIMITER $$
@@ -65,12 +66,11 @@ BEGIN
 
   COMMIT;
 
-  -- Optional convenience result --> don't need @out_id
   SELECT p_checkout_id AS checkout_id;
 END$$
 
 -- sp_return_book: safe return operation
--- Locks checkout and its book; idempotent (won't double-increment stock).
+-- Locks checkout and its book
 CREATE PROCEDURE sp_return_book (
   IN p_checkout_id INT
 )
@@ -99,13 +99,13 @@ BEGIN
       SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Checkout not found';
     END IF;
 
-    -- If already returned, do nothing
+    -- If already returned
     IF v_return_date IS NOT NULL THEN
       COMMIT;
       LEAVE main;
     END IF;
 
-    -- Lock the book row (explicit)
+    -- Lock the book row
     SELECT 1 INTO v_dummy
     FROM books
     WHERE book_id = v_book_id
@@ -115,7 +115,6 @@ BEGIN
     SET return_date = NOW()
     WHERE checkout_id = p_checkout_id;
 
-    -- Increment stock
     UPDATE books
     SET copies_available = copies_available + 1
     WHERE book_id = v_book_id;
@@ -124,8 +123,7 @@ BEGIN
   END main;
 END$$
 
--- sp_add_book: create book + initial stock, log admin action atomically
--- (includes optional published_year & cover_image_url)
+-- sp_add_book: create book + initial stock, log
 CREATE PROCEDURE sp_add_book (
   IN p_staff_id INT,
   IN p_title VARCHAR(255),
@@ -160,6 +158,8 @@ BEGIN
   INSERT INTO staff_logs (staff_id, action_type, book_id, timestamp)
   VALUES (p_staff_id, 'add_book', v_book_id, NOW());
 
+  SELECT v_book_id AS bookId;
+
   COMMIT;
 END$$
 
@@ -174,6 +174,7 @@ BEGIN
   DECLARE v_total INT;
   DECLARE v_available INT;
   DECLARE v_borrowed INT;
+  DECLARE v_status ENUM('active','retired');
 
   DECLARE EXIT HANDLER FOR SQLEXCEPTION
   BEGIN
@@ -184,8 +185,8 @@ BEGIN
   START TRANSACTION;
 
   -- Lock book row
-  SELECT copies_total, copies_available
-    INTO v_total, v_available
+  SELECT copies_total, copies_available, status
+    INTO v_total, v_available, v_status
   FROM books
   WHERE book_id = p_book_id
   FOR UPDATE;
@@ -200,10 +201,18 @@ BEGIN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'New total cannot be less than currently borrowed';
   END IF;
 
-  UPDATE books
-  SET copies_total = p_new_total,
-      copies_available = p_new_total - v_borrowed
-  WHERE book_id = p_book_id;
+  IF v_status = 'retired' THEN
+    -- keep availability unchanged for retired books
+    UPDATE books
+      SET copies_total = p_new_total
+    WHERE book_id = p_book_id;
+  ELSE
+    -- active: recompute availability from borrowed
+    UPDATE books
+      SET copies_total = p_new_total,
+          copies_available = p_new_total - v_borrowed
+    WHERE book_id = p_book_id;
+  END IF;
 
   INSERT INTO staff_logs (staff_id, action_type, book_id, timestamp)
   VALUES (p_staff_id, 'update_book', p_book_id, NOW());
@@ -229,7 +238,6 @@ BEGIN
   main: BEGIN
     START TRANSACTION;
 
-    -- Lock book
     SELECT status
       INTO v_status
     FROM books
@@ -241,7 +249,6 @@ BEGIN
     END IF;
 
     IF v_status = 'retired' THEN
-      -- Already retired; just log and commit
       INSERT INTO staff_logs (staff_id, action_type, book_id, timestamp)
       VALUES (p_staff_id, 'retire_book', p_book_id, NOW());
       COMMIT;
@@ -249,8 +256,8 @@ BEGIN
     END IF;
 
     UPDATE books
-    SET status = 'retired',
-        copies_available = 0
+      SET status = 'retired',
+          copies_available = 0
     WHERE book_id = p_book_id;
 
     INSERT INTO staff_logs (staff_id, action_type, book_id, timestamp)
@@ -260,8 +267,57 @@ BEGIN
   END main;
 END$$
 
--- sp_review_book: validate + upsert a review (one per user/book)
--- Requires UNIQUE KEY (user_id, book_id) on reviews table.
+-- sp_unretire_book: make book active again and reconcile availability
+CREATE PROCEDURE sp_unretire_book (
+  IN p_staff_id INT,
+  IN p_book_id INT
+)
+BEGIN
+  DECLARE v_status ENUM('active','retired');
+  DECLARE v_total INT;
+  DECLARE v_available INT;
+  DECLARE v_borrowed INT;
+
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    ROLLBACK;
+    RESIGNAL;
+  END;
+
+  START TRANSACTION;
+
+  SELECT status, copies_total, copies_available
+    INTO v_status, v_total, v_available
+  FROM books
+  WHERE book_id = p_book_id
+  FOR UPDATE;
+
+  IF v_status IS NULL THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Book not found';
+  END IF;
+
+  IF v_status = 'active' THEN
+    -- already active; just log as update
+    INSERT INTO staff_logs (staff_id, action_type, book_id, timestamp)
+    VALUES (p_staff_id, 'update_book', p_book_id, NOW());
+    COMMIT;
+    LEAVE;
+  END IF;
+
+  -- recompute available from borrowed
+  SET v_borrowed = v_total - v_available;
+  UPDATE books
+    SET status = 'active',
+        copies_available = GREATEST(v_total - v_borrowed, 0)
+  WHERE book_id = p_book_id;
+
+  INSERT INTO staff_logs (staff_id, action_type, book_id, timestamp)
+  VALUES (p_staff_id, 'update_book', p_book_id, NOW());
+
+  COMMIT;
+END$$
+
+-- sp_review_book: validate + upsert review
 CREATE PROCEDURE sp_review_book (
   IN p_user_id INT,
   IN p_book_id INT,
@@ -277,12 +333,10 @@ BEGIN
     RESIGNAL;
   END;
 
-  -- Basic validation
   IF p_rating < 1 OR p_rating > 5 THEN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Rating must be between 1 and 5';
   END IF;
 
-  -- Ensure the user has borrowed the book at least once
   SELECT COUNT(*) INTO v_has_borrowed
   FROM checkouts
   WHERE user_id = p_user_id
@@ -294,7 +348,6 @@ BEGIN
 
   START TRANSACTION;
 
-  -- Insert or update one review per (user, book)
   INSERT INTO reviews (user_id, book_id, rating, comment, review_date)
   VALUES (p_user_id, p_book_id, p_rating, p_comment, NOW())
   ON DUPLICATE KEY UPDATE

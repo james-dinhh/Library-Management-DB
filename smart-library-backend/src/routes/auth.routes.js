@@ -149,14 +149,14 @@ router.get('/me', async (req, res) => {
         const user = rows[0];
         if (!user) return res.status(401).json({ error: 'User no longer exists' });
         return res.json({
-             user: { 
-                id: user.user_id, 
-                name: user.name, 
-                email: user.email, 
+            user: {
+                id: user.user_id,
+                name: user.name,
+                email: user.email,
                 role: user.role,
                 registrationDate: user.registration_date ? new Date(user.registration_date).toISOString() : null
-             } 
-            });
+            }
+        });
     } catch (e) {
         return res.status(401).json({ error: 'Invalid or expired token' });
     }

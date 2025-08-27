@@ -4,22 +4,19 @@ import { Book } from '../types';
 import API from '../services/api';
 
 interface BookFormProps {
+  staffId: number;
   book?: Book | null;
   isOpen: boolean;
   onClose: () => void;
   onSave: (book: any) => void; // Changed to accept the saved book from API
 }
 
-const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) => {
+const BookForm: React.FC<BookFormProps> = ({ staffId, book, isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     title: '',
-    author: '',
     genre: '',
-    isbn: '',
-    description: '',
     coverImageUrl: '',
     totalCopies: 1,
-    copiesAvailable: 1,
     publishedYear: new Date().getFullYear(),
     rating: 0,
     reviewCount: 0,
@@ -55,13 +52,9 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
     if (book) {
       setFormData({
         title: book.title,
-        author: book.author,
         genre: book.genre,
-        isbn: book.isbn,
-        description: book.description,
         coverImageUrl: book.coverImageUrl,
         totalCopies: book.totalCopies,
-        copiesAvailable: book.copiesAvailable,
         publishedYear: book.publishedYear,
         rating: book.rating,
         reviewCount: book.reviewCount,
@@ -70,13 +63,9 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
     } else {
       setFormData({
         title: '',
-        author: '',
         genre: '',
-        isbn: '',
-        description: '',
         coverImageUrl: stockImages[0],
         totalCopies: 1,
-        copiesAvailable: 1,
         publishedYear: new Date().getFullYear(),
         rating: 0,
         reviewCount: 0,
@@ -88,9 +77,7 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
     if (!formData.title.trim()) newErrors.title = 'Title is required';
-    if (!formData.author.trim()) newErrors.author = 'Author is required';
     if (!formData.genre) newErrors.genre = 'Genre is required';
     if (!formData.publisherId) newErrors.publisherId = 'Publisher is required';
     if (!formData.isbn.trim()) newErrors.isbn = 'ISBN is required';
@@ -111,8 +98,7 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
-
+    if (!validateForm()) return; // stop if validation fails
     setIsSubmitting(true);
 
     try {
@@ -171,9 +157,7 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
   };
 
   if (!isOpen) return null;
@@ -182,13 +166,8 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {book ? 'Edit Book' : 'Add New Book'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
+          <h2 className="text-2xl font-bold text-gray-900">{book ? 'Edit Book' : 'Add New Book'}</h2>
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="h-6 w-6" />
           </button>
         </div>
@@ -200,71 +179,37 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
               {/* Basic Information */}
               <div className="bg-gray-50 rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
-                
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Title *
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
                     <input
                       type="text"
                       value={formData.title}
                       onChange={(e) => handleInputChange('title', e.target.value)}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                        errors.title ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${errors.title ? 'border-red-300' : 'border-gray-300'}`}
                       placeholder="Enter book title"
                     />
                     {errors.title && (
                       <p className="mt-1 text-sm text-red-600 flex items-center">
-                        <AlertCircle className="h-4 w-4 mr-1" />
-                        {errors.title}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Author *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.author}
-                      onChange={(e) => handleInputChange('author', e.target.value)}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                        errors.author ? 'border-red-300' : 'border-gray-300'
-                      }`}
-                      placeholder="Enter author name"
-                    />
-                    {errors.author && (
-                      <p className="mt-1 text-sm text-red-600 flex items-center">
-                        <AlertCircle className="h-4 w-4 mr-1" />
-                        {errors.author}
+                        <AlertCircle className="h-4 w-4 mr-1" /> {errors.title}
                       </p>
                     )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Genre *
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Genre *</label>
                       <select
                         value={formData.genre}
                         onChange={(e) => handleInputChange('genre', e.target.value)}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                          errors.genre ? 'border-red-300' : 'border-gray-300'
-                        }`}
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${errors.genre ? 'border-red-300' : 'border-gray-300'}`}
                       >
                         <option value="">Select genre</option>
-                        {genres.map(genre => (
-                          <option key={genre} value={genre}>{genre}</option>
-                        ))}
+                        {genres.map(genre => <option key={genre} value={genre}>{genre}</option>)}
                       </select>
                       {errors.genre && (
                         <p className="mt-1 text-sm text-red-600 flex items-center">
-                          <AlertCircle className="h-4 w-4 mr-1" />
-                          {errors.genre}
+                          <AlertCircle className="h-4 w-4 mr-1" /> {errors.genre}
                         </p>
                       )}
                     </div>
@@ -317,81 +262,37 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      ISBN *
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Publisher ID *</label>
                     <input
-                      type="text"
-                      value={formData.isbn}
-                      onChange={(e) => handleInputChange('isbn', e.target.value)}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                        errors.isbn ? 'border-red-300' : 'border-gray-300'
-                      }`}
-                      placeholder="978-0-123456-78-9"
+                      type="number"
+                      value={formData.publisherId}
+                      onChange={(e) => handleInputChange('publisherId', parseInt(e.target.value) || 0)}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${errors.publisherId ? 'border-red-300' : 'border-gray-300'}`}
+                      placeholder="Enter publisher ID"
+                      min={1}
                     />
-                    {errors.isbn && (
+                    {errors.publisherId && (
                       <p className="mt-1 text-sm text-red-600 flex items-center">
-                        <AlertCircle className="h-4 w-4 mr-1" />
-                        {errors.isbn}
+                        <AlertCircle className="h-4 w-4 mr-1" /> {errors.publisherId}
                       </p>
                     )}
                   </div>
-                </div>
-              </div>
 
-              {/* Inventory Management */}
-              <div className="bg-blue-50 rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Inventory Management</h3>
-                
-                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Total Copies *
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Total Copies *</label>
                     <input
                       type="number"
                       value={formData.totalCopies}
-                      onChange={(e) => handleInputChange('totalCopies', parseInt(e.target.value))}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                        errors.totalCopies ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      onChange={(e) => handleInputChange('totalCopies', parseInt(e.target.value) || 0)}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${errors.totalCopies ? 'border-red-300' : 'border-gray-300'}`}
                       min="1"
                     />
                     {errors.totalCopies && (
                       <p className="mt-1 text-sm text-red-600 flex items-center">
-                        <AlertCircle className="h-4 w-4 mr-1" />
-                        {errors.totalCopies}
+                        <AlertCircle className="h-4 w-4 mr-1" /> {errors.totalCopies}
                       </p>
                     )}
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Available Copies *
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.copiesAvailable}
-                      onChange={(e) => handleInputChange('copiesAvailable', parseInt(e.target.value))}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                        errors.copiesAvailable ? 'border-red-300' : 'border-gray-300'
-                      }`}
-                      min="0"
-                      max={formData.totalCopies}
-                    />
-                    {errors.copiesAvailable && (
-                      <p className="mt-1 text-sm text-red-600 flex items-center">
-                        <AlertCircle className="h-4 w-4 mr-1" />
-                        {errors.copiesAvailable}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-4 p-3 bg-blue-100 rounded-lg">
-                  <p className="text-sm text-blue-800">
-                    <strong>Borrowed copies:</strong> {formData.totalCopies - formData.copiesAvailable}
-                  </p>
                 </div>
               </div>
             </div>
@@ -401,7 +302,6 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
               {/* Cover Image */}
               <div className="bg-gray-50 rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Cover Image</h3>
-                
                 <div className="space-y-4">
                   <div className="flex justify-center">
                     <img
@@ -410,11 +310,8 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
                       className="w-32 h-40 object-cover rounded-lg shadow-md"
                     />
                   </div>
-
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Image URL
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
                     <input
                       type="url"
                       value={formData.coverImageUrl}
@@ -425,59 +322,20 @@ const BookForm: React.FC<BookFormProps> = ({ book, isOpen, onClose, onSave }) =>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Or choose from stock images:
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Or choose from stock images:</label>
                     <div className="grid grid-cols-3 gap-2">
                       {stockImages.map((image, index) => (
                         <button
                           key={index}
                           type="button"
                           onClick={() => handleInputChange('coverImageUrl', image)}
-                          className={`relative rounded-lg overflow-hidden border-2 transition-all ${
-                            formData.coverImageUrl === image
-                              ? 'border-blue-500 ring-2 ring-blue-200'
-                              : 'border-gray-200 hover:border-gray-300'
-                          }`}
+                          className={`relative rounded-lg overflow-hidden border-2 transition-all ${formData.coverImageUrl === image ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200 hover:border-gray-300'}`}
                         >
-                          <img
-                            src={image}
-                            alt={`Stock image ${index + 1}`}
-                            className="w-full h-16 object-cover"
-                          />
+                          <img src={image} alt={`Stock image ${index + 1}`} className="w-full h-16 object-cover" />
                         </button>
                       ))}
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div className="bg-gray-50 rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Description</h3>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Book Description *
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                    rows={6}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none ${
-                      errors.description ? 'border-red-300' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter a detailed description of the book..."
-                  />
-                  {errors.description && (
-                    <p className="mt-1 text-sm text-red-600 flex items-center">
-                      <AlertCircle className="h-4 w-4 mr-1" />
-                      {errors.description}
-                    </p>
-                  )}
-                  <p className="mt-1 text-sm text-gray-500">
-                    {formData.description.length}/500 characters
-                  </p>
                 </div>
               </div>
             </div>
