@@ -48,7 +48,7 @@ router.get('/low-availability', async (req, res) => {
   try {
     // Low availability
     const [rows] = await mysqlPool.query(
-      `SELECT title, copies_available
+      `SELECT title, copies_available AS copiesAvailable
        FROM books
        WHERE copies_available <= 3
        ORDER BY copies_available ASC`
