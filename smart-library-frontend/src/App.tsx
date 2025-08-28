@@ -27,73 +27,43 @@ function App() {
 
   // Fetch books from backend
   useEffect(() => {
-    const API_BASE = "http://localhost:4001";
+  const API_BASE = "http://localhost:4001";
 
-    const fetchBooks = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/books`);
-        if (!res.ok) throw new Error("Failed to fetch books");
-        const data = await res.json();
+  const fetchBooks = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/books`);
+      if (!res.ok) throw new Error("Failed to fetch books");
+      const data = await res.json();
 
-        const booksWithReviews = await Promise.all(data.map(async (b: any) => {
-          const token = localStorage.getItem('token');
-          const headers: { [key: string]: string } = {};
-          if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-          }
+      const booksWithReviews = await Promise.all(data.map(async (b: any) => {
+        const token = localStorage.getItem('token');
+        const headers: { [key: string]: string } = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
 
-          try {
-            const reviewsRes = await fetch(`${API_BASE}/reviews/book/${b.id}`, { headers });
-            const reviews = reviewsRes.ok ? await reviewsRes.json() : [];
+        try {
+          const reviewsRes = await fetch(`${API_BASE}/reviews/book/${b.id}`, { headers });
+          const reviews = reviewsRes.ok ? await reviewsRes.json() : [];
 
-            return {
-              id: String(b.id),
-              title: b.title,
-              author: b.author || b.authors || "Unknown",
-              coverImageUrl:
-                b.coverImageUrl ||
-                "https://images.pexels.com/photos/1029141/pexels-photo-1029141.jpeg",
-              publishedYear: b.publishedYear || "Unknown",
-              genre: b.genre || b.category || "Unknown",
-              isbn: b.isbn || "",
-              rating: b.rating || 0,
-              reviewCount: b.reviewCount || 0,
-              copiesAvailable: b.copiesAvailable ?? 0,
-              totalCopies: b.totalCopies ?? 0,
-              description: b.description || "",
-              status: b.status || "active",
-              reviews: reviews,
-            };
-          } catch (error) {
-            return { // Return book data even if reviews fail
-              id: String(b.id),
-              title: b.title,
-              author: b.author || b.authors || "Unknown",
-              coverImageUrl:
-                b.coverImageUrl ||
-                "https://images.pexels.com/photos/1029141/pexels-photo-1029141.jpeg",
-              publishedYear: b.publishedYear || "Unknown",
-              genre: b.genre || b.category || "Unknown",
-              isbn: b.isbn || "",
-              rating: b.rating || 0,
-              reviewCount: b.reviewCount || 0,
-              copiesAvailable: b.copiesAvailable ?? 0,
-              totalCopies: b.totalCopies ?? 0,
-              description: b.description || "",
-              status: b.status || "active",
-              reviews: [],
-            };
-          }
+          return { ...b, id: String(b.id), reviews };
+        } catch {
+          return { ...b, id: String(b.id), reviews: [] };
+        }
       }));
 
-        setBooks(booksWithReviews);
-      } catch (err) {
-        // Error fetching books - could be handled by setting an error state if needed
-      }
-    };
+      setBooks(booksWithReviews);
+    } catch (err) {
+      console.error("❌ Failed to fetch books:", err);
+    }
+  };
 
+  // Only refresh books when the "search" tab is selected
+  if (activeTab === "search") {
     fetchBooks();
-  }, []);
+  }
+}, [activeTab]);
+
 
   // Fetch user's reviews from backend
   const fetchUserReviews = async (userId: string) => {
