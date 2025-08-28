@@ -25,6 +25,14 @@ const router = Router();
  *               copiesTotal: { type: integer, example: 5 }
  *               publishedYear: { type: integer, example: 2003 }
  *               coverImageUrl: { type: string, example: "https://example.com/ddd.jpg" }
+ *               authorIds:
+ *                 type: array
+ *                 items: { type: integer }
+ *                 example: [3, 5]
+ *               authorNames:
+ *                 type: array
+ *                 items: { type: string }
+ *                 example: ["Eric Evans", "Martin Fowler"]
  *     responses:
  *       201:
  *         description: Book created
@@ -37,7 +45,7 @@ const router = Router();
  *                 bookId: { type: integer }
  */
 router.post('/books', async (req, res) => {
-  const { staffId, title, genre, publisherId, copiesTotal, publishedYear, coverImageUrl } = req.body || {};
+  const { staffId, title, genre, publisherId, copiesTotal, publishedYear, coverImageUrl, authorIds, authorNames } = req.body || {};
   if (!staffId || !title || !genre || !publisherId || copiesTotal == null) {
     return res.status(400).json({ error: 'staffId, title, genre, publisherId, copiesTotal are required' });
   }
@@ -60,7 +68,48 @@ router.post('/books', async (req, res) => {
       bookId = row?.bookId ? Number(row.bookId) : null;
     }
 
-    return res.status(201).json({ ok: true, bookId });
+    // Optionally attach authors
+    let attachedAuthors = 0;
+    // 1) From authorIds (validate existence)
+    if (Array.isArray(authorIds) && authorIds.length) {
+      const ids = [...new Set(authorIds.map(Number))].filter(n => Number.isFinite(n));
+      if (ids.length) {
+        const [rows] = await mysqlPool.query(
+          `SELECT author_id FROM authors WHERE author_id IN (${ids.map(() => '?').join(',')})`,
+          ids
+        );
+        const found = new Set(rows.map(r => r.author_id));
+        const validIds = ids.filter(id => found.has(id));
+        if (validIds.length) {
+          const values = validIds.map(aid => [bookId, aid]);
+          await mysqlPool.query('INSERT IGNORE INTO book_authors (book_id, author_id) VALUES ?', [values]);
+          attachedAuthors += validIds.length;
+        }
+      }
+    }
+
+    // 2) From authorNames (upsert authors by unique name)
+    if (Array.isArray(authorNames) && authorNames.length) {
+      const names = [...new Set(authorNames.map(n => String(n).trim()).filter(n => n.length))];
+      if (names.length) {
+        const values = names.map(n => [n]);
+        await mysqlPool.query('INSERT IGNORE INTO authors (name) VALUES ?', [values]);
+        // Fetch their ids
+        const placeholders = names.map(() => '?').join(',');
+        const [rows2] = await mysqlPool.query(
+          `SELECT author_id FROM authors WHERE name IN (${placeholders})`,
+          names
+        );
+        const ids2 = rows2.map(r => r.author_id);
+        if (ids2.length) {
+          const pairs = ids2.map(aid => [bookId, aid]);
+          await mysqlPool.query('INSERT IGNORE INTO book_authors (book_id, author_id) VALUES ?', [pairs]);
+          attachedAuthors += ids2.length;
+        }
+      }
+    }
+
+    return res.status(201).json({ ok: true, bookId, attachedAuthors });
   } catch (e) {
     return res.status(400).json({ error: e.sqlMessage || e.message });
   }
