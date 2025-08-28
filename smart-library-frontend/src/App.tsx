@@ -60,7 +60,7 @@ function App() {
 
   if (activeTab === "search") {
     fetchBooks(); // Initial fetch
-    intervalId = setInterval(fetchBooks, 100);
+    intervalId = setInterval(fetchBooks, 2000);
   }
 
   return () => {

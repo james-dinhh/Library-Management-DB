@@ -16,13 +16,15 @@ const BookCard: React.FC<BookCardProps> = ({ book, onViewDetails, onBorrow, user
   // Calculate average rating from reviews if available
   const calculateAverageRating = () => {
     if (book.reviews && book.reviews.length > 0) {
-      const totalRating = book.reviews.reduce((sum, review) => sum + review.rating, 0);
+      const totalRating = book.reviews.reduce((sum, review) => sum + (Number(review.rating) || 0), 0);
       return totalRating / book.reviews.length;
     }
-    return book.rating ?? 0;
+    return typeof book.rating === "number" ? book.rating : 0;
   };
 
   const rating = calculateAverageRating();
+  const ratingDisplay = typeof rating === "number" && !isNaN(rating) ? rating.toFixed(1) : "0.0";
+
   const reviewCount = book.reviews?.length ?? book.reviewCount ?? 0;
 
   const availableCopies = typeof book.copiesAvailable === 'number' ? book.copiesAvailable : 0;
@@ -73,7 +75,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, onViewDetails, onBorrow, user
               {'☆'.repeat(5 - Math.floor(rating))}
             </div>
             <span className="text-sm text-gray-600 ml-1">
-              {rating.toFixed(1)} ({reviewCount})
+              {ratingDisplay} ({reviewCount})
             </span>
           </div>
           <span className="text-xs text-gray-500 flex items-center">
