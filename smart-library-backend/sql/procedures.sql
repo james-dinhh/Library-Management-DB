@@ -13,7 +13,6 @@ DROP PROCEDURE IF EXISTS sp_review_book;
 DELIMITER $$
 
 -- sp_borrow_book: concurrency-safe borrow operation
--- Locks the book row, checks status & stock, inserts checkout, decrements stock.
 CREATE PROCEDURE sp_borrow_book (
   IN  p_user_id INT,
   IN  p_book_id INT,
@@ -33,7 +32,6 @@ BEGIN
 
   START TRANSACTION;
 
-  -- Lock the target book row
   SELECT status, copies_available
     INTO v_status, v_available
   FROM books
@@ -59,18 +57,15 @@ BEGIN
 
   SET p_checkout_id = LAST_INSERT_ID();
 
-  -- Decrement stock here (triggers only validate)
   UPDATE books
   SET copies_available = copies_available - 1
   WHERE book_id = p_book_id;
 
   COMMIT;
-
   SELECT p_checkout_id AS checkout_id;
 END$$
 
--- sp_return_book: safe return operation
--- Locks checkout and its book
+-- sp_return_book
 CREATE PROCEDURE sp_return_book (
   IN p_checkout_id INT
 )
@@ -88,7 +83,6 @@ BEGIN
   main: BEGIN
     START TRANSACTION;
 
-    -- Lock the checkout row
     SELECT book_id, return_date
       INTO v_book_id, v_return_date
     FROM checkouts
@@ -99,13 +93,11 @@ BEGIN
       SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Checkout not found';
     END IF;
 
-    -- If already returned
     IF v_return_date IS NOT NULL THEN
       COMMIT;
       LEAVE main;
     END IF;
 
-    -- Lock the book row
     SELECT 1 INTO v_dummy
     FROM books
     WHERE book_id = v_book_id
@@ -123,7 +115,7 @@ BEGIN
   END main;
 END$$
 
--- sp_add_book: create book + initial stock, log
+-- sp_add_book
 CREATE PROCEDURE sp_add_book (
   IN p_staff_id INT,
   IN p_title VARCHAR(255),
@@ -159,12 +151,10 @@ BEGIN
   VALUES (p_staff_id, 'add_book', v_book_id, NOW());
 
   SELECT v_book_id AS bookId;
-
   COMMIT;
 END$$
 
--- sp_update_inventory: adjust copies_total safely, recompute available, log
--- Ensures new total >= currently borrowed.
+-- sp_update_inventory
 CREATE PROCEDURE sp_update_inventory (
   IN p_staff_id INT,
   IN p_book_id INT,
@@ -184,7 +174,6 @@ BEGIN
 
   START TRANSACTION;
 
-  -- Lock book row
   SELECT copies_total, copies_available, status
     INTO v_total, v_available, v_status
   FROM books
@@ -195,24 +184,21 @@ BEGIN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Book not found';
   END IF;
 
-  SET v_borrowed = v_total - v_available;
+  -- Derive currently borrowed from open checkouts for robustness
+  SELECT COUNT(*) INTO v_borrowed
+  FROM checkouts
+  WHERE book_id = p_book_id
+    AND return_date IS NULL;
 
   IF p_new_total < v_borrowed THEN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'New total cannot be less than currently borrowed';
   END IF;
 
-  IF v_status = 'retired' THEN
-    -- keep availability unchanged for retired books
-    UPDATE books
-      SET copies_total = p_new_total
-    WHERE book_id = p_book_id;
-  ELSE
-    -- active: recompute availability from borrowed
-    UPDATE books
-      SET copies_total = p_new_total,
-          copies_available = p_new_total - v_borrowed
-    WHERE book_id = p_book_id;
-  END IF;
+  -- Keep availability consistent with constraints regardless of status
+  UPDATE books
+    SET copies_total = p_new_total,
+        copies_available = GREATEST(p_new_total - v_borrowed, 0)
+  WHERE book_id = p_book_id;
 
   INSERT INTO staff_logs (staff_id, action_type, book_id, timestamp)
   VALUES (p_staff_id, 'update_book', p_book_id, NOW());
@@ -220,8 +206,7 @@ BEGIN
   COMMIT;
 END$$
 
--- sp_retire_book: retire a book (no further borrows), log action
--- Sets status = 'retired' and sets available = 0 (borrowed copies remain tracked).
+-- sp_retire_book
 CREATE PROCEDURE sp_retire_book (
   IN p_staff_id INT,
   IN p_book_id INT
@@ -256,8 +241,7 @@ BEGIN
     END IF;
 
     UPDATE books
-      SET status = 'retired',
-          copies_available = 0
+      SET status = 'retired'
     WHERE book_id = p_book_id;
 
     INSERT INTO staff_logs (staff_id, action_type, book_id, timestamp)
@@ -267,7 +251,7 @@ BEGIN
   END main;
 END$$
 
--- sp_unretire_book: make book active again and reconcile availability
+-- sp_unretire_book
 CREATE PROCEDURE sp_unretire_book (
   IN p_staff_id INT,
   IN p_book_id INT
@@ -298,15 +282,17 @@ BEGIN
     END IF;
 
     IF v_status = 'active' THEN
-      -- already active; just log as update
       INSERT INTO staff_logs (staff_id, action_type, book_id, timestamp)
       VALUES (p_staff_id, 'update_book', p_book_id, NOW());
       COMMIT;
       LEAVE main;
     END IF;
 
-    -- recompute available from borrowed
-    SET v_borrowed = v_total - v_available;
+    -- Derive currently borrowed from open checkouts for robustness
+    SELECT COUNT(*) INTO v_borrowed
+    FROM checkouts
+    WHERE book_id = p_book_id
+      AND return_date IS NULL;
     UPDATE books
       SET status = 'active',
           copies_available = GREATEST(v_total - v_borrowed, 0)
@@ -319,7 +305,7 @@ BEGIN
   END main;
 END$$
 
--- sp_review_book: validate + upsert review
+-- sp_review_book
 CREATE PROCEDURE sp_review_book (
   IN p_user_id INT,
   IN p_book_id INT,
