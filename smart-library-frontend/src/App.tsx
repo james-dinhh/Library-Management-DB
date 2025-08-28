@@ -28,6 +28,7 @@ function App() {
   // Fetch books from backend
   useEffect(() => {
   const API_BASE = "http://localhost:4001";
+  let intervalId: NodeJS.Timeout | null = null;
 
   const fetchBooks = async () => {
     try {
@@ -45,7 +46,6 @@ function App() {
         try {
           const reviewsRes = await fetch(`${API_BASE}/reviews/book/${b.id}`, { headers });
           const reviews = reviewsRes.ok ? await reviewsRes.json() : [];
-
           return { ...b, id: String(b.id), reviews };
         } catch {
           return { ...b, id: String(b.id), reviews: [] };
@@ -54,14 +54,18 @@ function App() {
 
       setBooks(booksWithReviews);
     } catch (err) {
-      console.error("❌ Failed to fetch books:", err);
+      console.error("Failed to fetch books:", err);
     }
   };
 
-  // Only refresh books when the "search" tab is selected
   if (activeTab === "search") {
-    fetchBooks();
+    fetchBooks(); // Initial fetch
+    intervalId = setInterval(fetchBooks, 100);
   }
+
+  return () => {
+    if (intervalId) clearInterval(intervalId); 
+  };
 }, [activeTab]);
 
 
@@ -233,7 +237,7 @@ function App() {
         )
       );
     } catch (err) {
-      console.error("❌ Error borrowing book:", err);
+      console.error(" Error borrowing book:", err);
     }
   };
 

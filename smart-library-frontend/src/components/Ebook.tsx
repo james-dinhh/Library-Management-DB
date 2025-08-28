@@ -1,7 +1,47 @@
 import React, { useEffect, useState } from "react";
 
-function EbookList({ onSelectBook }) {
-  const [ebooks, setEbooks] = useState([]);
+// --- Types ---
+interface Ebook {
+  bookId: number;
+  title: string;
+  author: string;
+  genre: string;
+  publishedYear: number;
+}
+
+interface ReadingSession {
+  _id?: string;
+  userId: number;
+  bookId: number;
+  startTime: string | Date;
+  endTime: string | Date;
+  device?: string;
+  pagesRead?: number[];
+  highlights?: { page: number; text: string }[];
+}
+
+interface EbookListProps {
+  onSelectBook: (book: Ebook) => void;
+}
+
+interface ReaderProps {
+  book: Ebook;
+  userId: number;
+  onSessionEnd: () => void;
+}
+
+interface SessionsListProps {
+  userId: number;
+}
+
+interface EbooksAppProps {
+  userId: number;
+  userName: string;
+}
+
+// --- Components ---
+function EbookList({ onSelectBook }: EbookListProps) {
+  const [ebooks, setEbooks] = useState<Ebook[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     fetch("http://localhost:4001/ebooks/mongo-ebooks")
@@ -39,12 +79,12 @@ function EbookList({ onSelectBook }) {
   );
 }
 
-function Reader({ book, userId, onSessionEnd }) {
-  const [startTime] = useState(new Date());
-  const [pagesRead, setPagesRead] = useState([]);
-  const [highlights, setHighlights] = useState([]);
-  const [device] = useState(window.navigator.userAgent);
-  const [highlightText, setHighlightText] = useState("");
+function Reader({ book, userId, onSessionEnd }: ReaderProps) {
+  const [startTime] = useState<Date>(new Date());
+  const [pagesRead, setPagesRead] = useState<number[]>([]);
+  const [highlights, setHighlights] = useState<{ page: number; text: string }[]>([]);
+  const [device] = useState<string>(window.navigator.userAgent);
+  const [highlightText, setHighlightText] = useState<string>("");
 
   function readPage() {
     setPagesRead([...pagesRead, pagesRead.length + 1]);
@@ -117,9 +157,9 @@ function Reader({ book, userId, onSessionEnd }) {
   );
 }
 
-function SessionsList({ userId }) {
-  const [sessions, setSessions] = useState([]);
-  const [ebooks, setEbooks] = useState([]);
+function SessionsList({ userId }: SessionsListProps) {
+  const [sessions, setSessions] = useState<ReadingSession[]>([]);
+  const [ebooks, setEbooks] = useState<Ebook[]>([]);
   useEffect(() => {
     fetch("http://localhost:4001/ebooks/mongo-ebooks")
       .then(res => res.json())
@@ -129,7 +169,7 @@ function SessionsList({ userId }) {
       .then(setSessions);
   }, [userId]);
 
-  function getBookInfo(bookId) {
+  function getBookInfo(bookId: number) {
     const book = ebooks.find(b => b.bookId === bookId);
     return book ? `${book.title} by ${book.author}` : `Book ${bookId}`;
   }
@@ -159,8 +199,12 @@ function SessionsList({ userId }) {
   );
 }
 
-export default function EbooksApp({ userId }) {
-  const [selectedBook, setSelectedBook] = useState(null);
+interface EbooksAppProps {
+  userId: number;
+}
+
+export default function EbooksApp({ userId }: EbooksAppProps) {
+  const [selectedBook, setSelectedBook] = useState<Ebook | null>(null);
 
   function handleSessionEnd() {
     setSelectedBook(null);
@@ -175,7 +219,7 @@ export default function EbooksApp({ userId }) {
           <SessionsList userId={userId} />
         </>
       ) : (
-        <Reader book={selectedBook} userId={userId} onSessionEnd={handleSessionEnd} />
+        <Reader book={selectedBook!} userId={userId} onSessionEnd={handleSessionEnd} />
       )}
     </div>
   );

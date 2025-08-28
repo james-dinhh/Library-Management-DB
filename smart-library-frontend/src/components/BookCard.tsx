@@ -30,7 +30,10 @@ const BookCard: React.FC<BookCardProps> = ({ book, onViewDetails, onBorrow, user
   const publishedYear = book.publishedYear ?? 'Unknown';
   const genre = book.genre ?? 'Unknown';
   const title = book.title ?? 'Untitled';
-  const author = book.author ?? 'Unknown';
+  const author =
+    Array.isArray(book.authors) && book.authors.length > 0
+      ? book.authors.join(', ')
+      : 'Unknown';
   //const coverImageUrl = book.coverImageUrl ?? 'https://via.placeholder.com/150';
 
   // Determine if book is borrowable: must be active status AND have available copies
