@@ -166,7 +166,6 @@ const returnLibrary = async (checkoutId: number): Promise<any> => {
 // ---------- eBooks (reader & staff protected) ----------
 type EbookListQuery = { page?: number; pageSize?: number };
 
-// Preferred: use the generic /books endpoint with status=active
 const listBooksForEbooksPaged = async (
   params: EbookListQuery = { page: 1, pageSize: 12 }
 ): Promise<{ items: Array<{ bookId: number; title: string; author: string; genre: string; publishedYear: number | null }>; total: number }> => {
@@ -190,7 +189,6 @@ const listBooksForEbooksPaged = async (
   }));
   return { items, total };
 };
-// (Removed legacy listEbooksPaged that called /ebooks/books)
 
 const createEbookSession = async (payload: any): Promise<any> => {
   const res = await API.post('/ebooks/sessions', payload);
