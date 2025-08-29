@@ -21,7 +21,17 @@ const router = Router();
  *               staffId: { type: integer, example: 2 }
  *               title: { type: string, example: "Domain-Driven Design" }
  *               genre: { type: string, example: "Software" }
- *               publisherId: { type: integer, example: 1 }
+ *               publisherId:
+ *                 type: integer
+ *                 example: 1
+ *                 description: Provide either publisherId or publisherName
+ *               publisherName:
+ *                 type: string
+ *                 example: "Addison-Wesley"
+ *                 description: Used to create or reuse a publisher if publisherId is not provided
+ *               publisherAddress:
+ *                 type: string
+ *                 example: "75 Arlington St, Boston, MA"
  *               copiesTotal: { type: integer, example: 5 }
  *               publishedYear: { type: integer, example: 2003 }
  *               coverImageUrl: { type: string, example: "https://example.com/ddd.jpg" }
@@ -33,6 +43,10 @@ const router = Router();
  *                 type: array
  *                 items: { type: string }
  *                 example: ["Eric Evans", "Martin Fowler"]
+ *               authorBios:
+ *                 type: array
+ *                 items: { type: string }
+ *                 example: ["Eric Evans is the author of Domain-Driven Design.", "Martin Fowler is a software engineer and author."]
  *     responses:
  *       201:
  *         description: Book created
@@ -44,74 +58,106 @@ const router = Router();
  *                 ok: { type: boolean }
  *                 bookId: { type: integer }
  */
-router.post('/books', async (req, res) => {
-  const { staffId, title, genre, publisherId, copiesTotal, publishedYear, coverImageUrl, authorIds, authorNames } = req.body || {};
-  if (!staffId || !title || !genre || !publisherId || copiesTotal == null) {
-    return res.status(400).json({ error: 'staffId, title, genre, publisherId, copiesTotal are required' });
-  }
+router.post("/books", async (req, res) => {
+  const {
+    staffId,
+    title,
+    genre,
+    publisherId,
+    publisherName,
+    publisherAddress,
+    publishedYear,
+    copiesTotal,
+    coverImageUrl,
+    authorIds,
+    authorNames,
+    authorBios
+  } = req.body;
+
+  const connection = await mysqlPool.getConnection();
   try {
-    const [procResult] = await mysqlPool.query(
-      'CALL sp_add_book(?,?,?,?,?,?,?)',
-      [staffId, title, genre, Number(publisherId), Number(copiesTotal), publishedYear ?? null, coverImageUrl ?? null]
+    await connection.beginTransaction();
+
+    let finalPublisherId = publisherId;
+
+    // Handle publisher
+    if (!finalPublisherId && publisherName) {
+      await connection.query(
+        "INSERT IGNORE INTO publishers (name, address) VALUES (?, ?)",
+        [publisherName, publisherAddress || null]
+      );
+      const [rows] = await connection.query(
+        "SELECT publisher_id FROM publishers WHERE name = ?",
+        [publisherName]
+      );
+      if (rows.length > 0) {
+        finalPublisherId = rows[0].publisher_id;
+      }
+    }
+
+    if (!finalPublisherId) {
+      await connection.rollback();
+      return res.status(400).json({ error: "Publisher is required" });
+    }
+
+    // Insert book
+    const [bookResult] = await connection.query(
+      `INSERT INTO books 
+       (title, genre, published_year, publisher_id, cover_image_url, copies_total, copies_available, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'active')`,
+      [title, genre, publishedYear, finalPublisherId, coverImageUrl || null, copiesTotal, copiesTotal]
     );
 
-    let bookId = null;
-    try {
-      const firstSet = Array.isArray(procResult) ? procResult[0] : null;
-      if (Array.isArray(firstSet) && firstSet[0] && firstSet[0].bookId != null) {
-        bookId = Number(firstSet[0].bookId);
-      }
-    } catch {}
+    const bookId = bookResult.insertId;
 
-    if (!bookId) {
-      const [[row]] = await mysqlPool.query('SELECT LAST_INSERT_ID() AS bookId');
-      bookId = row?.bookId ? Number(row.bookId) : null;
-    }
+    // Handle authors
+    const finalAuthorIds = authorIds ? [...authorIds] : [];
 
-    // Optionally attach authors
-    let attachedAuthors = 0;
-    // 1) From authorIds (validate existence)
-    if (Array.isArray(authorIds) && authorIds.length) {
-      const ids = [...new Set(authorIds.map(Number))].filter(n => Number.isFinite(n));
-      if (ids.length) {
-        const [rows] = await mysqlPool.query(
-          `SELECT author_id FROM authors WHERE author_id IN (${ids.map(() => '?').join(',')})`,
-          ids
+    if (authorNames && authorNames.length > 0) {
+      for (let i = 0; i < authorNames.length; i++) {
+        const authorName = authorNames[i];
+        const authorBio = authorBios && authorBios[i] ? authorBios[i] : null;
+
+        // Insert new author or update existing bio if provided
+        await connection.query(
+          `INSERT INTO authors (name, bio)
+           VALUES (?, ?)
+           ON DUPLICATE KEY UPDATE bio = COALESCE(VALUES(bio), bio)`,
+          [authorName, authorBio]
         );
-        const found = new Set(rows.map(r => r.author_id));
-        const validIds = ids.filter(id => found.has(id));
-        if (validIds.length) {
-          const values = validIds.map(aid => [bookId, aid]);
-          await mysqlPool.query('INSERT IGNORE INTO book_authors (book_id, author_id) VALUES ?', [values]);
-          attachedAuthors += validIds.length;
-        }
       }
+
+      const [authorRows] = await connection.query(
+        "SELECT author_id FROM authors WHERE name IN (?)",
+        [authorNames]
+      );
+      finalAuthorIds.push(...authorRows.map(r => r.author_id));
     }
 
-    // 2) From authorNames (upsert authors by unique name)
-    if (Array.isArray(authorNames) && authorNames.length) {
-      const names = [...new Set(authorNames.map(n => String(n).trim()).filter(n => n.length))];
-      if (names.length) {
-        const values = names.map(n => [n]);
-        await mysqlPool.query('INSERT IGNORE INTO authors (name) VALUES ?', [values]);
-        // Fetch their ids
-        const placeholders = names.map(() => '?').join(',');
-        const [rows2] = await mysqlPool.query(
-          `SELECT author_id FROM authors WHERE name IN (${placeholders})`,
-          names
-        );
-        const ids2 = rows2.map(r => r.author_id);
-        if (ids2.length) {
-          const pairs = ids2.map(aid => [bookId, aid]);
-          await mysqlPool.query('INSERT IGNORE INTO book_authors (book_id, author_id) VALUES ?', [pairs]);
-          attachedAuthors += ids2.length;
-        }
-      }
+    // Attach authors to book
+    if (finalAuthorIds.length > 0) {
+      const values = finalAuthorIds.map(aid => [bookId, aid]);
+      await connection.query(
+        "INSERT IGNORE INTO book_authors (book_id, author_id) VALUES ?",
+        [values]
+      );
     }
 
-    return res.status(201).json({ ok: true, bookId, attachedAuthors });
-  } catch (e) {
-    return res.status(400).json({ error: e.sqlMessage || e.message });
+    // Log staff action
+    await connection.query(
+      "INSERT INTO staff_logs (staff_id, action_type, book_id, timestamp) VALUES (?, 'add_book', ?, NOW())",
+      [staffId, bookId]
+    );
+
+    await connection.commit();
+
+    res.json({ bookId });
+  } catch (err) {
+    await connection.rollback();
+    console.error("Error adding book:", err);
+    res.status(500).json({ error: "Failed to add book" });
+  } finally {
+    connection.release();
   }
 });
 

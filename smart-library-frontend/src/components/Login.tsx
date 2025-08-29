@@ -12,7 +12,6 @@ const API_BASE = "http://localhost:4001";
 const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [userType, setUserType] = useState<'reader' | 'staff'>('reader');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,7 +22,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister }) => {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, role: userType }),
+        body: JSON.stringify({ email, password }),
       });
 
       if (!res.ok) {
@@ -50,34 +49,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister }) => {
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">SmartLibrary</h1>
           <p className="text-gray-600">Welcome to your digital library experience</p>
-        </div>
-
-        {/* User Type Selection */}
-        <div className="mb-6">
-          <div className="flex rounded-lg bg-gray-100 p-1">
-            <button
-              type="button"
-              onClick={() => setUserType('reader')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
-                userType === 'reader'
-                  ? 'bg-white text-blue-700 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              Library Member
-            </button>
-            <button
-              type="button"
-              onClick={() => setUserType('staff')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
-                userType === 'staff'
-                  ? 'bg-white text-blue-700 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              Library Staff
-            </button>
-          </div>
         </div>
 
         {/* Login Form */}

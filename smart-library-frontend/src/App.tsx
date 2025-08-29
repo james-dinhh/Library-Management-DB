@@ -7,6 +7,7 @@ import UserProfile from "./components/UserProfile";
 import StaffDashboard from "./components/StaffDashboard";
 import EbooksApp from "./components/Ebook";
 import { User, Book, BorrowRecord, Review } from "./types";
+import { ToastProvider } from "./components/ui/toast";
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -28,7 +29,7 @@ function App() {
   // Fetch books from backend
   useEffect(() => {
   const API_BASE = "http://localhost:4001";
-  let intervalId: NodeJS.Timeout | null = null;
+  let intervalId: ReturnType<typeof setInterval> | null = null;
 
   const fetchBooks = async () => {
     try {
@@ -325,15 +326,17 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header
-        currentUser={currentUser}
-        onLogout={handleLogout}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
-      {renderContent()}
-    </div>
+    <ToastProvider>
+      <div className="min-h-screen bg-gray-50">
+        <Header
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+        {renderContent()}
+      </div>
+    </ToastProvider>
   );
 }
 
