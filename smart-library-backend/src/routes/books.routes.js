@@ -48,13 +48,13 @@ const router = Router();
  *         schema:
  *           type: string
  *           enum: [title, genre, publishedYear, publisher, copiesAvailable, copiesTotal, status, rating, ratingsCount]
- *         description: Sort field (default: title)
+ *         description: "Sort field (default: title)"
  *       - in: query
  *         name: sortDir
  *         schema:
  *           type: string
  *           enum: [asc, desc]
- *         description: Sort direction (default: asc)
+ *         description: "Sort direction (default: asc)"
  *     responses:
  *       200:
  *         description: List of books
