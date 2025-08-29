@@ -235,8 +235,6 @@ const BookForm: React.FC<BookFormProps> = ({ staffId, book, isOpen, onClose, onS
     }
   };
 
-  // Note: deletion of publishers/authors is disabled to avoid breaking references.
-
   if (!isOpen) return null;
 
   return (

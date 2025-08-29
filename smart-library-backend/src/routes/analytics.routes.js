@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { connectMongo, ReadingSession } from '../db/mongo.js';
+import { mysqlPool } from '../db/mysql.js';
 
 const router = Router();
 
@@ -16,6 +17,37 @@ function dateMatch(start, end) {
   if (startDate) match.startTime = { ...(match.startTime || {}), $gte: startDate };
   if (endDate) match.startTime = { ...(match.startTime || {}), $lte: endDate };
   return match;
+}
+
+// Helpers to enrich analytics with relational data from MySQL
+async function fetchUserNames(userIds = []) {
+  if (!Array.isArray(userIds) || userIds.length === 0) return {};
+  try {
+    const [rows] = await mysqlPool.query(
+      `SELECT user_id, name FROM users WHERE user_id IN (${userIds.map(() => '?').join(',')})`,
+      userIds
+    );
+    const map = {};
+    for (const r of rows) map[r.user_id] = r.name;
+    return map;
+  } catch (e) {
+    return {};
+  }
+}
+
+async function fetchBookTitles(bookIds = []) {
+  if (!Array.isArray(bookIds) || bookIds.length === 0) return {};
+  try {
+    const [rows] = await mysqlPool.query(
+      `SELECT book_id, title FROM books WHERE book_id IN (${bookIds.map(() => '?').join(',')})`,
+      bookIds
+    );
+    const map = {};
+    for (const r of rows) map[r.book_id] = r.title;
+    return map;
+  } catch (e) {
+    return {};
+  }
 }
 
 // GET /analytics/avg-session-time-per-user?start=&end=&limit=
@@ -57,8 +89,12 @@ router.get('/avg-session-time-per-user', async (req, res) => {
       { $limit: limit }
     ].filter(Boolean);
 
-    const docs = await ReadingSession.aggregate(pipeline);
-    res.json({ start, end, count: docs.length, results: docs });
+  const docs = await ReadingSession.aggregate(pipeline);
+  // Enrich with user names from MySQL
+  const userIds = [...new Set(docs.map(d => d.userId).filter(v => Number.isFinite(v)))];
+  const userMap = await fetchUserNames(userIds);
+  const enriched = docs.map(d => ({ ...d, userName: userMap[d.userId] || null }));
+  res.json({ start, end, count: docs.length, results: enriched });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -90,8 +126,12 @@ router.get('/most-highlighted-books', async (req, res) => {
       { $limit: limit }
     ].filter(Boolean);
 
-    const docs = await ReadingSession.aggregate(pipeline);
-    res.json({ start, end, count: docs.length, results: docs });
+  const docs = await ReadingSession.aggregate(pipeline);
+  // Enrich with book titles from MySQL
+  const bookIds = [...new Set(docs.map(d => d.bookId).filter(v => Number.isFinite(v)))];
+  const bookMap = await fetchBookTitles(bookIds);
+  const enriched = docs.map(d => ({ ...d, title: bookMap[d.bookId] || null }));
+  res.json({ start, end, count: docs.length, results: enriched });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -130,8 +170,12 @@ router.get('/top-books-by-reading-time', async (req, res) => {
       { $limit: limit }
     ].filter(Boolean);
 
-    const docs = await ReadingSession.aggregate(pipeline);
-    res.json({ start, end, count: docs.length, results: docs });
+  const docs = await ReadingSession.aggregate(pipeline);
+  // Enrich with book titles from MySQL
+  const bookIds = [...new Set(docs.map(d => d.bookId).filter(v => Number.isFinite(v)))];
+  const bookMap = await fetchBookTitles(bookIds);
+  const enriched = docs.map(d => ({ ...d, title: bookMap[d.bookId] || null }));
+  res.json({ start, end, count: docs.length, results: enriched });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

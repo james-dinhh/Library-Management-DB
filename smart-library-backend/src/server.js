@@ -24,8 +24,6 @@ import authorsRouter from './routes/authors.routes.js';
 import reportsRouter from './routes/reports.routes.js';
 //ebook routes
 import ebookRoutes from "./routes/ebook.routes.js";
-//user id
-import userRoutes from "./routes/users.routes.js";
 
 // Swagger (OpenAPI)
 import swaggerUi from 'swagger-ui-express';
@@ -100,6 +98,7 @@ app.use('/books', booksRouter);
 // Readers + Staff can borrow/return and write reviews
 app.use('/library', authenticate, authorizeRole('reader', 'staff'), libraryRouter);
 app.use('/reviews', authenticate, authorizeRole('reader', 'staff'), reviewsRouter);
+app.use("/ebooks", authenticate, authorizeRole('reader', 'staff'), ebookRoutes);
 
 // Staff-only analytics, admin, stats, management for publishers and authors
 app.use('/analytics', authenticate, authorizeRole('staff'), analyticsRouter);
@@ -108,10 +107,7 @@ app.use('/stats', authenticate, authorizeRole('staff'), statsRouter);
 app.use('/publishers', authenticate, authorizeRole('staff'), publishersRouter);
 app.use('/authors', authenticate, authorizeRole('staff'), authorsRouter);
 app.use('/reports', authenticate, authorizeRole('staff'), reportsRouter);
-//ebook
-app.use("/ebooks", ebookRoutes);
-//user id
-app.use("/", userRoutes);
+
 // Startup
 const port = process.env.PORT || 4001;
 

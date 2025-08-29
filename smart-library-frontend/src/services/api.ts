@@ -39,7 +39,6 @@ const getBooks = async (): Promise<Book[]> => {
   return res.data;
 };
 
-// New: server-side pagination/sorting-capable fetch
 type BooksQuery = {
   q?: string;
   genre?: string;
@@ -59,15 +58,6 @@ const getBooksPaged = async (params: BooksQuery): Promise<{ items: Book[]; total
 };
 
 // Books for Staff Dashboard: flattens authors array into a single author string
-const getBooksForDashboard = async (): Promise<any[]> => {
-  const res = await API.get('/books');
-  const raw = res.data || [];
-  return raw.map((r: any) => ({
-    ...r,
-    author: r.authors?.length ? r.authors.join(', ') : '',
-  }));
-};
-
 const getBooksForDashboardPaged = async (params: BooksQuery): Promise<{ items: any[]; total: number }> => {
   const res = await API.get('/books', { params });
   const totalHeader = (res.headers && (res.headers['x-total-count'] || res.headers['X-Total-Count'])) as string | undefined;
@@ -157,16 +147,67 @@ const analyticsTopBooksByReadingTime = async (limit = 10): Promise<any> => {
   return res.data;
 };
 
+// ---------- Library (borrowings) ----------
+const listUserBorrowings = async (userId: string | number): Promise<any[]> => {
+  const res = await API.get(`/library/user/${userId}/borrowings`);
+  return res.data;
+};
+
+const borrowLibrary = async (payload: { userId: number; bookId: number; days: number }): Promise<any> => {
+  const res = await API.post('/library/borrow', payload);
+  return res.data;
+};
+
+const returnLibrary = async (checkoutId: number): Promise<any> => {
+  const res = await API.post('/library/return', { checkoutId });
+  return res.data;
+};
+
+// ---------- eBooks (reader & staff protected) ----------
+type EbookListQuery = { page?: number; pageSize?: number };
+
+// Preferred: use the generic /books endpoint with status=active
+const listBooksForEbooksPaged = async (
+  params: EbookListQuery = { page: 1, pageSize: 12 }
+): Promise<{ items: Array<{ bookId: number; title: string; author: string; genre: string; publishedYear: number | null }>; total: number }> => {
+  const res = await API.get('/books', {
+    params: {
+      status: 'active',
+      page: params.page ?? 1,
+      pageSize: params.pageSize ?? 12,
+      sortBy: 'title',
+      sortDir: 'asc',
+    },
+  });
+  const totalHeader = (res.headers && (res.headers['x-total-count'] || res.headers['X-Total-Count'])) as string | undefined;
+  const total = totalHeader ? Number(totalHeader) : (Array.isArray(res.data) ? res.data.length : 0);
+  const items = (res.data || []).map((r: any) => ({
+    bookId: Number(r.id),
+    title: r.title,
+    author: r.authors?.length ? r.authors.join(', ') : '',
+    genre: r.genre,
+    publishedYear: r.publishedYear ?? null,
+  }));
+  return { items, total };
+};
+// (Removed legacy listEbooksPaged that called /ebooks/books)
+
+const createEbookSession = async (payload: any): Promise<any> => {
+  const res = await API.post('/ebooks/sessions', payload);
+  return res.data;
+};
+
+const listEbookSessions = async (userId: number): Promise<any[]> => {
+  const res = await API.get(`/ebooks/sessions/${userId}`);
+  return res.data;
+};
+
 // ---------- Misc (Mongo eBooks, user lookup) ----------
 const listMongoEbooks = async (): Promise<any[]> => {
   const res = await API.get('/ebooks/mongo-ebooks');
   return res.data;
 };
 
-const getUserById = async (id: number): Promise<any> => {
-  const res = await API.get(`/user/${id}`);
-  return res.data;
-};
 
 // ---------- Publishers API (staff) ----------
 const listPublishers = async (q?: string): Promise<any[]> => {
@@ -238,6 +279,11 @@ const getBookReviews = async (bookId: number): Promise<Review[]> => {
   return res.data;
 };
 
+const getUserReviews = async (userId: string | number): Promise<any[]> => {
+  const res = await API.get(`/reviews/user/${userId}`);
+  return res.data;
+};
+
 const submitBookReview = async (
   bookId: number,
   userId: number,
@@ -255,7 +301,6 @@ export default {
   getCurrentUser,
   getBooks,
   getBooksPaged,
-  getBooksForDashboard,
   getBooksForDashboardPaged,
   getBookById,
   borrowBook,
@@ -286,7 +331,15 @@ export default {
   analyticsTopBooksByReadingTime,
   // misc
   listMongoEbooks,
-  getUserById,
+  // ebooks
+  listBooksForEbooksPaged,
+  createEbookSession,
+  listEbookSessions,
+  // library
+  listUserBorrowings,
+  borrowLibrary,
+  returnLibrary,
   getBookReviews,
+  getUserReviews,
   submitBookReview,
 };

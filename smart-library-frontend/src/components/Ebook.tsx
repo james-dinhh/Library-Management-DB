@@ -1,4 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import type React from "react";
+import API from "../services/api";
+import { Calendar } from 'lucide-react';
+import { ConfirmDialog } from "./ui/dialogs";
 
 /** ============================
  *  Types
@@ -8,7 +12,7 @@ interface Ebook {
   title: string;
   author: string;
   genre: string;
-  publishedYear: number;
+  publishedYear: number | null;
 }
 
 interface SessionBook {
@@ -48,14 +52,14 @@ interface ReaderProps {
   book: Ebook;
   userId: number;
   onSessionEnd: () => void;
+  onCancel: () => void;
 }
 
 interface SessionsListProps {
   userId: number;
 }
 
-/** Centralize API base */
-const API_BASE = "http://localhost:4001";
+/** Centralize via API client */
 
 /** ============================
  *  Components
@@ -64,18 +68,35 @@ function EbookList({ onSelectBook }: EbookListProps) {
   const [ebooks, setEbooks] = useState<Ebook[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(12);
+  const [total, setTotal] = useState<number>(0);
 
   useEffect(() => {
-    // 🔄 Use MySQL-backed endpoint
-    fetch(`${API_BASE}/ebooks/books`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`Failed to load eBooks (${res.status})`);
-        return res.json();
-      })
-      .then(setEbooks)
-      .catch((e) => setErr(e.message))
-      .finally(() => setLoading(false));
-  }, []);
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      setErr(null);
+      try {
+  const { items, total } = await API.listBooksForEbooksPaged({ page, pageSize });
+        if (!cancelled) {
+          setEbooks(items);
+          setTotal(total);
+        }
+      } catch (e: any) {
+        if (!cancelled) {
+          // Axios error normalization
+          const status = e?.response?.status;
+          if (status === 401) setErr('Unauthorized. Please log in to view eBooks.');
+          else setErr(e?.message || 'Failed to load eBooks');
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [page, pageSize]);
 
   if (loading) return <div className="text-center py-8">Loading eBooks…</div>;
   if (err) return <div className="text-center py-8 text-red-600">{err}</div>;
@@ -90,26 +111,86 @@ function EbookList({ onSelectBook }: EbookListProps) {
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">eBooks</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <h1 className="text-2xl md:text-3xl font-bold">eBooks</h1>
+      {/* Pagination controls */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-sm text-gray-600">
+          {(() => {
+            const start = total === 0 ? 0 : (page - 1) * pageSize + 1;
+            const end = Math.min(total, page * pageSize);
+            return `Showing ${start}-${end} of ${total}`;
+          })()}
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-600">Rows per page:</label>
+          <select
+            className="border border-gray-300 rounded px-2 py-1 text-sm"
+            value={pageSize}
+            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+          >
+            <option value={6}>6</option>
+            <option value={12}>12</option>
+            <option value={24}>24</option>
+          </select>
+          <div className="flex items-center gap-1 ml-4">
+            <button
+              className="px-2 py-1 border rounded disabled:opacity-50"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page <= 1}
+            >
+              Prev
+            </button>
+            <span className="mx-2 text-sm text-gray-700">Page {page} of {Math.max(1, Math.ceil(total / pageSize) || 1)}</span>
+            <button
+              className="px-2 py-1 border rounded disabled:opacity-50"
+              onClick={() => setPage(p => (p * pageSize < total ? p + 1 : p))}
+              disabled={page * pageSize >= total}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {ebooks.map((book) => (
           <div
             key={book.bookId}
-            className="bg-white rounded-lg shadow p-4 flex flex-col justify-between"
+            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden group h-full flex flex-col"
           >
-            <div>
-              <div className="font-semibold text-lg">{book.title}</div>
-              <div className="text-gray-600 mb-2">by {book.author}</div>
-              <div className="text-sm text-gray-500">
-                {book.genre}, {book.publishedYear}
+            <div className="relative">
+              <img
+                src="/book.jpg"
+                alt={book.title}
+                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div className="absolute bottom-3 left-3 px-3 py-1 rounded-full text-xs font-medium text-white bg-indigo-600">
+                eBook
               </div>
             </div>
-            <button
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-              onClick={() => onSelectBook(book)}
-            >
-              Read
-            </button>
+
+            <div className="p-5 flex flex-col h-full">
+              <h3 className="font-bold text-lg text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-700 transition-colors">
+                {book.title}
+              </h3>
+              <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
+
+              <div className="flex items-center justify-between mb-4">
+                <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                  {book.genre}
+                </span>
+                <span className="text-xs text-gray-500 flex items-center">
+                  <Calendar className="h-3 w-3 mr-1" />
+                  {book.publishedYear ?? 'Unknown'}
+                </span>
+              </div>
+
+              <button
+                className="mt-auto w-full px-3 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors duration-200 text-sm font-medium"
+                onClick={() => onSelectBook(book)}
+              >
+                Read
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -117,28 +198,63 @@ function EbookList({ onSelectBook }: EbookListProps) {
   );
 }
 
-function Reader({ book, userId, onSessionEnd }: ReaderProps) {
+function Reader({ book, userId, onSessionEnd, onCancel }: ReaderProps) {
   const [startTime] = useState<Date>(new Date());
   const [pagesRead, setPagesRead] = useState<number[]>([]);
   const [highlights, setHighlights] = useState<{ page: number; text: string }[]>(
     []
   );
+  const [currentPage, setCurrentPage] = useState<number>(0);
   const [device] = useState<string>(window.navigator.userAgent);
   const [highlightText, setHighlightText] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [elapsedSec, setElapsedSec] = useState<number>(0);
+  const [confirmEnd, setConfirmEnd] = useState<boolean>(false);
+  const [confirmDiscard, setConfirmDiscard] = useState<boolean>(false);
+
+  // Tick session timer
+  useEffect(() => {
+    const id = setInterval(() => {
+      setElapsedSec(Math.max(0, Math.floor((Date.now() - startTime.getTime()) / 1000)));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [startTime]);
 
   function readPage() {
-    setPagesRead((prev) => [...prev, prev.length + 1]); // ✅ fixed
+    // Advance the current page, and record it in pagesRead for stats
+    setCurrentPage((prev) => {
+      const next = prev + 1;
+      setPagesRead((p) => [...p, next]);
+      return next;
+    });
   }
 
   function addHighlight() {
     const text = highlightText.trim();
     if (!text) return;
-    // Tie highlight to the most recently "read" page index
-    const page = Math.max(1, pagesRead.length);
-    setHighlights((prev) => [...prev, { page, text }]); // ✅ fixed
+    // Attach to the current page (starts at 0 before any reading)
+    const page = currentPage;
+    setHighlights((prev) => [...prev, { page, text }]);
     setHighlightText("");
+  }
+
+  function removeHighlight(idx: number) {
+    setHighlights(prev => prev.filter((_, i) => i !== idx));
+  }
+
+  function onHighlightKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      addHighlight();
+    }
+  }
+
+  function requestBack() {
+    // If there's any progress, confirm discard; else go back immediately
+    const hasProgress = pagesRead.length > 0 || highlights.length > 0 || elapsedSec >= 5;
+    if (hasProgress) setConfirmDiscard(true);
+    else onCancel();
   }
 
   async function endSession() {
@@ -151,85 +267,146 @@ function Reader({ book, userId, onSessionEnd }: ReaderProps) {
         startTime,
         endTime: new Date(),
         device,
-        // ✅ send both forms for compatibility:
-        pages_read: pagesRead.length, // backend-friendly numeric
-        pagesRead, // legacy array
+        pages_read: pagesRead.length, 
+        pagesRead, 
         highlights,
       };
 
-      const res = await fetch(`${API_BASE}/ebooks/sessions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Failed to save session (${res.status}): ${text}`);
-      }
+  await API.createEbookSession(payload);
 
       onSessionEnd();
     } catch (e: any) {
-      setErr(e.message || String(e));
+      const status = e?.response?.status;
+      if (status === 401) setErr('Unauthorized. Please log in again.');
+      else setErr(e.message || String(e));
     } finally {
       setSubmitting(false);
     }
   }
 
+  const mins = Math.floor(elapsedSec / 60);
+  const secs = elapsedSec % 60;
+
   return (
-    <div className="max-w-xl mx-auto bg-white rounded-lg shadow p-6 mt-6">
-      <h2 className="text-xl font-bold mb-2">Reading: {book.title}</h2>
-      <div className="mb-4 text-gray-600">by {book.author}</div>
-
-      <div className="flex gap-2 mb-4">
-        <button
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition disabled:opacity-60"
-          onClick={readPage}
-          disabled={submitting}
-        >
-          Read Next Page
-        </button>
-
-        <input
-          type="text"
-          value={highlightText}
-          onChange={(e) => setHighlightText(e.target.value)}
-          placeholder="Highlight text"
-          className="border rounded px-2 py-1 flex-1"
-          disabled={submitting}
-        />
-        <button
-          className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition disabled:opacity-60"
-          onClick={addHighlight}
-          disabled={submitting}
-        >
-          Add Highlight
-        </button>
+    <div className="max-w-3xl mx-auto grid gap-6 mt-6">
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-bold mb-1">Reading: {book.title}</h2>
+        <div className="mb-4 text-gray-600">by {book.author}</div>
+        <div className="flex flex-wrap items-center gap-4 mb-4">
+          <span className="inline-flex items-center text-sm px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+            Time: <span className="ml-1 font-semibold">{mins}:{secs.toString().padStart(2,'0')}</span>
+          </span>
+          <span className="inline-flex items-center text-sm px-3 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">
+            Current Page: <span className="ml-1 font-semibold">{currentPage}</span>
+          </span>
+          <span className="inline-flex items-center text-sm px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+            Highlights: <span className="ml-1 font-semibold">{highlights.length}</span>
+          </span>
+        </div>
+        <div className="flex flex-col md:flex-row gap-3">
+          <button
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition disabled:opacity-60"
+            onClick={requestBack}
+            disabled={submitting}
+          >
+            Back
+          </button>
+          <button
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition disabled:opacity-60"
+            onClick={readPage}
+            disabled={submitting}
+          >
+            Read Next Page
+          </button>
+          <div className="flex-1 flex gap-2">
+            <input
+              type="text"
+              value={highlightText}
+              onChange={(e) => setHighlightText(e.target.value)}
+              onKeyDown={onHighlightKeyDown}
+              maxLength={200}
+              placeholder="Add a highlight (press Enter to add)"
+              className="border rounded px-3 py-2 flex-1"
+              disabled={submitting}
+            />
+            <button
+              className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition disabled:opacity-60"
+              onClick={addHighlight}
+              disabled={submitting || !highlightText.trim()}
+            >
+              Add Highlight
+            </button>
+          </div>
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-60"
+            onClick={() => setConfirmEnd(true)}
+            disabled={submitting}
+          >
+            End Session
+          </button>
+        </div>
+        {err && <div className="text-red-600 mt-3">{err}</div>}
       </div>
 
-      <button
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition mb-4 disabled:opacity-60"
-        onClick={endSession}
-        disabled={submitting}
-      >
-        {submitting ? "Saving..." : "End Session"}
-      </button>
-
-      {err && <div className="text-red-600 mb-2">{err}</div>}
-
-      <div className="mb-2">
-        Pages Read: <span className="font-semibold">{pagesRead.length}</span>
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-semibold">Highlights</h3>
+          {highlights.length > 0 && (
+            <span className="text-sm text-gray-500">{highlights.length} total</span>
+          )}
+        </div>
+        {highlights.length === 0 ? (
+          <div className="text-gray-500">No highlights yet. Add one above.</div>
+        ) : (
+          <ul className="divide-y">
+            {highlights.map((h, i) => (
+              <li key={i} className="py-2 flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-sm text-gray-500">Page {h.page}</div>
+                  <div>{h.text}</div>
+                </div>
+                <button
+                  className="text-sm text-red-600 hover:text-red-700"
+                  onClick={() => removeHighlight(i)}
+                  disabled={submitting}
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
-      <div>
-        <div className="font-semibold mb-1">Highlights:</div>
-        <ul className="list-disc pl-6">
-          {highlights.map((h, i) => (
-            <li key={i}>
-              Page {h.page}: {h.text}
-            </li>
-          ))}
-        </ul>
-      </div>
+
+      <ConfirmDialog
+        open={confirmEnd}
+        title="End Reading Session?"
+        message={
+          <div className="text-sm text-gray-700">
+            <div className="mb-1"><strong>Book:</strong> {book.title}</div>
+            <div className="mb-1"><strong>Duration:</strong> {mins} min {secs}s</div>
+            <div className="mb-1"><strong>Pages read:</strong> {pagesRead.length} (last page {currentPage})</div>
+            <div><strong>Highlights:</strong> {highlights.length}</div>
+          </div>
+        }
+        confirmText="Save & End"
+        onCancel={() => setConfirmEnd(false)}
+        onConfirm={() => { setConfirmEnd(false); endSession(); }}
+      />
+
+      <ConfirmDialog
+        open={confirmDiscard}
+        title="Discard Session?"
+        message={
+          <div className="text-sm text-gray-700">
+            You have unsaved progress. If you go back now, this session will not be saved.
+          </div>
+        }
+        confirmText="Discard"
+        tone="danger"
+        onCancel={() => setConfirmDiscard(false)}
+        onConfirm={() => { setConfirmDiscard(false); onCancel(); }}
+      />
     </div>
   );
 }
@@ -238,6 +415,7 @@ function SessionsList({ userId }: SessionsListProps) {
   const [sessions, setSessions] = useState<ReadingSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -246,12 +424,14 @@ function SessionsList({ userId }: SessionsListProps) {
       setLoading(true);
       setErr(null);
       try {
-        const res = await fetch(`${API_BASE}/ebooks/sessions/${userId}`);
-        if (!res.ok) throw new Error(`sessions ${res.status}`);
-        const sessionsJson = await res.json();
+        const sessionsJson = await API.listEbookSessions(userId);
         if (!cancelled) setSessions(sessionsJson);
       } catch (e: any) {
-        if (!cancelled) setErr(e.message || String(e));
+        if (!cancelled) {
+          const status = e?.response?.status;
+          if (status === 401) setErr('Unauthorized. Please log in to view sessions.');
+          else setErr(e.message || String(e));
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -284,14 +464,13 @@ function SessionsList({ userId }: SessionsListProps) {
   if (!sessions.length)
     return (
       <div className="text-gray-600 mt-6">
-        No sessions yet for user {userId}. Try reading a book above, or ensure
-        your sample document’s <code>userId</code> matches this value.
+  You haven’t logged any reading sessions yet. Pick a book above to start your first session—your progress will appear here.
       </div>
     );
 
   return (
     <div className="mt-8">
-      <h2 className="text-xl font-bold mb-4">Your Reading Sessions</h2>
+      <h2 className="text-2xl md:text-3xl font-bold">Your Reading Sessions</h2>
       <ul className="space-y-2">
         {sessions.map((s) => {
           const key =
@@ -299,6 +478,12 @@ function SessionsList({ userId }: SessionsListProps) {
             `${String(s.startTime ?? "")}:${String(s.endTime ?? "")}:${s.bookId}`;
           const start = s.startTime ? new Date(s.startTime) : null;
           const end = s.endTime ? new Date(s.endTime) : null;
+          const highlightsArray = Array.isArray(s.highlights) ? s.highlights : [];
+          const isExpanded = expanded[key] ?? false;
+          const previewCount = 3;
+          const shownHighlights = isExpanded
+            ? highlightsArray
+            : highlightsArray.slice(0, previewCount);
 
           return (
             <li key={key} className="bg-gray-50 rounded p-3 shadow flex flex-col">
@@ -311,8 +496,32 @@ function SessionsList({ userId }: SessionsListProps) {
               </div>
               <div className="text-sm mt-1">
                 Pages: {sessionPagesCount(s)}, Highlights:{" "}
-                {Array.isArray(s.highlights) ? s.highlights.length : 0}
+                {highlightsArray.length}
               </div>
+              {highlightsArray.length > 0 && (
+                <div className="mt-2">
+                  <div className="text-sm font-semibold mb-1">Highlights</div>
+                  <ul className="list-disc pl-6">
+                    {shownHighlights.map((h, i) => (
+                      <li key={i}>
+                        Page {h.page}: {h.text}
+                      </li>
+                    ))}
+                  </ul>
+                  {highlightsArray.length > previewCount && (
+                    <button
+                      className="mt-2 text-sm text-blue-600 hover:text-blue-700 self-start"
+                      onClick={() =>
+                        setExpanded((prev) => ({ ...prev, [key]: !isExpanded }))
+                      }
+                    >
+                      {isExpanded
+                        ? "Show less"
+                        : `Show all ${highlightsArray.length}`}
+                    </button>
+                  )}
+                </div>
+              )}
             </li>
           );
         })}
@@ -323,6 +532,7 @@ function SessionsList({ userId }: SessionsListProps) {
 
 export default function EbooksApp({ userId }: { userId: number }) {
   const [selectedBook, setSelectedBook] = useState<Ebook | null>(null);
+  const [activeTab, setActiveTab] = useState<'ebooks' | 'sessions'>('ebooks');
 
   function handleSessionEnd() {
     setSelectedBook(null);
@@ -330,14 +540,46 @@ export default function EbooksApp({ userId }: { userId: number }) {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6 text-blue-700">eBooks App</h1>
-      {!selectedBook ? (
-        <>
+      <div className="mb-4">
+        <div className="border-b border-gray-200 mt-4">
+          <nav className="flex space-x-8">
+            <button
+              onClick={() => setActiveTab('ebooks')}
+              className={`py-3 px-2 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                activeTab === 'ebooks'
+                  ? 'border-blue-700 text-blue-700'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              eBooks
+            </button>
+            <button
+              onClick={() => setActiveTab('sessions')}
+              className={`py-3 px-2 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                activeTab === 'sessions'
+                  ? 'border-blue-700 text-blue-700'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Reading Sessions
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      {activeTab === 'ebooks' ? (
+        selectedBook ? (
+          <Reader
+            book={selectedBook}
+            userId={userId}
+            onSessionEnd={handleSessionEnd}
+            onCancel={() => setSelectedBook(null)}
+          />
+        ) : (
           <EbookList onSelectBook={setSelectedBook} />
-          <SessionsList userId={userId} />
-        </>
+        )
       ) : (
-        <Reader book={selectedBook} userId={userId} onSessionEnd={handleSessionEnd} />
+        <SessionsList userId={userId} />
       )}
     </div>
   );

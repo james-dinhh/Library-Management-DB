@@ -51,8 +51,6 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   // Add state for MongoDB eBooks
   const [mongoBooks, setMongoBooks] = useState<any[]>([]);
 
-  // Add state for user names
-  const [userNames, setUserNames] = useState<{[id: number]: string}>({});
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch books (server-side pagination/sorting + server filters)
@@ -87,22 +85,6 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   useEffect(() => {
   API.listMongoEbooks().then(setMongoBooks);
   }, []);
-
-  // Fetch user names when analytics data changes
-  useEffect(() => {
-    async function loadUserNames() {
-      const ids = averageSessionTime.map(u => u.userId);
-      const names: {[id: number]: string} = {};
-      for (const id of ids) {
-        try {
-          const user = await API.getUserById(id);
-          names[id] = user.name;
-        } catch {}
-      }
-      setUserNames(names);
-    }
-    if (averageSessionTime.length) loadUserNames();
-  }, [averageSessionTime]);
 
   // Close the action menu on outside click using a ref to the open menu container
   useEffect(() => {
@@ -261,7 +243,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   const handleGenerateAverageSessionTime = async () => {
     try {
   const data = await API.analyticsAvgSessionTime();
-      setAverageSessionTime(data.results); // 👈 use .results
+      setAverageSessionTime(data.results);
     } catch (err) {
       // Error handling could be implemented by showing error to user
     }
@@ -290,6 +272,17 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     const book = mongoBooks.find(b => b.bookId === bookId);
     return book ? `${book.title} by ${book.author}` : `Book ${bookId}`;
   }
+
+  // Format average session time adaptively in minutes or hours per session
+  const formatAvgSession = (minutes: number) => {
+    const m = Number(minutes);
+    if (!Number.isFinite(m) || m <= 0) return '0 min/session';
+    if (m >= 60) {
+      const hours = m / 60;
+      return `${hours.toFixed(2)} hr/session`;
+    }
+    return `${m.toFixed(2)} min/session`;
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -627,7 +620,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
               <ul className="list-decimal pl-5">
                 {averageSessionTime.map((u, i) => (
                   <li key={i}>
-                    {userNames[u.userId] || `User ${u.userId}`} — {u.avgSessionMinutes} min/session ({u.sessions} sessions)
+                    {(u.userName || `User ${u.userId}`)} — {formatAvgSession(u.avgSessionMinutes)} ({u.sessions} sessions)
                   </li>
                 ))}
               </ul>
@@ -645,7 +638,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
               <ul className="list-decimal pl-5">
                 {mostHighlighted.map((b, i) => (
                   <li key={i}>
-                    {getMongoBookTitle(b.bookId)} — {b.totalHighlights} highlights
+                    {(b.title || getMongoBookTitle(b.bookId))} — {b.totalHighlights} highlights
                   </li>
                 ))}
               </ul>
@@ -664,7 +657,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
               <ul className="list-decimal pl-5">
                 {topReadingTime.map((b, i) => (
                   <li key={i}>
-                    {getMongoBookTitle(b.bookId)} — {b.totalReadingHours} hours read ({b.sessions} sessions)
+                    {(b.title || getMongoBookTitle(b.bookId))} — {b.totalReadingHours} hours read ({b.sessions} sessions)
                   </li>
                 ))}
               </ul>

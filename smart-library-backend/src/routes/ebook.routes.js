@@ -33,49 +33,6 @@ router.get("/mongo-ebooks", async (req, res) => {
   }
 });
 
-router.get("/books", async (req, res) => {
-  try {
-    // Pull basic book info
-    const [books] = await mysqlPool.query(
-      `SELECT b.book_id, b.title, b.genre, b.published_year
-       FROM books b
-       WHERE b.status = 'active'
-       ORDER BY b.title ASC`
-    );
-
-    // Pull authors in one query and map
-    const ids = books.map(b => b.book_id);
-    let authorMap = new Map();
-    if (ids.length) {
-      const placeholders = ids.map(() => "?").join(",");
-      const [rows] = await mysqlPool.query(
-        `SELECT ba.book_id, a.name
-         FROM book_authors ba
-         JOIN authors a ON a.author_id = ba.author_id
-         WHERE ba.book_id IN (${placeholders})`,
-        ids
-      );
-      // group by book_id -> "Name1, Name2"
-      for (const r of rows) {
-        const k = Number(r.book_id);
-        authorMap.set(k, authorMap.has(k) ? `${authorMap.get(k)}, ${r.name}` : r.name);
-      }
-    }
-
-    const out = books.map(b => ({
-      bookId: Number(b.book_id),
-      title: b.title,
-      author: authorMap.get(Number(b.book_id)) || "(Unknown author)",
-      genre: b.genre || "",
-      publishedYear: b.published_year || null,
-    }));
-
-    res.json(out);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch books" });
-  }
-});
-
 /**
  * POST /ebooks/sessions
  * Insert a reading session in Mongo, but first validate userId/bookId in MySQL.
