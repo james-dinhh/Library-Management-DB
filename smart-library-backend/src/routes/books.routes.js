@@ -120,11 +120,11 @@ router.get('/', async (req, res) => {
   // One-shot query; authors aggregated as JSON array
   const sqlBase = `
     SELECT
-      b.book_id                AS id,
+      b.book_id AS id,
       b.title,
       b.genre,
       b.published_year,
-      p.name                   AS publisher,
+      p.name AS publisher,
       b.cover_image_url,
       b.copies_total,
       b.copies_available,

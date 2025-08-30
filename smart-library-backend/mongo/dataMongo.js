@@ -18,7 +18,6 @@ const SHOULD_RESET =
   process.argv.includes("--reset") ||
   String(process.env.MONGO_RESET).toLowerCase() === "true";
 
-// Optional sample sessions (you can keep/remove)
 const sampleReadingSessions = [
   {
     userId: 1, 
@@ -96,7 +95,7 @@ async function ensureIndexes(db) {
 
 async function seed(db) {
   const sessionsCol = db.collection("reading_sessions");
-  const ebooksCol = db.collection("ebooks");
+  // const ebooksCol = db.collection("ebooks");
 
   if (SHOULD_RESET) {
     console.warn("[dataMongo] --reset given: clearing old Mongo collections…");

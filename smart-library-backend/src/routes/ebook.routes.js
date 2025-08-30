@@ -22,48 +22,6 @@ async function withMongo(fn) {
 
 /**
  * @openapi
- * /ebooks/mongo-ebooks:
- *   get:
- *     tags:
- *       - eBooks
- *     summary: List mirrored eBooks from MongoDB
- *     description: Returns eBook documents mirrored in the Mongo `ebooks` collection.
- *     responses:
- *       200:
- *         description: Array of eBook documents
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *             examples:
- *               sample:
- *                 value:
- *                   - _id: "64f0a1bc2c7d9fa5b12c34de"
- *                     bookId: 2001
- *                     title: The Great Adventure
- *                     author: Jane Doe
- *                     format: epub
- *                   - _id: "64f0a1bc2c7d9fa5b12c34df"
- *                     bookId: 2002
- *                     title: Learning TypeScript
- *                     author: Alex Smith
- *                     format: pdf
- *       500:
- *         description: Failed to fetch eBooks
- */
-router.get("/mongo-ebooks", async (req, res) => {
-  try {
-    const ebooks = await withMongo(db => db.collection("ebooks").find({}).toArray());
-    res.json(ebooks);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch eBooks" });
-  }
-});
-
-/**
- * @openapi
  * /ebooks/sessions:
  *   post:
  *     tags:

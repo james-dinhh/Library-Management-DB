@@ -75,7 +75,9 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
         setBooks(sortedItems);
         setTotal(total);
       } catch (err) {
-        // optional: toast.show('Failed to load books', 'error');
+    console.error('Failed to load books', err);
+    const msg = (err as any)?.response?.data?.error || (err as any)?.message || 'Failed to load books';
+    toast.show(msg, 'error');
       }
     };
     fetchPage();
@@ -217,7 +219,9 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   const data = await API.reportsMostBorrowed(dateRange.start, dateRange.end);
       setMostBorrowed(data);
     } catch (err) {
-      // Error handling could be implemented by showing error to user
+    console.error('Failed to generate Most Borrowed report', err);
+    const msg = (err as any)?.response?.data?.error || (err as any)?.message || 'Failed to generate Most Borrowed report';
+    toast.show(msg, 'error');
     }
   };
 
@@ -226,7 +230,9 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   const data = await API.reportsTopReaders();
       setTopReaders(data);
     } catch (err) {
-      // Error handling could be implemented by showing error to user
+    console.error('Failed to generate Top Readers report', err);
+    const msg = (err as any)?.response?.data?.error || (err as any)?.message || 'Failed to generate Top Readers report';
+    toast.show(msg, 'error');
     }
   };
 
@@ -235,7 +241,9 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   const data = await API.reportsLowAvailability();
       setLowAvailability(data);
     } catch (err) {
-      // Error handling could be implemented by showing error to user
+    console.error('Failed to generate Low Availability report', err);
+    const msg = (err as any)?.response?.data?.error || (err as any)?.message || 'Failed to generate Low Availability report';
+    toast.show(msg, 'error');
     }
   };
 
@@ -245,7 +253,9 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   const data = await API.analyticsAvgSessionTime();
       setAverageSessionTime(data.results);
     } catch (err) {
-      // Error handling could be implemented by showing error to user
+    console.error('Failed to load Average Session Time analytics', err);
+    const msg = (err as any)?.response?.data?.error || (err as any)?.message || 'Failed to load Average Session Time';
+    toast.show(msg, 'error');
     }
   };
 
@@ -255,7 +265,9 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       // backend returns { start, end, count, results: [...] }
       setMostHighlighted(data.results);
     } catch (err) {
-      // Error handling could be implemented by showing error to user
+    console.error('Failed to load Most Highlighted Books analytics', err);
+    const msg = (err as any)?.response?.data?.error || (err as any)?.message || 'Failed to load Most Highlighted Books';
+    toast.show(msg, 'error');
     }
   };
 
@@ -264,7 +276,9 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   const data = await API.analyticsTopBooksByReadingTime();
       setTopReadingTime(data.results);
     } catch (err) {
-      // Error handling could be implemented by showing error to user
+    console.error('Failed to load Top Books by Reading Time analytics', err);
+    const msg = (err as any)?.response?.data?.error || (err as any)?.message || 'Failed to load Top Books by Reading Time';
+    toast.show(msg, 'error');
     }
   };
 

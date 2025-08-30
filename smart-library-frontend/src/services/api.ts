@@ -1,4 +1,3 @@
-// src/services/api.ts
 import axios from 'axios';
 import { Book, User, Review } from '../types';
 
@@ -147,7 +146,7 @@ const analyticsTopBooksByReadingTime = async (limit = 10): Promise<any> => {
   return res.data;
 };
 
-// ---------- Library (borrowings) ----------
+// ---------- Library ----------
 const listUserBorrowings = async (userId: string | number): Promise<any[]> => {
   const res = await API.get(`/library/user/${userId}/borrowings`);
   return res.data;
