@@ -11,12 +11,19 @@ if (!uri) {
   process.exit(0);
 }
 
-const SHOULD_SEED =
-  process.argv.includes("--seed") ||
-  String(process.env.SEED_MONGO).toLowerCase() === "true";
-const SHOULD_RESET =
-  process.argv.includes("--reset") ||
-  String(process.env.MONGO_RESET).toLowerCase() === "true";
+// ---- CLI flags ----
+const argv = process.argv.slice(2);
+const FLAGS = {
+  help: argv.includes("--help") || argv.includes("-h"),
+  seed: argv.includes("--seed") || /^true$/i.test(String(process.env.MONGO_SEED || process.env.SEED_MONGO || "")),
+  reset: argv.includes("--reset") || /^true$/i.test(String(process.env.MONGO_RESET || "")),
+  init: argv.includes("--init") || /^true$/i.test(String(process.env.MONGO_INIT || "")),
+};
+
+if (FLAGS.init) {
+  FLAGS.reset = true;
+  FLAGS.seed = true;
+}
 
 const sampleReadingSessions = [
   {
@@ -88,6 +95,11 @@ async function withClient(fn) {
   }
 }
 
+async function collectionExists(db, name) {
+  const matches = await db.listCollections({ name }).toArray();
+  return matches.length > 0;
+}
+
 async function ensureIndexes(db) {
   await db.collection("reading_sessions").createIndex({ userId: 1, startTime: -1 });
   await db.collection("reading_sessions").createIndex({ bookId: 1, startTime: -1 });
@@ -95,13 +107,7 @@ async function ensureIndexes(db) {
 
 async function seed(db) {
   const sessionsCol = db.collection("reading_sessions");
-  // const ebooksCol = db.collection("ebooks");
-
-  if (SHOULD_RESET) {
-    console.warn("[dataMongo] --reset given: clearing old Mongo collections…");
-    await sessionsCol.deleteMany({});
-    await ebooksCol.deleteMany({});
-  }
+  // Optional: const ebooksCol = db.collection("ebooks");
 
   if (sampleReadingSessions.length) {
     const result = await sessionsCol.insertMany(sampleReadingSessions, { ordered: false });
@@ -111,16 +117,56 @@ async function seed(db) {
   }
 }
 
+async function resetCollections(db) {
+  console.warn("[dataMongo] Reset: clearing collections if they exist…");
+  const sessionsCol = db.collection("reading_sessions");
+  try {
+    await sessionsCol.deleteMany({});
+    console.log("[dataMongo] Cleared reading_sessions");
+  } catch (e) {
+    console.warn("[dataMongo] reading_sessions reset skipped:", e.message);
+  }
+  // Reset ebooks only if the collection exists
+  try {
+    if (await collectionExists(db, "ebooks")) {
+      await db.collection("ebooks").deleteMany({});
+      console.log("[dataMongo] Cleared ebooks");
+    }
+  } catch (e) {
+    console.warn("[dataMongo] ebooks reset skipped:", e.message);
+  }
+}
+
+function printHelp() {
+  console.log(`\nMongo setup script\n\nUsage:\n  node mongo/dataMongo.js [--init] [--reset] [--seed] [--help]\n\nFlags:\n  --init   Reset and then seed sample data (equivalent to --reset --seed)\n  --reset  Clear reading_sessions (and ebooks if present)\n  --seed   Insert sample reading sessions\n  --help   Show this help\n\nDefaults (no flags):\n  - Ensure indexes\n  - If reading_sessions is empty, auto-seed sample sessions; otherwise skip seeding\n`);
+}
+
 async function main() {
   await withClient(async (db) => {
     await ensureIndexes(db);
-
-    if (!SHOULD_SEED) {
-      console.log("[dataMongo] Seed flags not set; doing nothing. (Pass --seed to insert sample data.)");
+    
+    if (FLAGS.help) {
+      printHelp();
       return;
     }
 
-    await seed(db);
+    if (FLAGS.reset) {
+      await resetCollections(db);
+    }
+
+    if (FLAGS.seed) {
+      await seed(db);
+      return;
+    }
+
+    // No flags: auto-seed only if collection is empty
+    const count = await db.collection("reading_sessions").estimatedDocumentCount();
+    if (count === 0) {
+      console.log("[dataMongo] reading_sessions is empty — seeding sample data by default.");
+      await seed(db);
+    } else {
+      console.log(`[dataMongo] reading_sessions has ${count} documents — skipping seed.`);
+    }
   });
 }
 
