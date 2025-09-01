@@ -66,8 +66,11 @@ const BookSearch: React.FC<BookSearchProps> = ({ books, currentUser, onBorrow })
 
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'title':
-          return String(a.title ?? '').localeCompare(String(b.title ?? ''));
+        case 'title': {
+          // Natural sort for titles like "Book 2", "Book 10", etc.
+          const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+          return collator.compare(String(a.title ?? ''), String(b.title ?? ''));
+        }
         case 'author':
           return authorTextOf(a).localeCompare(authorTextOf(b));
         case 'rating':

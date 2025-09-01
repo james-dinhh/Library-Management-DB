@@ -112,10 +112,16 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     })
     .sort((a, b) => {
       switch (sortBy) {
-        case 'title': return a.title.localeCompare(b.title);
-        case 'author': return (a.author || '').localeCompare(b.author || '');
-        case 'availability': return (b.copiesAvailable || 0) - (a.copiesAvailable || 0);
-        default: return 0;
+        case 'title': {
+          const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+          return collator.compare(a.title, b.title);
+        }
+        case 'author':
+          return (a.author || '').localeCompare(b.author || '');
+        case 'availability':
+          return (b.copiesAvailable || 0) - (a.copiesAvailable || 0);
+        default:
+          return 0;
       }
     });
 

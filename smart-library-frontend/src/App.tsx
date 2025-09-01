@@ -29,42 +29,35 @@ function App() {
   const [userReviews, setUserReviews] = useState<Review[]>([]);
 
   // Fetch books from backend (now via API client) and include reviews
-  useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval> | null = null;
-
-    const fetchBooks = async () => {
-      try {
-        const { items } = await API.getBooksPaged({});
-        const booksWithReviews = await Promise.all(
-          (items || []).map(async (b: any) => {
-            try {
-              const reviews = await API.getBookReviews(Number(b.id));
-              const author = Array.isArray((b as any).authors)
-                ? (b as any).authors.join(', ')
-                : (b as any).author ?? '';
-              return { ...b, author, id: String(b.id), reviews } as Book;
-            } catch {
-              const author = Array.isArray((b as any).authors)
-                ? (b as any).authors.join(', ')
-                : (b as any).author ?? '';
-              return { ...b, author, id: String(b.id), reviews: [] } as Book;
-            }
-          })
-        );
-        setBooks(booksWithReviews);
-      } catch (err) {
-        console.error("Failed to fetch books:", err);
-      }
-    };
-
-    if (activeTab === "search") {
-      fetchBooks(); // Initial fetch
-      intervalId = setInterval(fetchBooks, 2000);
+  const fetchBooks = async () => {
+    try {
+      const { items } = await API.getBooksPaged({});
+      const booksWithReviews = await Promise.all(
+        (items || []).map(async (b: any) => {
+          try {
+            const reviews = await API.getBookReviews(Number(b.id));
+            const author = Array.isArray((b as any).authors)
+              ? (b as any).authors.join(', ')
+              : (b as any).author ?? '';
+            return { ...b, author, id: String(b.id), reviews } as Book;
+          } catch {
+            const author = Array.isArray((b as any).authors)
+              ? (b as any).authors.join(', ')
+              : (b as any).author ?? '';
+            return { ...b, author, id: String(b.id), reviews: [] } as Book;
+          }
+        })
+      );
+      setBooks(booksWithReviews);
+    } catch (err) {
+      console.error("Failed to fetch books:", err);
     }
+  };
 
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
+  useEffect(() => {
+    if (activeTab === "search") {
+      fetchBooks();
+    }
   }, [activeTab]);
 
 
@@ -186,11 +179,13 @@ function App() {
             : b
         )
       );
-  // Show success toast at top-center
-  show(`Borrowed “${book.title}” successfully. Due in 14 days.`, 'success');
+      // Refetch books to update availability
+      await fetchBooks();
+      // Show success toast at top-center
+      show(`Borrowed “${book.title}” successfully. Due in 14 days.`, 'success');
     } catch (err) {
-  console.error(" Error borrowing book:", err);
-  show('Could not borrow the book. Please try again.', 'error');
+      console.error(" Error borrowing book:", err);
+      show('Could not borrow the book. Please try again.', 'error');
     }
   };
 
@@ -216,6 +211,8 @@ function App() {
             ? { ...book, copiesAvailable: book.copiesAvailable + 1 }
             : book
         ));
+        // Refetch books to update availability
+        await fetchBooks();
         // Use isLate if available
         if (returnedRecord.isLate === 1) {
           show(`Returned “${returnedBook?.title ?? 'book'}”. This book was overdue. Please return on time next time!`, 'info');
