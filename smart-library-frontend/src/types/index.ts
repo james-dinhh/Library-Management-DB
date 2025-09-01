@@ -33,6 +33,7 @@ export interface BorrowRecord {
   dueDate: string;
   returnDate?: string;
   status: 'borrowed' | 'returned' | 'overdue';
+  isLate?: number | null; // 1 = late, 0 = on time, null = not returned
 }
 
 export interface Review {

@@ -6,7 +6,6 @@ import { spawn } from 'child_process';
 
 const DB_NAME = process.env.MYSQL_DB || 'smart_library';
 const SHOULD_RESET_DB = process.argv.includes('--reset') || /^true$/i.test(process.env.MYSQL_RESET_DB || '');
-const SHOULD_SEED = process.argv.includes('--seed') || /^true$/i.test(process.env.MYSQL_SEED_DB || '');
 
 // Remove block comments /* ... */ and trim lines
 function stripBlockComments(sql) {
@@ -158,21 +157,20 @@ async function setupDatabase() {
       await runSQLFile('procedures.sql'); 
       await runSQLFile('triggers.sql');
 
-      if (SHOULD_SEED) {
-        console.log('\n Seeding sample data (sql/dataSql.js)...');
-        const seederPath = path.join(process.cwd(), 'sql', 'dataSql.js');
-        await new Promise((resolve, reject) => {
-          const child = spawn(process.execPath, [seederPath], {
-            stdio: 'inherit',
-          });
-          child.on('exit', (code) => {
-            if (code === 0) resolve();
-            else reject(new Error(`Seeder exited with code ${code}`));
-          });
-          child.on('error', reject);
+      // Always seed after schema and routines
+      console.log('\n Seeding sample data (sql/dataSql.js)...');
+      const seederPath = path.join(process.cwd(), 'sql', 'dataSql.js');
+      await new Promise((resolve, reject) => {
+        const child = spawn(process.execPath, [seederPath], {
+          stdio: 'inherit',
         });
-        console.log(' Seeding completed.');
-      }
+        child.on('exit', (code) => {
+          if (code === 0) resolve();
+          else reject(new Error(`Seeder exited with code ${code}`));
+        });
+        child.on('error', reject);
+      });
+      console.log(' Seeding completed.');
     } else {
       console.log(' No tables created. Check schema.sql file.');
     }

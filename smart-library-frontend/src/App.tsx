@@ -127,7 +127,9 @@ function App() {
         bookId: String(record.book_id),
         borrowDate: record.borrow_date?.split('T')[0] || record.borrow_date,
         dueDate: record.due_date?.split('T')[0] || record.due_date,
+        returnDate: record.return_date?.split('T')[0] || record.return_date,
         status: record.return_date ? 'returned' : 'borrowed',
+        isLate: typeof record.is_late === 'number' ? record.is_late : record.is_late === null ? null : undefined,
       }));
       setBorrowRecords(mappedRecords);
     } catch {}
@@ -195,28 +197,42 @@ function App() {
   const handleReturn = async (checkoutId: string) => {
     try {
       await API.returnLibrary(Number(checkoutId));
-      
+
       // Update the UI state to reflect the returned book
       const checkoutIdNum = Number(checkoutId);
-      setBorrowRecords(borrowRecords.map(record => 
-        record.checkoutId === checkoutIdNum 
+      // Find the returned record (before update)
+      const returnedRecord = borrowRecords.find(record => record.checkoutId === checkoutIdNum);
+
+      setBorrowRecords(borrowRecords.map(record =>
+        record.checkoutId === checkoutIdNum
           ? { ...record, status: 'returned' as const, returnDate: new Date().toISOString().split("T")[0] }
           : record
       ));
-      
-      // Find the book and increment available copies
-      const returnedRecord = borrowRecords.find(record => record.checkoutId === checkoutIdNum);
+
       if (returnedRecord) {
         const returnedBook = books.find(b => b.id === returnedRecord.bookId);
-        setBooks(books.map(book => 
-          book.id === returnedRecord.bookId 
+        setBooks(books.map(book =>
+          book.id === returnedRecord.bookId
             ? { ...book, copiesAvailable: book.copiesAvailable + 1 }
             : book
         ));
-        // Show success toast at top-center
-        show(`Returned “${returnedBook?.title ?? 'book'}”. Thanks for returning on time!`, 'success');
+        // Use isLate if available
+        if (returnedRecord.isLate === 1) {
+          show(`Returned “${returnedBook?.title ?? 'book'}”. This book was overdue. Please return on time next time!`, 'info');
+        } else if (returnedRecord.isLate === 0) {
+          show(`Returned “${returnedBook?.title ?? 'book'}”. Thanks for returning on time!`, 'success');
+        } else {
+          // fallback to JS check if isLate is missing
+          const now = new Date();
+          const due = new Date(returnedRecord.dueDate);
+          if (now > due) {
+            show(`Returned “${returnedBook?.title ?? 'book'}”. This book was overdue. Please return on time next time!`, 'info');
+          } else {
+            show(`Returned “${returnedBook?.title ?? 'book'}”. Thanks for returning on time!`, 'success');
+          }
+        }
       }
-  } catch (err) {
+    } catch (err) {
       show('Could not return the book. Please try again.', 'error');
     }
   };

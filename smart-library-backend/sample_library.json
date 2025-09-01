@@ -56,7 +56,7 @@
     {
       "author_id": 2,
       "name": "Thao Vu",
-      "bio": "Children’s book author."
+      "bio": "Children\u2019s book author."
     },
     {
       "author_id": 3,
@@ -119,7 +119,7 @@
       "publisher_id": 1,
       "cover_image_url": "http://example.com/echoes.jpg",
       "copies_total": 4,
-      "copies_available": 4,
+      "copies_available": 3,
       "status": "active",
       "avg_rating": 4.0,
       "ratings_count": 5
@@ -253,22 +253,1681 @@
       "status": "active",
       "avg_rating": 0,
       "ratings_count": 0
+    },
+    {
+      "book_id": 14,
+      "title": "Book 14",
+      "genre": "Cookbook",
+      "published_year": 2013,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 9,
+      "copies_available": 0,
+      "status": "retired",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 15,
+      "title": "Book 15",
+      "genre": "Children",
+      "published_year": 2002,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 9,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 16,
+      "title": "Book 16",
+      "genre": "Children",
+      "published_year": 2016,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 10,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 17,
+      "title": "Book 17",
+      "genre": "Art",
+      "published_year": 2018,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 8,
+      "copies_available": 1,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 18,
+      "title": "Book 18",
+      "genre": "Travel",
+      "published_year": 2001,
+      "publisher_id": 3,
+      "cover_image_url": null,
+      "copies_total": 6,
+      "copies_available": 1,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 19,
+      "title": "Book 19",
+      "genre": "Poetry",
+      "published_year": 2012,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 7,
+      "copies_available": 6,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 20,
+      "title": "Book 20",
+      "genre": "Cookbook",
+      "published_year": 2013,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 3,
+      "copies_available": 3,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 21,
+      "title": "Book 21",
+      "genre": "Folklore",
+      "published_year": 2008,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 7,
+      "copies_available": 6,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 22,
+      "title": "Book 22",
+      "genre": "Fiction",
+      "published_year": 2010,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 3,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 23,
+      "title": "Book 23",
+      "genre": "Poetry",
+      "published_year": 2010,
+      "publisher_id": 3,
+      "cover_image_url": null,
+      "copies_total": 9,
+      "copies_available": 4,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 24,
+      "title": "Book 24",
+      "genre": "History",
+      "published_year": 2014,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 10,
+      "copies_available": 8,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 25,
+      "title": "Book 25",
+      "genre": "Fantasy",
+      "published_year": 2021,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 2,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 26,
+      "title": "Book 26",
+      "genre": "Fiction",
+      "published_year": 2022,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 9,
+      "copies_available": 8,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 27,
+      "title": "Book 27",
+      "genre": "Fantasy",
+      "published_year": 2007,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 2,
+      "copies_available": 1,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 28,
+      "title": "Book 28",
+      "genre": "Fiction",
+      "published_year": 2005,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 5,
+      "copies_available": 0,
+      "status": "retired",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 29,
+      "title": "Book 29",
+      "genre": "Children",
+      "published_year": 2013,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 4,
+      "copies_available": 4,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 30,
+      "title": "Book 30",
+      "genre": "Cookbook",
+      "published_year": 2001,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 5,
+      "copies_available": 0,
+      "status": "retired",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 31,
+      "title": "Book 31",
+      "genre": "Poetry",
+      "published_year": 2005,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 2,
+      "copies_available": 1,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 32,
+      "title": "Book 32",
+      "genre": "Thriller",
+      "published_year": 2021,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 2,
+      "copies_available": 1,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 33,
+      "title": "Book 33",
+      "genre": "Fantasy",
+      "published_year": 2003,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 9,
+      "copies_available": 5,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 34,
+      "title": "Book 34",
+      "genre": "History",
+      "published_year": 2019,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 4,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 35,
+      "title": "Book 35",
+      "genre": "Travel",
+      "published_year": 2023,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 2,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 36,
+      "title": "Book 36",
+      "genre": "Thriller",
+      "published_year": 2018,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 5,
+      "copies_available": 1,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 37,
+      "title": "Book 37",
+      "genre": "Poetry",
+      "published_year": 2016,
+      "publisher_id": 3,
+      "cover_image_url": null,
+      "copies_total": 4,
+      "copies_available": 3,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 38,
+      "title": "Book 38",
+      "genre": "Art",
+      "published_year": 2010,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 6,
+      "copies_available": 0,
+      "status": "retired",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 39,
+      "title": "Book 39",
+      "genre": "Art",
+      "published_year": 2009,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 4,
+      "copies_available": 1,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 40,
+      "title": "Book 40",
+      "genre": "Historical Fiction",
+      "published_year": 2005,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 7,
+      "copies_available": 5,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 41,
+      "title": "Book 41",
+      "genre": "Art",
+      "published_year": 2015,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 6,
+      "copies_available": 4,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 42,
+      "title": "Book 42",
+      "genre": "Historical Fiction",
+      "published_year": 2023,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 2,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 43,
+      "title": "Book 43",
+      "genre": "Historical Fiction",
+      "published_year": 2019,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 7,
+      "copies_available": 7,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 44,
+      "title": "Book 44",
+      "genre": "Art",
+      "published_year": 2021,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 8,
+      "copies_available": 8,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 45,
+      "title": "Book 45",
+      "genre": "History",
+      "published_year": 2014,
+      "publisher_id": 3,
+      "cover_image_url": null,
+      "copies_total": 10,
+      "copies_available": 9,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 46,
+      "title": "Book 46",
+      "genre": "History",
+      "published_year": 2005,
+      "publisher_id": 3,
+      "cover_image_url": null,
+      "copies_total": 7,
+      "copies_available": 5,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 47,
+      "title": "Book 47",
+      "genre": "Art",
+      "published_year": 2009,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 8,
+      "copies_available": 1,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 48,
+      "title": "Book 48",
+      "genre": "Historical Fiction",
+      "published_year": 2022,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 5,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 49,
+      "title": "Book 49",
+      "genre": "Fiction",
+      "published_year": 2011,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 5,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 50,
+      "title": "Book 50",
+      "genre": "Cookbook",
+      "published_year": 2022,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 7,
+      "copies_available": 4,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 51,
+      "title": "Book 51",
+      "genre": "Cookbook",
+      "published_year": 2002,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 7,
+      "copies_available": 3,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 52,
+      "title": "Book 52",
+      "genre": "Children",
+      "published_year": 2006,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 5,
+      "copies_available": 3,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 53,
+      "title": "Book 53",
+      "genre": "Poetry",
+      "published_year": 2008,
+      "publisher_id": 3,
+      "cover_image_url": null,
+      "copies_total": 7,
+      "copies_available": 1,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 54,
+      "title": "Book 54",
+      "genre": "Cookbook",
+      "published_year": 2002,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 6,
+      "copies_available": 6,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 55,
+      "title": "Book 55",
+      "genre": "Folklore",
+      "published_year": 2019,
+      "publisher_id": 3,
+      "cover_image_url": null,
+      "copies_total": 5,
+      "copies_available": 0,
+      "status": "retired",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 56,
+      "title": "Book 56",
+      "genre": "Folklore",
+      "published_year": 2010,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 7,
+      "copies_available": 3,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 57,
+      "title": "Book 57",
+      "genre": "Cookbook",
+      "published_year": 2011,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 9,
+      "copies_available": 5,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 58,
+      "title": "Book 58",
+      "genre": "Travel",
+      "published_year": 2007,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 2,
+      "copies_available": 0,
+      "status": "retired",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 59,
+      "title": "Book 59",
+      "genre": "Art",
+      "published_year": 2019,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 4,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 60,
+      "title": "Book 60",
+      "genre": "Fiction",
+      "published_year": 2003,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 6,
+      "copies_available": 5,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 61,
+      "title": "Book 61",
+      "genre": "History",
+      "published_year": 2017,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 8,
+      "copies_available": 1,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 62,
+      "title": "Book 62",
+      "genre": "Travel",
+      "published_year": 2017,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 6,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 63,
+      "title": "Book 63",
+      "genre": "Fantasy",
+      "published_year": 2015,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 4,
+      "copies_available": 3,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 64,
+      "title": "Book 64",
+      "genre": "Cookbook",
+      "published_year": 2012,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 8,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 65,
+      "title": "Book 65",
+      "genre": "Fantasy",
+      "published_year": 2012,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 3,
+      "copies_available": 3,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 66,
+      "title": "Book 66",
+      "genre": "History",
+      "published_year": 2024,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 4,
+      "copies_available": 4,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 67,
+      "title": "Book 67",
+      "genre": "Poetry",
+      "published_year": 2011,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 5,
+      "copies_available": 3,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 68,
+      "title": "Book 68",
+      "genre": "Fantasy",
+      "published_year": 2022,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 9,
+      "copies_available": 5,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 69,
+      "title": "Book 69",
+      "genre": "Poetry",
+      "published_year": 2022,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 7,
+      "copies_available": 5,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 70,
+      "title": "Book 70",
+      "genre": "History",
+      "published_year": 2016,
+      "publisher_id": 3,
+      "cover_image_url": null,
+      "copies_total": 10,
+      "copies_available": 8,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 71,
+      "title": "Book 71",
+      "genre": "Fantasy",
+      "published_year": 2011,
+      "publisher_id": 3,
+      "cover_image_url": null,
+      "copies_total": 8,
+      "copies_available": 8,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 72,
+      "title": "Book 72",
+      "genre": "Poetry",
+      "published_year": 2006,
+      "publisher_id": 3,
+      "cover_image_url": null,
+      "copies_total": 4,
+      "copies_available": 4,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 73,
+      "title": "Book 73",
+      "genre": "Historical Fiction",
+      "published_year": 2013,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 5,
+      "copies_available": 3,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 74,
+      "title": "Book 74",
+      "genre": "Thriller",
+      "published_year": 2015,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 6,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 75,
+      "title": "Book 75",
+      "genre": "Art",
+      "published_year": 2022,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 4,
+      "copies_available": 0,
+      "status": "retired",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 76,
+      "title": "Book 76",
+      "genre": "Fiction",
+      "published_year": 2000,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 4,
+      "copies_available": 0,
+      "status": "retired",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 77,
+      "title": "Book 77",
+      "genre": "Poetry",
+      "published_year": 2001,
+      "publisher_id": 3,
+      "cover_image_url": null,
+      "copies_total": 9,
+      "copies_available": 7,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 78,
+      "title": "Book 78",
+      "genre": "Poetry",
+      "published_year": 2020,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 5,
+      "copies_available": 5,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 79,
+      "title": "Book 79",
+      "genre": "Children",
+      "published_year": 2018,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 9,
+      "copies_available": 3,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 80,
+      "title": "Book 80",
+      "genre": "Children",
+      "published_year": 2016,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 4,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 81,
+      "title": "Book 81",
+      "genre": "Poetry",
+      "published_year": 2006,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 2,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 82,
+      "title": "Book 82",
+      "genre": "History",
+      "published_year": 2024,
+      "publisher_id": 3,
+      "cover_image_url": null,
+      "copies_total": 4,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 83,
+      "title": "Book 83",
+      "genre": "Historical Fiction",
+      "published_year": 2010,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 2,
+      "copies_available": 1,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 84,
+      "title": "Book 84",
+      "genre": "Fiction",
+      "published_year": 2017,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 10,
+      "copies_available": 2,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 85,
+      "title": "Book 85",
+      "genre": "Art",
+      "published_year": 2011,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 3,
+      "copies_available": 1,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 86,
+      "title": "Book 86",
+      "genre": "Cookbook",
+      "published_year": 2012,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 8,
+      "copies_available": 6,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 87,
+      "title": "Book 87",
+      "genre": "Fiction",
+      "published_year": 2021,
+      "publisher_id": 3,
+      "cover_image_url": null,
+      "copies_total": 8,
+      "copies_available": 5,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 88,
+      "title": "Book 88",
+      "genre": "Thriller",
+      "published_year": 2007,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 5,
+      "copies_available": 4,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 89,
+      "title": "Book 89",
+      "genre": "Fantasy",
+      "published_year": 2023,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 8,
+      "copies_available": 8,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 90,
+      "title": "Book 90",
+      "genre": "Folklore",
+      "published_year": 2025,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 8,
+      "copies_available": 1,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 91,
+      "title": "Book 91",
+      "genre": "Children",
+      "published_year": 2004,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 4,
+      "copies_available": 4,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 92,
+      "title": "Book 92",
+      "genre": "History",
+      "published_year": 2005,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 10,
+      "copies_available": 0,
+      "status": "retired",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 93,
+      "title": "Book 93",
+      "genre": "Fantasy",
+      "published_year": 2024,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 5,
+      "copies_available": 1,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 94,
+      "title": "Book 94",
+      "genre": "Cookbook",
+      "published_year": 2005,
+      "publisher_id": 3,
+      "cover_image_url": null,
+      "copies_total": 3,
+      "copies_available": 0,
+      "status": "retired",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 95,
+      "title": "Book 95",
+      "genre": "Children",
+      "published_year": 2015,
+      "publisher_id": 3,
+      "cover_image_url": null,
+      "copies_total": 6,
+      "copies_available": 4,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 96,
+      "title": "Book 96",
+      "genre": "Travel",
+      "published_year": 2022,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 2,
+      "copies_available": 0,
+      "status": "retired",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 97,
+      "title": "Book 97",
+      "genre": "Children",
+      "published_year": 2007,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 10,
+      "copies_available": 7,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 98,
+      "title": "Book 98",
+      "genre": "Fiction",
+      "published_year": 2006,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 10,
+      "copies_available": 5,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 99,
+      "title": "Book 99",
+      "genre": "Cookbook",
+      "published_year": 2023,
+      "publisher_id": 4,
+      "cover_image_url": null,
+      "copies_total": 10,
+      "copies_available": 9,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 100,
+      "title": "Book 100",
+      "genre": "Cookbook",
+      "published_year": 2005,
+      "publisher_id": 1,
+      "cover_image_url": null,
+      "copies_total": 9,
+      "copies_available": 3,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
+    },
+    {
+      "book_id": 101,
+      "title": "Book 101",
+      "genre": "Thriller",
+      "published_year": 2010,
+      "publisher_id": 2,
+      "cover_image_url": null,
+      "copies_total": 6,
+      "copies_available": 3,
+      "status": "active",
+      "avg_rating": 0,
+      "ratings_count": 0
     }
   ],
   "book_authors": [
-    { "book_id": 1, "author_id": 1 },
-    { "book_id": 2, "author_id": 2 },
-    { "book_id": 3, "author_id": 3 },
-    { "book_id": 4, "author_id": 4 },
-    { "book_id": 5, "author_id": 1 },
-    { "book_id": 6, "author_id": 2 },
-    { "book_id": 7, "author_id": 6 },
-    { "book_id": 8, "author_id": 5 },
-    { "book_id": 9, "author_id": 7 },
-    { "book_id": 10, "author_id": 4 },
-    { "book_id": 11, "author_id": 3 },
-    { "book_id": 12, "author_id": 1 },
-    { "book_id": 13, "author_id": 5 }
+    {
+      "book_id": 1,
+      "author_id": 1
+    },
+    {
+      "book_id": 2,
+      "author_id": 2
+    },
+    {
+      "book_id": 3,
+      "author_id": 3
+    },
+    {
+      "book_id": 4,
+      "author_id": 4
+    },
+    {
+      "book_id": 5,
+      "author_id": 1
+    },
+    {
+      "book_id": 6,
+      "author_id": 2
+    },
+    {
+      "book_id": 7,
+      "author_id": 6
+    },
+    {
+      "book_id": 8,
+      "author_id": 5
+    },
+    {
+      "book_id": 9,
+      "author_id": 7
+    },
+    {
+      "book_id": 10,
+      "author_id": 4
+    },
+    {
+      "book_id": 11,
+      "author_id": 3
+    },
+    {
+      "book_id": 12,
+      "author_id": 1
+    },
+    {
+      "book_id": 13,
+      "author_id": 5
+    },
+    {
+      "book_id": 14,
+      "author_id": 5
+    },
+    {
+      "book_id": 14,
+      "author_id": 1
+    },
+    {
+      "book_id": 15,
+      "author_id": 5
+    },
+    {
+      "book_id": 16,
+      "author_id": 5
+    },
+    {
+      "book_id": 17,
+      "author_id": 5
+    },
+    {
+      "book_id": 18,
+      "author_id": 5
+    },
+    {
+      "book_id": 18,
+      "author_id": 1
+    },
+    {
+      "book_id": 19,
+      "author_id": 4
+    },
+    {
+      "book_id": 20,
+      "author_id": 5
+    },
+    {
+      "book_id": 21,
+      "author_id": 1
+    },
+    {
+      "book_id": 22,
+      "author_id": 2
+    },
+    {
+      "book_id": 22,
+      "author_id": 1
+    },
+    {
+      "book_id": 23,
+      "author_id": 4
+    },
+    {
+      "book_id": 24,
+      "author_id": 1
+    },
+    {
+      "book_id": 25,
+      "author_id": 5
+    },
+    {
+      "book_id": 26,
+      "author_id": 4
+    },
+    {
+      "book_id": 27,
+      "author_id": 5
+    },
+    {
+      "book_id": 27,
+      "author_id": 4
+    },
+    {
+      "book_id": 28,
+      "author_id": 2
+    },
+    {
+      "book_id": 28,
+      "author_id": 3
+    },
+    {
+      "book_id": 29,
+      "author_id": 2
+    },
+    {
+      "book_id": 30,
+      "author_id": 7
+    },
+    {
+      "book_id": 30,
+      "author_id": 1
+    },
+    {
+      "book_id": 31,
+      "author_id": 6
+    },
+    {
+      "book_id": 32,
+      "author_id": 2
+    },
+    {
+      "book_id": 33,
+      "author_id": 4
+    },
+    {
+      "book_id": 33,
+      "author_id": 7
+    },
+    {
+      "book_id": 34,
+      "author_id": 3
+    },
+    {
+      "book_id": 34,
+      "author_id": 4
+    },
+    {
+      "book_id": 35,
+      "author_id": 5
+    },
+    {
+      "book_id": 36,
+      "author_id": 6
+    },
+    {
+      "book_id": 36,
+      "author_id": 4
+    },
+    {
+      "book_id": 37,
+      "author_id": 2
+    },
+    {
+      "book_id": 37,
+      "author_id": 4
+    },
+    {
+      "book_id": 38,
+      "author_id": 6
+    },
+    {
+      "book_id": 38,
+      "author_id": 7
+    },
+    {
+      "book_id": 39,
+      "author_id": 3
+    },
+    {
+      "book_id": 39,
+      "author_id": 7
+    },
+    {
+      "book_id": 40,
+      "author_id": 4
+    },
+    {
+      "book_id": 41,
+      "author_id": 5
+    },
+    {
+      "book_id": 42,
+      "author_id": 5
+    },
+    {
+      "book_id": 43,
+      "author_id": 5
+    },
+    {
+      "book_id": 44,
+      "author_id": 3
+    },
+    {
+      "book_id": 45,
+      "author_id": 2
+    },
+    {
+      "book_id": 46,
+      "author_id": 3
+    },
+    {
+      "book_id": 47,
+      "author_id": 1
+    },
+    {
+      "book_id": 47,
+      "author_id": 2
+    },
+    {
+      "book_id": 48,
+      "author_id": 4
+    },
+    {
+      "book_id": 48,
+      "author_id": 6
+    },
+    {
+      "book_id": 49,
+      "author_id": 1
+    },
+    {
+      "book_id": 49,
+      "author_id": 4
+    },
+    {
+      "book_id": 50,
+      "author_id": 7
+    },
+    {
+      "book_id": 51,
+      "author_id": 4
+    },
+    {
+      "book_id": 51,
+      "author_id": 7
+    },
+    {
+      "book_id": 52,
+      "author_id": 3
+    },
+    {
+      "book_id": 53,
+      "author_id": 4
+    },
+    {
+      "book_id": 54,
+      "author_id": 6
+    },
+    {
+      "book_id": 55,
+      "author_id": 7
+    },
+    {
+      "book_id": 55,
+      "author_id": 6
+    },
+    {
+      "book_id": 56,
+      "author_id": 6
+    },
+    {
+      "book_id": 57,
+      "author_id": 4
+    },
+    {
+      "book_id": 57,
+      "author_id": 1
+    },
+    {
+      "book_id": 58,
+      "author_id": 5
+    },
+    {
+      "book_id": 59,
+      "author_id": 1
+    },
+    {
+      "book_id": 60,
+      "author_id": 2
+    },
+    {
+      "book_id": 61,
+      "author_id": 7
+    },
+    {
+      "book_id": 62,
+      "author_id": 3
+    },
+    {
+      "book_id": 62,
+      "author_id": 2
+    },
+    {
+      "book_id": 63,
+      "author_id": 6
+    },
+    {
+      "book_id": 63,
+      "author_id": 4
+    },
+    {
+      "book_id": 64,
+      "author_id": 3
+    },
+    {
+      "book_id": 65,
+      "author_id": 5
+    },
+    {
+      "book_id": 66,
+      "author_id": 5
+    },
+    {
+      "book_id": 67,
+      "author_id": 1
+    },
+    {
+      "book_id": 68,
+      "author_id": 4
+    },
+    {
+      "book_id": 69,
+      "author_id": 2
+    },
+    {
+      "book_id": 69,
+      "author_id": 3
+    },
+    {
+      "book_id": 70,
+      "author_id": 2
+    },
+    {
+      "book_id": 71,
+      "author_id": 3
+    },
+    {
+      "book_id": 72,
+      "author_id": 4
+    },
+    {
+      "book_id": 72,
+      "author_id": 1
+    },
+    {
+      "book_id": 73,
+      "author_id": 7
+    },
+    {
+      "book_id": 74,
+      "author_id": 1
+    },
+    {
+      "book_id": 75,
+      "author_id": 1
+    },
+    {
+      "book_id": 76,
+      "author_id": 3
+    },
+    {
+      "book_id": 76,
+      "author_id": 2
+    },
+    {
+      "book_id": 77,
+      "author_id": 5
+    },
+    {
+      "book_id": 78,
+      "author_id": 3
+    },
+    {
+      "book_id": 79,
+      "author_id": 1
+    },
+    {
+      "book_id": 80,
+      "author_id": 5
+    },
+    {
+      "book_id": 80,
+      "author_id": 3
+    },
+    {
+      "book_id": 81,
+      "author_id": 6
+    },
+    {
+      "book_id": 81,
+      "author_id": 2
+    },
+    {
+      "book_id": 82,
+      "author_id": 1
+    },
+    {
+      "book_id": 83,
+      "author_id": 3
+    },
+    {
+      "book_id": 84,
+      "author_id": 2
+    },
+    {
+      "book_id": 85,
+      "author_id": 3
+    },
+    {
+      "book_id": 85,
+      "author_id": 1
+    },
+    {
+      "book_id": 86,
+      "author_id": 2
+    },
+    {
+      "book_id": 87,
+      "author_id": 2
+    },
+    {
+      "book_id": 87,
+      "author_id": 6
+    },
+    {
+      "book_id": 88,
+      "author_id": 2
+    },
+    {
+      "book_id": 88,
+      "author_id": 4
+    },
+    {
+      "book_id": 89,
+      "author_id": 1
+    },
+    {
+      "book_id": 90,
+      "author_id": 6
+    },
+    {
+      "book_id": 91,
+      "author_id": 7
+    },
+    {
+      "book_id": 91,
+      "author_id": 2
+    },
+    {
+      "book_id": 92,
+      "author_id": 7
+    },
+    {
+      "book_id": 93,
+      "author_id": 5
+    },
+    {
+      "book_id": 94,
+      "author_id": 6
+    },
+    {
+      "book_id": 94,
+      "author_id": 1
+    },
+    {
+      "book_id": 95,
+      "author_id": 3
+    },
+    {
+      "book_id": 96,
+      "author_id": 6
+    },
+    {
+      "book_id": 97,
+      "author_id": 7
+    },
+    {
+      "book_id": 98,
+      "author_id": 5
+    },
+    {
+      "book_id": 99,
+      "author_id": 5
+    },
+    {
+      "book_id": 100,
+      "author_id": 6
+    },
+    {
+      "book_id": 100,
+      "author_id": 2
+    },
+    {
+      "book_id": 101,
+      "author_id": 7
+    }
   ],
   "checkouts": [
     {
@@ -286,6 +1945,159 @@
       "book_id": 3,
       "borrow_date": "2025-08-05",
       "due_date": "2025-08-12",
+      "return_date": null,
+      "is_late": null
+    },
+    {
+      "checkout_id": 3,
+      "user_id": 1,
+      "book_id": 16,
+      "borrow_date": "2025-08-01",
+      "due_date": "2025-08-08",
+      "return_date": "2025-08-09",
+      "is_late": true
+    },
+    {
+      "checkout_id": 4,
+      "user_id": 3,
+      "book_id": 22,
+      "borrow_date": "2025-08-13",
+      "due_date": "2025-08-20",
+      "return_date": null,
+      "is_late": null
+    },
+    {
+      "checkout_id": 5,
+      "user_id": 2,
+      "book_id": 26,
+      "borrow_date": "2025-08-06",
+      "due_date": "2025-08-13",
+      "return_date": null,
+      "is_late": null
+    },
+    {
+      "checkout_id": 7,
+      "user_id": 1,
+      "book_id": 32,
+      "borrow_date": "2025-08-06",
+      "due_date": "2025-08-13",
+      "return_date": null,
+      "is_late": null
+    },
+    {
+      "checkout_id": 8,
+      "user_id": 2,
+      "book_id": 34,
+      "borrow_date": "2025-08-13",
+      "due_date": "2025-08-20",
+      "return_date": "2025-08-27",
+      "is_late": true
+    },
+    {
+      "checkout_id": 10,
+      "user_id": 3,
+      "book_id": 43,
+      "borrow_date": "2025-08-08",
+      "due_date": "2025-08-15",
+      "return_date": "2025-08-14",
+      "is_late": false
+    },
+    {
+      "checkout_id": 11,
+      "user_id": 1,
+      "book_id": 44,
+      "borrow_date": "2025-08-05",
+      "due_date": "2025-08-12",
+      "return_date": "2025-08-11",
+      "is_late": false
+    },
+    {
+      "checkout_id": 12,
+      "user_id": 1,
+      "book_id": 49,
+      "borrow_date": "2025-08-15",
+      "due_date": "2025-08-22",
+      "return_date": "2025-08-30",
+      "is_late": true
+    },
+    {
+      "checkout_id": 14,
+      "user_id": 3,
+      "book_id": 60,
+      "borrow_date": "2025-08-11",
+      "due_date": "2025-08-18",
+      "return_date": "2025-08-26",
+      "is_late": true
+    },
+    {
+      "checkout_id": 15,
+      "user_id": 3,
+      "book_id": 63,
+      "borrow_date": "2025-08-11",
+      "due_date": "2025-08-18",
+      "return_date": null,
+      "is_late": null
+    },
+    {
+      "checkout_id": 16,
+      "user_id": 2,
+      "book_id": 65,
+      "borrow_date": "2025-08-02",
+      "due_date": "2025-08-09",
+      "return_date": "2025-08-11",
+      "is_late": true
+    },
+    {
+      "checkout_id": 17,
+      "user_id": 2,
+      "book_id": 72,
+      "borrow_date": "2025-08-10",
+      "due_date": "2025-08-17",
+      "return_date": "2025-08-17",
+      "is_late": false
+    },
+    {
+      "checkout_id": 18,
+      "user_id": 2,
+      "book_id": 74,
+      "borrow_date": "2025-08-15",
+      "due_date": "2025-08-22",
+      "return_date": "2025-08-30",
+      "is_late": true
+    },
+    {
+      "checkout_id": 19,
+      "user_id": 1,
+      "book_id": 83,
+      "borrow_date": "2025-08-02",
+      "due_date": "2025-08-09",
+      "return_date": null,
+      "is_late": null
+    },
+    {
+      "checkout_id": 20,
+      "user_id": 2,
+      "book_id": 90,
+      "borrow_date": "2025-08-07",
+      "due_date": "2025-08-14",
+      "return_date": "2025-08-17",
+      "is_late": true
+    },
+    {
+      "checkout_id": 22,
+      "user_id": 3,
+      "book_id": 93,
+      "borrow_date": "2025-08-13",
+      "due_date": "2025-08-20",
+      "return_date": "2025-08-26",
+      "is_late": true
+    },
+    {
+      "checkout_id": 23,
+      "user_id": 2,
+      "book_id": 99,
+      "borrow_date": "2025-08-11",
+      "due_date": "2025-08-18",
       "return_date": null,
       "is_late": null
     }
@@ -306,6 +2118,254 @@
       "rating": 4,
       "comment": "Very informative and well-written.",
       "review_date": "2025-08-13"
+    },
+    {
+      "review_id": 3,
+      "user_id": 3,
+      "book_id": 14,
+      "rating": 4,
+      "comment": "Great book!",
+      "review_date": "2025-07-24"
+    },
+    {
+      "review_id": 4,
+      "user_id": 1,
+      "book_id": 18,
+      "rating": 5,
+      "comment": "Highly recommended.",
+      "review_date": "2025-07-17"
+    },
+    {
+      "review_id": 5,
+      "user_id": 2,
+      "book_id": 24,
+      "rating": 3,
+      "comment": "Well written.",
+      "review_date": "2025-07-24"
+    },
+    {
+      "review_id": 6,
+      "user_id": 3,
+      "book_id": 26,
+      "rating": 4,
+      "comment": "Interesting read.",
+      "review_date": "2025-08-06"
+    },
+    {
+      "review_id": 7,
+      "user_id": 3,
+      "book_id": 28,
+      "rating": 4,
+      "comment": "Great book!",
+      "review_date": "2025-08-05"
+    },
+    {
+      "review_id": 8,
+      "user_id": 1,
+      "book_id": 29,
+      "rating": 3,
+      "comment": "Interesting read.",
+      "review_date": "2025-07-28"
+    },
+    {
+      "review_id": 9,
+      "user_id": 3,
+      "book_id": 31,
+      "rating": 4,
+      "comment": "Highly recommended.",
+      "review_date": "2025-07-20"
+    },
+    {
+      "review_id": 10,
+      "user_id": 1,
+      "book_id": 32,
+      "rating": 4,
+      "comment": "Great book!",
+      "review_date": "2025-07-18"
+    },
+    {
+      "review_id": 11,
+      "user_id": 2,
+      "book_id": 33,
+      "rating": 5,
+      "comment": "Great book!",
+      "review_date": "2025-07-26"
+    },
+    {
+      "review_id": 12,
+      "user_id": 1,
+      "book_id": 37,
+      "rating": 4,
+      "comment": "Great book!",
+      "review_date": "2025-08-01"
+    },
+    {
+      "review_id": 13,
+      "user_id": 1,
+      "book_id": 43,
+      "rating": 3,
+      "comment": "Interesting read.",
+      "review_date": "2025-08-12"
+    },
+    {
+      "review_id": 14,
+      "user_id": 1,
+      "book_id": 44,
+      "rating": 3,
+      "comment": "Enjoyed it a lot.",
+      "review_date": "2025-08-05"
+    },
+    {
+      "review_id": 15,
+      "user_id": 2,
+      "book_id": 46,
+      "rating": 3,
+      "comment": "Well written.",
+      "review_date": "2025-07-28"
+    },
+    {
+      "review_id": 16,
+      "user_id": 3,
+      "book_id": 48,
+      "rating": 5,
+      "comment": "Interesting read.",
+      "review_date": "2025-08-10"
+    },
+    {
+      "review_id": 17,
+      "user_id": 2,
+      "book_id": 49,
+      "rating": 5,
+      "comment": "Great book!",
+      "review_date": "2025-08-10"
+    },
+    {
+      "review_id": 18,
+      "user_id": 2,
+      "book_id": 50,
+      "rating": 4,
+      "comment": "Well written.",
+      "review_date": "2025-08-10"
+    },
+    {
+      "review_id": 19,
+      "user_id": 2,
+      "book_id": 55,
+      "rating": 5,
+      "comment": "Enjoyed it a lot.",
+      "review_date": "2025-07-26"
+    },
+    {
+      "review_id": 20,
+      "user_id": 2,
+      "book_id": 56,
+      "rating": 4,
+      "comment": "Enjoyed it a lot.",
+      "review_date": "2025-08-04"
+    },
+    {
+      "review_id": 21,
+      "user_id": 2,
+      "book_id": 57,
+      "rating": 4,
+      "comment": "Well written.",
+      "review_date": "2025-07-18"
+    },
+    {
+      "review_id": 22,
+      "user_id": 1,
+      "book_id": 62,
+      "rating": 4,
+      "comment": "Enjoyed it a lot.",
+      "review_date": "2025-08-04"
+    },
+    {
+      "review_id": 23,
+      "user_id": 1,
+      "book_id": 68,
+      "rating": 4,
+      "comment": "Well written.",
+      "review_date": "2025-08-08"
+    },
+    {
+      "review_id": 24,
+      "user_id": 3,
+      "book_id": 69,
+      "rating": 5,
+      "comment": "Great book!",
+      "review_date": "2025-07-31"
+    },
+    {
+      "review_id": 25,
+      "user_id": 2,
+      "book_id": 75,
+      "rating": 3,
+      "comment": "Well written.",
+      "review_date": "2025-08-06"
+    },
+    {
+      "review_id": 26,
+      "user_id": 2,
+      "book_id": 76,
+      "rating": 3,
+      "comment": "Enjoyed it a lot.",
+      "review_date": "2025-07-28"
+    },
+    {
+      "review_id": 27,
+      "user_id": 3,
+      "book_id": 83,
+      "rating": 4,
+      "comment": "Highly recommended.",
+      "review_date": "2025-08-15"
+    },
+    {
+      "review_id": 28,
+      "user_id": 3,
+      "book_id": 88,
+      "rating": 5,
+      "comment": "Great book!",
+      "review_date": "2025-07-25"
+    },
+    {
+      "review_id": 29,
+      "user_id": 3,
+      "book_id": 89,
+      "rating": 5,
+      "comment": "Great book!",
+      "review_date": "2025-07-16"
+    },
+    {
+      "review_id": 30,
+      "user_id": 1,
+      "book_id": 91,
+      "rating": 3,
+      "comment": "Highly recommended.",
+      "review_date": "2025-08-09"
+    },
+    {
+      "review_id": 31,
+      "user_id": 3,
+      "book_id": 96,
+      "rating": 5,
+      "comment": "Interesting read.",
+      "review_date": "2025-07-31"
+    },
+    {
+      "review_id": 32,
+      "user_id": 2,
+      "book_id": 98,
+      "rating": 4,
+      "comment": "Great book!",
+      "review_date": "2025-08-08"
+    },
+    {
+      "review_id": 33,
+      "user_id": 2,
+      "book_id": 100,
+      "rating": 4,
+      "comment": "Interesting read.",
+      "review_date": "2025-08-12"
     }
   ],
   "staff_logs": [
@@ -329,6 +2389,622 @@
       "action_type": "add_book",
       "book_id": 3,
       "timestamp": "2025-08-03"
+    },
+    {
+      "log_id": 4,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 14,
+      "timestamp": "2025-08-14"
+    },
+    {
+      "log_id": 5,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 15,
+      "timestamp": "2025-08-15"
+    },
+    {
+      "log_id": 6,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 16,
+      "timestamp": "2025-08-16"
+    },
+    {
+      "log_id": 7,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 17,
+      "timestamp": "2025-08-17"
+    },
+    {
+      "log_id": 8,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 18,
+      "timestamp": "2025-08-18"
+    },
+    {
+      "log_id": 9,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 19,
+      "timestamp": "2025-08-19"
+    },
+    {
+      "log_id": 10,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 20,
+      "timestamp": "2025-08-20"
+    },
+    {
+      "log_id": 11,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 21,
+      "timestamp": "2025-08-21"
+    },
+    {
+      "log_id": 12,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 22,
+      "timestamp": "2025-08-22"
+    },
+    {
+      "log_id": 13,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 23,
+      "timestamp": "2025-08-23"
+    },
+    {
+      "log_id": 14,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 24,
+      "timestamp": "2025-08-24"
+    },
+    {
+      "log_id": 15,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 25,
+      "timestamp": "2025-08-25"
+    },
+    {
+      "log_id": 16,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 26,
+      "timestamp": "2025-08-26"
+    },
+    {
+      "log_id": 17,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 27,
+      "timestamp": "2025-08-27"
+    },
+    {
+      "log_id": 18,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 28,
+      "timestamp": "2025-08-28"
+    },
+    {
+      "log_id": 19,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 29,
+      "timestamp": "2025-08-29"
+    },
+    {
+      "log_id": 20,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 30,
+      "timestamp": "2025-08-30"
+    },
+    {
+      "log_id": 21,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 31,
+      "timestamp": "2025-08-31"
+    },
+    {
+      "log_id": 22,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 32,
+      "timestamp": "2025-09-01"
+    },
+    {
+      "log_id": 23,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 33,
+      "timestamp": "2025-09-02"
+    },
+    {
+      "log_id": 24,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 34,
+      "timestamp": "2025-09-03"
+    },
+    {
+      "log_id": 25,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 35,
+      "timestamp": "2025-09-04"
+    },
+    {
+      "log_id": 26,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 36,
+      "timestamp": "2025-09-05"
+    },
+    {
+      "log_id": 27,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 37,
+      "timestamp": "2025-09-06"
+    },
+    {
+      "log_id": 28,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 38,
+      "timestamp": "2025-09-07"
+    },
+    {
+      "log_id": 29,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 39,
+      "timestamp": "2025-09-08"
+    },
+    {
+      "log_id": 30,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 40,
+      "timestamp": "2025-09-09"
+    },
+    {
+      "log_id": 31,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 41,
+      "timestamp": "2025-09-10"
+    },
+    {
+      "log_id": 32,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 42,
+      "timestamp": "2025-09-11"
+    },
+    {
+      "log_id": 33,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 43,
+      "timestamp": "2025-09-12"
+    },
+    {
+      "log_id": 34,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 44,
+      "timestamp": "2025-09-13"
+    },
+    {
+      "log_id": 35,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 45,
+      "timestamp": "2025-09-14"
+    },
+    {
+      "log_id": 36,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 46,
+      "timestamp": "2025-09-15"
+    },
+    {
+      "log_id": 37,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 47,
+      "timestamp": "2025-09-16"
+    },
+    {
+      "log_id": 38,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 48,
+      "timestamp": "2025-09-17"
+    },
+    {
+      "log_id": 39,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 49,
+      "timestamp": "2025-09-18"
+    },
+    {
+      "log_id": 40,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 50,
+      "timestamp": "2025-09-19"
+    },
+    {
+      "log_id": 41,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 51,
+      "timestamp": "2025-09-20"
+    },
+    {
+      "log_id": 42,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 52,
+      "timestamp": "2025-09-21"
+    },
+    {
+      "log_id": 43,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 53,
+      "timestamp": "2025-09-22"
+    },
+    {
+      "log_id": 44,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 54,
+      "timestamp": "2025-09-23"
+    },
+    {
+      "log_id": 45,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 55,
+      "timestamp": "2025-09-24"
+    },
+    {
+      "log_id": 46,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 56,
+      "timestamp": "2025-09-25"
+    },
+    {
+      "log_id": 47,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 57,
+      "timestamp": "2025-09-26"
+    },
+    {
+      "log_id": 48,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 58,
+      "timestamp": "2025-09-27"
+    },
+    {
+      "log_id": 49,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 59,
+      "timestamp": "2025-09-28"
+    },
+    {
+      "log_id": 50,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 60,
+      "timestamp": "2025-09-29"
+    },
+    {
+      "log_id": 51,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 61,
+      "timestamp": "2025-09-30"
+    },
+    {
+      "log_id": 52,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 62,
+      "timestamp": "2025-10-01"
+    },
+    {
+      "log_id": 53,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 63,
+      "timestamp": "2025-10-02"
+    },
+    {
+      "log_id": 54,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 64,
+      "timestamp": "2025-10-03"
+    },
+    {
+      "log_id": 55,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 65,
+      "timestamp": "2025-10-04"
+    },
+    {
+      "log_id": 56,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 66,
+      "timestamp": "2025-10-05"
+    },
+    {
+      "log_id": 57,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 67,
+      "timestamp": "2025-10-06"
+    },
+    {
+      "log_id": 58,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 68,
+      "timestamp": "2025-10-07"
+    },
+    {
+      "log_id": 59,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 69,
+      "timestamp": "2025-10-08"
+    },
+    {
+      "log_id": 60,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 70,
+      "timestamp": "2025-10-09"
+    },
+    {
+      "log_id": 61,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 71,
+      "timestamp": "2025-10-10"
+    },
+    {
+      "log_id": 62,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 72,
+      "timestamp": "2025-10-11"
+    },
+    {
+      "log_id": 63,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 73,
+      "timestamp": "2025-10-12"
+    },
+    {
+      "log_id": 64,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 74,
+      "timestamp": "2025-10-13"
+    },
+    {
+      "log_id": 65,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 75,
+      "timestamp": "2025-10-14"
+    },
+    {
+      "log_id": 66,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 76,
+      "timestamp": "2025-10-15"
+    },
+    {
+      "log_id": 67,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 77,
+      "timestamp": "2025-10-16"
+    },
+    {
+      "log_id": 68,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 78,
+      "timestamp": "2025-10-17"
+    },
+    {
+      "log_id": 69,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 79,
+      "timestamp": "2025-10-18"
+    },
+    {
+      "log_id": 70,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 80,
+      "timestamp": "2025-10-19"
+    },
+    {
+      "log_id": 71,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 81,
+      "timestamp": "2025-10-20"
+    },
+    {
+      "log_id": 72,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 82,
+      "timestamp": "2025-10-21"
+    },
+    {
+      "log_id": 73,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 83,
+      "timestamp": "2025-10-22"
+    },
+    {
+      "log_id": 74,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 84,
+      "timestamp": "2025-10-23"
+    },
+    {
+      "log_id": 75,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 85,
+      "timestamp": "2025-10-24"
+    },
+    {
+      "log_id": 76,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 86,
+      "timestamp": "2025-10-25"
+    },
+    {
+      "log_id": 77,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 87,
+      "timestamp": "2025-10-26"
+    },
+    {
+      "log_id": 78,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 88,
+      "timestamp": "2025-10-27"
+    },
+    {
+      "log_id": 79,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 89,
+      "timestamp": "2025-10-28"
+    },
+    {
+      "log_id": 80,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 90,
+      "timestamp": "2025-10-29"
+    },
+    {
+      "log_id": 81,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 91,
+      "timestamp": "2025-10-30"
+    },
+    {
+      "log_id": 82,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 92,
+      "timestamp": "2025-10-31"
+    },
+    {
+      "log_id": 83,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 93,
+      "timestamp": "2025-11-01"
+    },
+    {
+      "log_id": 84,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 94,
+      "timestamp": "2025-11-02"
+    },
+    {
+      "log_id": 85,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 95,
+      "timestamp": "2025-11-03"
+    },
+    {
+      "log_id": 86,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 96,
+      "timestamp": "2025-11-04"
+    },
+    {
+      "log_id": 87,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 97,
+      "timestamp": "2025-11-05"
+    },
+    {
+      "log_id": 88,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 98,
+      "timestamp": "2025-11-06"
+    },
+    {
+      "log_id": 89,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 99,
+      "timestamp": "2025-11-07"
+    },
+    {
+      "log_id": 90,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 100,
+      "timestamp": "2025-11-08"
+    },
+    {
+      "log_id": 91,
+      "staff_id": 2,
+      "action_type": "add_book",
+      "book_id": 101,
+      "timestamp": "2025-11-09"
     }
   ]
 }
