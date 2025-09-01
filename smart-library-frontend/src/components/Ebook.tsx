@@ -109,6 +109,10 @@ function EbookList({ onSelectBook }: EbookListProps) {
     );
   }
 
+  // Natural sort for eBook titles
+  const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+  const sortedEbooks = [...ebooks].sort((a, b) => collator.compare(a.title, b.title));
+
   return (
     <div>
       <h1 className="text-2xl md:text-3xl font-bold">eBooks</h1>
@@ -152,7 +156,7 @@ function EbookList({ onSelectBook }: EbookListProps) {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {ebooks.map((book) => (
+        {sortedEbooks.map((book) => (
           <div
             key={book.bookId}
             className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden group h-full flex flex-col"
@@ -463,15 +467,16 @@ function SessionsList({ userId }: SessionsListProps) {
   if (err) return <div className="text-red-600">{err}</div>;
   if (!sessions.length)
     return (
-      <div className="text-gray-600 mt-6">
-  You haven’t logged any reading sessions yet. Pick a book above to start your first session—your progress will appear here.
+      <div className="text-gray-600 mt-6 text-center">
+        You haven’t logged any reading sessions yet.<br />
+        <span className="text-sm text-gray-400">Pick a book above to start your first session—your progress will appear here.</span>
       </div>
     );
 
   return (
     <div className="mt-8">
-      <h2 className="text-2xl md:text-3xl font-bold">Your Reading Sessions</h2>
-      <ul className="space-y-2">
+      <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">Your Reading Sessions</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {sessions.map((s) => {
           const key =
             s._id ??
@@ -486,31 +491,55 @@ function SessionsList({ userId }: SessionsListProps) {
             : highlightsArray.slice(0, previewCount);
 
           return (
-            <li key={key} className="bg-gray-50 rounded p-3 shadow flex flex-col">
-              <div>
-                <span className="font-semibold">{sessionBookLabel(s)}</span>
-                <span className="ml-2 text-gray-600">
-                  {start ? start.toLocaleString() : "?"} –{" "}
-                  {end ? end.toLocaleString() : "?"}
+            <div
+              key={key}
+              className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 flex flex-col border border-gray-100"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold text-lg text-blue-800 truncate" title={sessionBookLabel(s)}>
+                  {sessionBookLabel(s)}
+                </span>
+                <span className="ml-2 text-xs text-gray-500 whitespace-nowrap">
+                  {start ? start.toLocaleDateString() : "?"}
                 </span>
               </div>
-              <div className="text-sm mt-1">
-                Pages: {sessionPagesCount(s)}, Highlights:{" "}
-                {highlightsArray.length}
+              <div className="flex items-center gap-2 mb-2 text-sm text-gray-600">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-medium">
+                  Pages: <span className="ml-1 font-semibold">{sessionPagesCount(s)}</span>
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-800 border border-yellow-200 text-xs font-medium">
+                  Highlights: <span className="ml-1 font-semibold">{highlightsArray.length}</span>
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200 text-xs font-medium">
+                  {start && end ? (
+                    <>
+                      {start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – {end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </>
+                  ) : (
+                    "?"
+                  )}
+                </span>
+              </div>
+              <div className="mb-2 text-xs text-gray-400">
+                {start && end ? (
+                  <>
+                    {start.toLocaleString()} – {end.toLocaleString()}
+                  </>
+                ) : null}
               </div>
               {highlightsArray.length > 0 && (
                 <div className="mt-2">
-                  <div className="text-sm font-semibold mb-1">Highlights</div>
-                  <ul className="list-disc pl-6">
+                  <div className="text-sm font-semibold mb-1 text-gray-700">Highlights</div>
+                  <ul className="list-disc pl-6 space-y-1">
                     {shownHighlights.map((h, i) => (
-                      <li key={i}>
-                        Page {h.page}: {h.text}
+                      <li key={i} className="text-gray-800 text-sm">
+                        <span className="font-medium text-blue-700">Page {h.page}:</span> {h.text}
                       </li>
                     ))}
                   </ul>
                   {highlightsArray.length > previewCount && (
                     <button
-                      className="mt-2 text-sm text-blue-600 hover:text-blue-700 self-start"
+                      className="mt-2 text-xs text-blue-600 hover:text-blue-800 underline self-start"
                       onClick={() =>
                         setExpanded((prev) => ({ ...prev, [key]: !isExpanded }))
                       }
@@ -522,10 +551,10 @@ function SessionsList({ userId }: SessionsListProps) {
                   )}
                 </div>
               )}
-            </li>
+            </div>
           );
         })}
-      </ul>
+      </div>
     </div>
   );
 }

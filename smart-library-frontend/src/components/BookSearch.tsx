@@ -1,8 +1,10 @@
-import React, { useState, useMemo, useEffect } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Search, Filter, Grid, List } from 'lucide-react';
 import { Book, User } from '../types';
 import BookCard from './BookCard';
 import BookDetails from './BookDetails';
+import API from '../services/api';
 
 interface BookSearchProps {
   books: Book[];
@@ -10,7 +12,8 @@ interface BookSearchProps {
   onBorrow: (book: Book) => void;
 }
 
-const BookSearch: React.FC<BookSearchProps> = ({ books, currentUser, onBorrow }) => {
+
+const BookSearch: React.FC<BookSearchProps> = ({ books: initialBooks, currentUser, onBorrow }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('');
   const [availabilityFilter, setAvailabilityFilter] = useState('all');
@@ -21,6 +24,13 @@ const BookSearch: React.FC<BookSearchProps> = ({ books, currentUser, onBorrow })
   // Pagination state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
+  const [books, setBooks] = useState<Book[]>(initialBooks);
+
+  // Sync books prop from App.tsx to local state whenever it changes
+  useEffect(() => {
+    setBooks(initialBooks);
+  }, [initialBooks]);
+  const [total, setTotal] = useState(0);
 
   // Normalize authors: prefer backend authors[]; fallback to author string
   const authorTextOf = (book: Book | any): string => {
@@ -34,40 +44,51 @@ const BookSearch: React.FC<BookSearchProps> = ({ books, currentUser, onBorrow })
     }
   };
 
-  const genres = useMemo(() => {
-    const uniqueGenres = [...new Set(books.map(book => String(book.genre ?? '')))];
-    return uniqueGenres.sort();
-  }, [books]);
+  // Fetch books from backend when filters/search/sort/page/pageSize change
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchBooks() {
+      try {
+        const params: any = {
+          q: searchTerm || undefined,
+          genre: selectedGenre || undefined,
+          status: availabilityFilter === 'all' ? undefined : (availabilityFilter === 'available' ? 'active' : 'retired'),
+          page,
+          pageSize,
+          sortBy,
+          sortDir: 'asc',
+        };
+        const { items, total } = await API.getBooksPaged(params);
+        if (!cancelled) {
+          setBooks(items);
+          setTotal(total);
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setBooks([]);
+          setTotal(0);
+        }
+      } finally {
+      }
+    }
+    fetchBooks();
+    return () => { cancelled = true; };
+  }, [searchTerm, selectedGenre, availabilityFilter, minRating, sortBy, page, pageSize]);
 
-  const filteredAndSortedBooks = useMemo(() => {
-    let filtered = books.filter(book => {
-      const title = String(book.title ?? '');
-  const author = authorTextOf(book);
-      const genre = String(book.genre ?? '');
-      const rating = Number(book.rating ?? 0);
-      const copies = Number(book.copiesAvailable ?? 0);
+  // Reset to first page when filters/search/sort change
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, selectedGenre, availabilityFilter, minRating, sortBy]);
 
-      const matchesSearch =
-        title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        genre.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesGenre = !selectedGenre || genre === selectedGenre;
-
-      const matchesAvailability =
-        availabilityFilter === 'all' ||
-        (availabilityFilter === 'available' && copies > 0) ||
-        (availabilityFilter === 'unavailable' && copies === 0);
-
-      const matchesRating = rating >= minRating;
-
-      return matchesSearch && matchesGenre && matchesAvailability && matchesRating;
-    });
-
-    filtered.sort((a, b) => {
+  // Filter and sort client-side for rating/minRating (since backend may not support it)
+  const filteredAndSortedBooks = books
+    .filter(book => {
+  const rating = Number(book.rating ?? 0);
+  return rating >= minRating;
+    })
+    .sort((a, b) => {
       switch (sortBy) {
         case 'title': {
-          // Natural sort for titles like "Book 2", "Book 10", etc.
           const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
           return collator.compare(String(a.title ?? ''), String(b.title ?? ''));
         }
@@ -84,17 +105,10 @@ const BookSearch: React.FC<BookSearchProps> = ({ books, currentUser, onBorrow })
       }
     });
 
-    return filtered;
-  }, [books, searchTerm, selectedGenre, availabilityFilter, minRating, sortBy]);
+  const genres = [...new Set(books.map(book => String(book.genre ?? '')))].sort();
 
-  // Reset to first page when filters/search/sort change
-  useEffect(() => {
-    setPage(1);
-  }, [searchTerm, selectedGenre, availabilityFilter, minRating, sortBy]);
-
-  const total = filteredAndSortedBooks.length;
-  const startIndex = total === 0 ? 0 : (page - 1) * pageSize;
-  const endIndex = Math.min(total, startIndex + pageSize);
+  const startIndex = filteredAndSortedBooks.length === 0 ? 0 : (page - 1) * pageSize;
+  const endIndex = Math.min(filteredAndSortedBooks.length, startIndex + pageSize);
   const paginatedBooks = filteredAndSortedBooks.slice(startIndex, endIndex);
 
   if (selectedBook) {

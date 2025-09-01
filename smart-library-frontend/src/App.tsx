@@ -150,7 +150,12 @@ function App() {
   };
 
   const handleBorrow = async (book: Book) => {
-    if (!currentUser || book.copiesAvailable <= 0) return;
+    if (!currentUser) return;
+    if (book.copiesAvailable <= 0) {
+      show('Book is out of stock.', 'error');
+      await fetchBooks();
+      return;
+    }
 
     try {
       const data = await API.borrowLibrary({
@@ -185,7 +190,23 @@ function App() {
       show(`Borrowed “${book.title}” successfully. Due in 14 days.`, 'success');
     } catch (err) {
       console.error(" Error borrowing book:", err);
-      show('Could not borrow the book. Please try again.', 'error');
+      // Try to show a more specific error if available
+      let message = 'Could not borrow the book. Please try again.';
+      if (err && typeof err === 'object') {
+        const apiErr = err as any;
+        if (apiErr?.response?.data?.error) {
+          message = apiErr.response.data.error;
+        } else if (apiErr?.message && typeof apiErr.message === 'string') {
+          // If the error message contains 'out of stock', show a specific message
+          if (apiErr.message.toLowerCase().includes('out of stock')) {
+            message = 'Book is out of stock.';
+          } else {
+            message = apiErr.message;
+          }
+        }
+      }
+      show(message, 'error');
+      await fetchBooks();
     }
   };
 

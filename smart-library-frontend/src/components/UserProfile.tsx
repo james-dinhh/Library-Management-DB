@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { User, Calendar, BookOpen, Star, ChevronRight, Award, TrendingUp } from 'lucide-react';
+import { User, Calendar, BookOpen, Star, Award, TrendingUp } from 'lucide-react';
 import { User as UserType, BorrowRecord, Book, Review } from '../types';
 import { formatDate as rawFormatDate, calculateDaysUntilDue } from '../utils/helpers';
 
@@ -242,7 +242,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
                       }`}>
                         {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
                       </span>
-                      <ChevronRight className="h-5 w-5 text-gray-400" />
                     </div>
                   </div>
                 ))}
