@@ -43,7 +43,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   const [lowAvailability, setLowAvailability] = useState<any[]>([]);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
-  // NEW: Analytics state
+  // Analytics state
   const [averageSessionTime, setAverageSessionTime] = useState<any[]>([]);
   const [mostHighlighted, setMostHighlighted] = useState<any[]>([]);
   const [topReadingTime, setTopReadingTime] = useState<any[]>([]);
@@ -149,6 +149,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     }
   };
 
+  // Delete Book Handler
   const handleDeleteBook = async (bookId: number) => {
     try {
   await API.retireBook(Number(bookId), Number(currentUser.id));
@@ -170,6 +171,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     }
   };
 
+  // Unretire Book Handler
   const handleUnretireBook = async (bookId: number) => {
     try {
       console.log('Unretiring book:', bookId, 'Staff ID:', currentUser.id);
@@ -193,6 +195,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     }
   };
 
+  // Inventory Update Handler
   const handleInventoryUpdate = async (bookId: number, newTotal: number) => {
     try {
   await API.updateBookInventory(Number(bookId), Number(currentUser.id), newTotal);
@@ -219,7 +222,8 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     setSelectedBook(null);
   };
 
-  // Report handlers
+  // ------ Report handlers -----
+  // Generate Most Borrowed Report
   const handleGenerateMostBorrowed = async () => {
     try {
   const data = await API.reportsMostBorrowed(dateRange.start, dateRange.end);
@@ -231,6 +235,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     }
   };
 
+  // Generate Top Readers Report
   const handleGenerateTopReaders = async () => {
     try {
   const data = await API.reportsTopReaders();
@@ -242,6 +247,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     }
   };
 
+  // Generate Low Availability Report
   const handleGenerateLowAvailability = async () => {
     try {
   const data = await API.reportsLowAvailability();
@@ -253,7 +259,8 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     }
   };
 
-  // NEW: Analytics handlers
+  // ----- Analytics handlers -----
+  // Generate Average Session Time Analytics
   const handleGenerateAverageSessionTime = async () => {
     try {
   const data = await API.analyticsAvgSessionTime();
@@ -265,6 +272,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     }
   };
 
+  // Generate Most Highlighted Analytics
   const handleGenerateMostHighlighted = async () => {
     try {
   const data = await API.analyticsMostHighlightedBooks();
@@ -277,6 +285,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     }
   };
 
+  // Generate Top Reading Time Analytics
   const handleGenerateTopReadingTime = async () => {
     try {
   const data = await API.analyticsTopBooksByReadingTime();
@@ -338,7 +347,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
               <span>Reports</span>
             </button>
 
-            {/* NEW: Analytics tab button */}
+            {/* Analytics tab button */}
             <button
               onClick={() => setActiveTab('analytics')}
               className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors duration-200 ${
@@ -445,7 +454,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
                           {book.status === 'retired' ? 'Retired' : 'Active'}
                         </span>
                       </td>
-                      {/* NEW Inventory cell */}
+                      {/* Inventory cell */}
                       <td className={`px-6 py-4 whitespace-nowrap ${book.status === 'retired' ? 'text-gray-500' : ''}`}>
                         {book.copiesAvailable}/{book.totalCopies || book.copiesAvailable}
                       </td>
@@ -621,7 +630,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
           </div>
         )}
 
-        {/* --- NEW: Analytics Tab --- */}
+        {/* --- Analytics Tab --- */}
         {activeTab === 'analytics' && (
           <div className="p-8 space-y-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Analytics</h2>

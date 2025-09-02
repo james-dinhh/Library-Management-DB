@@ -6,7 +6,7 @@ interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  widthClassName?: string; // e.g. max-w-lg
+  widthClassName?: string; 
 }
 
 const Modal: React.FC<ModalProps> = ({ open, title, onClose, children, footer, widthClassName = 'max-w-lg' }) => {

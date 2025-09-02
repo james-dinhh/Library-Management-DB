@@ -1,3 +1,4 @@
+// Typescript Declarations for Book
 export interface Book {
   id: string;
   title: string;
@@ -15,6 +16,7 @@ export interface Book {
   reviews?: Review[];
 }
 
+// Typescript Declarations for User
 export interface User {
   id: string;
   name: string;
@@ -24,9 +26,10 @@ export interface User {
   avatar: string;
 }
 
+//Typescript Declaration for BorrowRecord
 export interface BorrowRecord {
   id: string;
-  checkoutId: number; // Real database checkout ID
+  checkoutId: number;
   userId: string;
   bookId: string;
   borrowDate: string;
@@ -36,6 +39,7 @@ export interface BorrowRecord {
   isLate?: number | null; // 1 = late, 0 = on time, null = not returned
 }
 
+// Typescript Declaration for Review
 export interface Review {
   id: string;
   bookId: string;
@@ -47,6 +51,7 @@ export interface Review {
   bookTitle?: string;
 }
 
+// Typescript Declaration for Analytics
 export interface Analytics {
   totalBooks: number;
   totalUsers: number;

@@ -448,9 +448,8 @@ function SessionsList({ userId }: SessionsListProps) {
   }, [userId]);
 
   function sessionBookLabel(s: ReadingSession) {
-    // Prefer hydrated book title if backend provided it
     if (s.book && s.book.title) return s.book.title;
-    // Fallback to ID only (rare—only when book was deleted)
+    // Fallback to ID only
     return `Book ${s.bookId}`;
   }
 

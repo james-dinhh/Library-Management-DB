@@ -21,7 +21,6 @@ const BookSearch: React.FC<BookSearchProps> = ({ books: initialBooks, currentUse
   const [sortBy, setSortBy] = useState('title');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-  // Pagination state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
   const [books, setBooks] = useState<Book[]>(initialBooks);
@@ -80,7 +79,7 @@ const BookSearch: React.FC<BookSearchProps> = ({ books: initialBooks, currentUse
     setPage(1);
   }, [searchTerm, selectedGenre, availabilityFilter, minRating, sortBy]);
 
-  // Filter and sort client-side for rating/minRating (since backend may not support it)
+  // Filter and sort client-side for rating/minRating
   const filteredAndSortedBooks = books
     .filter(book => {
   const rating = Number(book.rating ?? 0);

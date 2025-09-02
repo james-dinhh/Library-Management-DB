@@ -14,6 +14,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  // Login Functionality
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -104,7 +105,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToRegister }) => {
           </button>
         </form>
 
-        {/* 🔹 Registration Link */}
+        {/* Registration Link */}
         <p className="mt-6 text-center text-sm text-gray-600">
           Don’t have an account?{' '}
           <button

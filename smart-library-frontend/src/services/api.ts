@@ -82,14 +82,12 @@ const createBook = async (bookData: {
   staffId: number;
   title: string;
   genre: string;
-  // Provide either publisherId or publisherName (+ optional address)
   publisherId?: number;
   publisherName?: string;
   publisherAddress?: string;
   copiesTotal: number;
   publishedYear?: number;
   coverImageUrl?: string;
-  // Optional author linking/creation
   authorIds?: number[];
   authorNames?: string[];
   authorBios?: string[];
@@ -98,7 +96,7 @@ const createBook = async (bookData: {
   return res.data;
 };
 
-// ---------- Admin Books (staff) ----------
+// ---------- Admin Books API (staff) ----------
 const retireBook = async (bookId: number, staffId: number): Promise<any> => {
   const res = await API.put(`/admin/books/${bookId}/retire`, { staffId });
   return res.data;
@@ -114,7 +112,7 @@ const updateBookInventory = async (bookId: number, staffId: number, newTotal: nu
   return res.data;
 };
 
-// ---------- Reports (staff) ----------
+// ---------- Reports API (staff) ----------
 const reportsMostBorrowed = async (start: string, end: string): Promise<any> => {
   const res = await API.get('/reports/most-borrowed', { params: { start, end } });
   return res.data;
@@ -130,7 +128,7 @@ const reportsLowAvailability = async (): Promise<any> => {
   return res.data;
 };
 
-// ---------- Analytics (Mongo-backed) ----------
+// ---------- Analytics API ----------
 const analyticsAvgSessionTime = async (limit = 100): Promise<any> => {
   const res = await API.get('/analytics/avg-session-time-per-user', { params: { limit } });
   return res.data;
@@ -146,7 +144,7 @@ const analyticsTopBooksByReadingTime = async (limit = 10): Promise<any> => {
   return res.data;
 };
 
-// ---------- Library ----------
+// ---------- Library API ----------
 const listUserBorrowings = async (userId: string | number): Promise<any[]> => {
   const res = await API.get(`/library/user/${userId}/borrowings`);
   return res.data;
@@ -162,7 +160,7 @@ const returnLibrary = async (checkoutId: number): Promise<any> => {
   return res.data;
 };
 
-// ---------- eBooks (reader & staff protected) ----------
+// ---------- eBooks API ----------
 type EbookListQuery = { page?: number; pageSize?: number };
 
 const listBooksForEbooksPaged = async (
@@ -199,7 +197,6 @@ const listEbookSessions = async (userId: number): Promise<any[]> => {
   return res.data;
 };
 
-// ---------- Misc (Mongo eBooks, user lookup) ----------
 const listMongoEbooks = async (): Promise<any[]> => {
   const res = await API.get('/ebooks/mongo-ebooks');
   return res.data;
@@ -264,7 +261,6 @@ const deleteAuthor = async (id: number): Promise<any> => {
   return res.data;
 };
 
-// Attach authors to a book (admin)
 const attachAuthorsToBook = async (bookId: number, authorIds: number[]): Promise<any> => {
   const res = await API.post(`/admin/books/${bookId}/authors`, { authorIds });
   return res.data;
@@ -291,7 +287,7 @@ const submitBookReview = async (
   return res.data;
 };
 
-// ---------- Export ----------
+// ---------- Export API ----------
 export default {
   login,
   logout,

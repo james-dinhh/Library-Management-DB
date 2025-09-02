@@ -28,7 +28,7 @@ function App() {
   const [borrowRecords, setBorrowRecords] = useState<BorrowRecord[]>([]);
   const [userReviews, setUserReviews] = useState<Review[]>([]);
 
-  // Fetch books from backend (now via API client) and include reviews
+  // Fetch books from backend and include reviews
   const fetchBooks = async () => {
     try {
       const { items } = await API.getBooksPaged({});
@@ -128,10 +128,11 @@ function App() {
     } catch {}
   };
 
+  // Login Functionality
   const handleLogin = (user: User) => {
     const normalizedUser = {
       ...user,
-      id: String(user.id) // Ensure id is stored as string
+      id: String(user.id)
     };
     setCurrentUser(normalizedUser);
     setActiveTab("search");
@@ -140,6 +141,7 @@ function App() {
     fetchUserReviews(String(user.id));
   };
 
+  // Logout Functionality
   const handleLogout = () => {
     localStorage.removeItem('token');
     setCurrentUser(null);
@@ -149,6 +151,7 @@ function App() {
     setAuthMode("login"); 
   };
 
+  // Borrowing Functionality
   const handleBorrow = async (book: Book) => {
     if (!currentUser) return;
     if (book.copiesAvailable <= 0) {
@@ -166,7 +169,7 @@ function App() {
 
       const newRecord: BorrowRecord = {
         id: `br${Date.now()}`,
-        checkoutId: data.checkoutId, // Store the real database checkout ID
+        checkoutId: data.checkoutId,
         userId: currentUser.id,
         bookId: book.id,
         borrowDate: new Date().toISOString().split("T")[0],
@@ -210,6 +213,7 @@ function App() {
     }
   };
 
+  // Book Return Functionality
   const handleReturn = async (checkoutId: string) => {
     try {
       await API.returnLibrary(Number(checkoutId));

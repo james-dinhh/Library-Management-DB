@@ -1,3 +1,4 @@
+// Function for consistent date formatting
 export const formatDate = (dateString: string): string => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -6,6 +7,7 @@ export const formatDate = (dateString: string): string => {
   });
 };
 
+// Function for calculating days left until book is due to be returned
 export const calculateDaysUntilDue = (dueDate: string): number => {
   const due = new Date(dueDate);
   const today = new Date();
@@ -13,12 +15,14 @@ export const calculateDaysUntilDue = (dueDate: string): number => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
+// Function for showing star ratings on book cards
 export const renderStars = (rating: number): string => {
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating % 1 !== 0;
   return '★'.repeat(fullStars) + (hasHalfStar ? '☆' : '') + '☆'.repeat(5 - fullStars - (hasHalfStar ? 1 : 0));
 };
 
+// Function for determining availability status
 export const getAvailabilityStatus = (availableCopies: number, status: 'active' | 'retired' = 'active'): {
   status: string;
   color: string;

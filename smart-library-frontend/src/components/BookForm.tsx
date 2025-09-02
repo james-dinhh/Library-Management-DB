@@ -9,7 +9,7 @@ interface BookFormProps {
   book?: Book | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (book: any) => void; // accept the saved book from API
+  onSave: (book: any) => void; 
 }
 
 type Option = { id: number; name: string };
@@ -138,6 +138,7 @@ const BookForm: React.FC<BookFormProps> = ({ staffId, book, isOpen, onClose, onS
     return () => { active = false; };
   }, [debouncedAuthorQuery]);
 
+  // Validation Instructions
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.title.trim()) newErrors.title = 'Title is required';
@@ -151,6 +152,7 @@ const BookForm: React.FC<BookFormProps> = ({ staffId, book, isOpen, onClose, onS
     return Object.keys(newErrors).length === 0;
   };
 
+  // Submission Functionality
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -191,6 +193,7 @@ const BookForm: React.FC<BookFormProps> = ({ staffId, book, isOpen, onClose, onS
     }
   };
 
+  // Input Change Functionality
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
@@ -201,6 +204,7 @@ const BookForm: React.FC<BookFormProps> = ({ staffId, book, isOpen, onClose, onS
   };
   const removeSelectedAuthor = (id: number) => setSelectedAuthors(prev => prev.filter(a => a.id !== id));
 
+  // Create Publisher Functionality
   const handleCreatePublisher = async (e?: React.SyntheticEvent) => {
     e?.preventDefault();
     if (!newPublisher.name.trim()) return;
@@ -218,6 +222,7 @@ const BookForm: React.FC<BookFormProps> = ({ staffId, book, isOpen, onClose, onS
     }
   };
 
+  // Create Author Functionality
   const handleCreateAuthor = async (e?: React.SyntheticEvent) => {
     e?.preventDefault();
     if (!newAuthor.name.trim()) return;

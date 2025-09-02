@@ -15,6 +15,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onSwitchToLogin }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  // Registration Functionality
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');

@@ -18,6 +18,7 @@ const formatDate = (date?: string | Date) => {
   return isNaN(d.getTime()) ? '' : rawFormatDate(String(d));
 };
 
+// Profile Page
 const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, books, onReturn, userReviews }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'reviews'>('overview');
 

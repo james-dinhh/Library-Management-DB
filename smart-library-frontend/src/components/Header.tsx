@@ -9,6 +9,7 @@ interface HeaderProps {
   onTabChange: (tab: string) => void;
 }
 
+// Website Header Declaration
 const Header: React.FC<HeaderProps> = ({ currentUser, onLogout, activeTab, onTabChange }) => {
   if (!currentUser) return null;
 
