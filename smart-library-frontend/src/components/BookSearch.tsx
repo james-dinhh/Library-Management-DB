@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Grid, List } from 'lucide-react';
 import { Book, User } from '../types';
@@ -12,7 +11,6 @@ interface BookSearchProps {
   onBorrow: (book: Book) => void;
   onRefreshBooks?: () => Promise<void>;
 }
-
 
 const BookSearch: React.FC<BookSearchProps> = ({ books: initialBooks, currentUser, onBorrow, onRefreshBooks }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -81,35 +79,16 @@ const BookSearch: React.FC<BookSearchProps> = ({ books: initialBooks, currentUse
   }, [searchTerm, selectedGenre, availabilityFilter, minRating, sortBy]);
 
   // Filter and sort client-side for rating/minRating
-  const filteredAndSortedBooks = books
-    .filter(book => {
-  const rating = Number(book.rating ?? 0);
-  return rating >= minRating;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'title': {
-          const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
-          return collator.compare(String(a.title ?? ''), String(b.title ?? ''));
-        }
-        case 'author':
-          return authorTextOf(a).localeCompare(authorTextOf(b));
-        case 'rating':
-          return (Number(b.rating ?? 0)) - (Number(a.rating ?? 0));
-        case 'year':
-          return (Number(b.publishedYear ?? 0)) - (Number(a.publishedYear ?? 0));
-        case 'availability':
-          return (Number(b.copiesAvailable ?? 0)) - (Number(a.copiesAvailable ?? 0));
-        default:
-          return 0;
-      }
-    });
+  const filteredAndSortedBooks = books.filter(book => {
+    const rating = Number(book.rating ?? 0);
+    return rating >= minRating;
+  });
 
   const genres = [...new Set(books.map(book => String(book.genre ?? '')))].sort();
 
   const startIndex = filteredAndSortedBooks.length === 0 ? 0 : (page - 1) * pageSize;
   const endIndex = Math.min(filteredAndSortedBooks.length, startIndex + pageSize);
-  const paginatedBooks = filteredAndSortedBooks.slice(startIndex, endIndex);
+  const paginatedBooks = filteredAndSortedBooks; // Use filtered data for display
 
   if (selectedBook) {
     return (
@@ -240,7 +219,7 @@ const BookSearch: React.FC<BookSearchProps> = ({ books: initialBooks, currentUse
       {/* Results Summary */}
       <div className="flex items-center justify-between mb-6">
         <p className="text-gray-600">
-          Showing {filteredAndSortedBooks.length} of {books.length} books
+          Showing {filteredAndSortedBooks.length} of {total} books
         </p>
         <div className="flex items-center space-x-2 text-sm text-gray-500">
           <Filter className="h-4 w-4" />
@@ -275,10 +254,10 @@ const BookSearch: React.FC<BookSearchProps> = ({ books: initialBooks, currentUse
       )}
 
       {/* Pagination footer */}
-      {filteredAndSortedBooks.length > 0 && (
+      {filteredAndSortedBooks.length > 0 && total > 0 && (
         <div className="flex items-center justify-between mt-8">
           <div className="text-sm text-gray-600">
-            {total === 0 ? 'No results' : `Showing ${total === 0 ? 0 : startIndex + 1}-${endIndex} of ${total}`}
+            {total === 0 ? 'No results' : `Showing ${((page - 1) * pageSize) + 1}-${Math.min(total, page * pageSize)} of ${total}`}
           </div>
           <div className="flex items-center gap-2">
             <label className="text-sm text-gray-600">Per page:</label>
