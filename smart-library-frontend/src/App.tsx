@@ -35,22 +35,29 @@ function App() {
       const booksWithReviews = await Promise.all(
         (items || []).map(async (b: any) => {
           try {
-            const reviews = await API.getBookReviews(Number(b.id));
-            const author = Array.isArray((b as any).authors)
-              ? (b as any).authors.join(', ')
-              : (b as any).author ?? '';
-            return { ...b, author, id: String(b.id), reviews } as Book;
-          } catch {
-            const author = Array.isArray((b as any).authors)
-              ? (b as any).authors.join(', ')
-              : (b as any).author ?? '';
-            return { ...b, author, id: String(b.id), reviews: [] } as Book;
+            const reviews = await API.getBookReviews(b.id);
+            const avgRating = reviews.length > 0 
+              ? reviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length 
+              : 0;
+            return {
+              ...b,
+              reviews: reviews || [],
+              rating: Number(avgRating.toFixed(1))
+            };
+          } catch (reviewErr) {
+            console.error(`Failed to fetch reviews for book ${b.id}:`, reviewErr);
+            return {
+              ...b,
+              reviews: [],
+              rating: 0
+            };
           }
         })
       );
       setBooks(booksWithReviews);
     } catch (err) {
       console.error("Failed to fetch books:", err);
+      setBooks([]); // Set empty array on error
     }
   };
 
@@ -58,7 +65,7 @@ function App() {
     if (activeTab === "search") {
       fetchBooks();
     }
-  }, [activeTab]);
+  }, [activeTab, currentUser]); 
 
 
   // Fetch user's reviews from backend
@@ -139,6 +146,8 @@ function App() {
     // Fetch user's borrowings when they log in
     fetchUserBorrowings(String(user.id));
     fetchUserReviews(String(user.id));
+    // Fetch books with reviews immediately after login
+    fetchBooks();
   };
 
   // Logout Functionality
