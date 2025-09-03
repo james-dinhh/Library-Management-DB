@@ -268,6 +268,12 @@ function App() {
     );
   }
 
+  // Callback to refresh books after review submission (this thing fixed the review not fetch after action performed on the catalog)
+  const handleRefreshBooks = async () => {
+    await fetchBooks();
+    await fetchUserReviews(String(currentUser?.id));
+  };
+
   // If logged in, show app content
   const renderContent = () => {
     switch (activeTab) {
@@ -277,6 +283,7 @@ function App() {
             books={books}
             currentUser={currentUser}
             onBorrow={handleBorrow}
+            onRefreshBooks={handleRefreshBooks}
           />
         );
       case "profile":
@@ -299,6 +306,7 @@ function App() {
             books={books}
             currentUser={currentUser}
             onBorrow={handleBorrow}
+            onRefreshBooks={handleRefreshBooks}
           />
         );
     }

@@ -10,10 +10,11 @@ interface BookSearchProps {
   books: Book[];
   currentUser: User;
   onBorrow: (book: Book) => void;
+  onRefreshBooks?: () => Promise<void>;
 }
 
 
-const BookSearch: React.FC<BookSearchProps> = ({ books: initialBooks, currentUser, onBorrow }) => {
+const BookSearch: React.FC<BookSearchProps> = ({ books: initialBooks, currentUser, onBorrow, onRefreshBooks }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('');
   const [availabilityFilter, setAvailabilityFilter] = useState('all');
@@ -117,6 +118,7 @@ const BookSearch: React.FC<BookSearchProps> = ({ books: initialBooks, currentUse
         currentUser={currentUser}
         onBack={() => setSelectedBook(null)}
         onBorrow={onBorrow}
+        onRefreshBooks={onRefreshBooks}
       />
     );
   }

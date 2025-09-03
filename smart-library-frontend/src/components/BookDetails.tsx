@@ -10,9 +10,10 @@ interface BookDetailsProps {
   currentUser?: UserType | null;
   onBack: () => void;
   onBorrow: (book: Book) => void;
+  onRefreshBooks?: () => Promise<void>;
 }
 
-const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, onBorrow }) => {
+const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, onBorrow, onRefreshBooks }) => {
   // If book or currentUser are missing, show fallback UI
   if (!book || !currentUser) {
     return (
@@ -104,6 +105,11 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
       });
       const data = await refreshed.json();
       setBookReviews(Array.isArray(data) ? data : []);
+
+      // Also refresh the main books list to update reviews
+      if (onRefreshBooks) {
+        await onRefreshBooks();
+      }
 
       setShowReviewForm(false);
       setNewReview({ rating: 5, comment: '' });
