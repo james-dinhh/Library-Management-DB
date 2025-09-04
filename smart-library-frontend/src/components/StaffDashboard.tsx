@@ -22,10 +22,6 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   const [sortBy, setSortBy] = useState('title');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const toast = useToast();
-  // Pagination state
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [total, setTotal] = useState(0);
 
   // Dialog state
   const [confirmState, setConfirmState] = useState<{
@@ -53,18 +49,16 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
 
   const menuRef = useRef<HTMLDivElement | null>(null);
 
-  // Fetch books (server-side pagination/sorting + server filters)
+  // Fetch books (server-side sorting + server filters; no pagination)
   useEffect(() => {
     const fetchPage = async () => {
       try {
         // Map UI sort to server sort where possible
         const serverSortBy = sortBy === 'availability' ? 'copiesAvailable' : (sortBy === 'title' ? 'title' : undefined);
-        const { items, total } = await API.getBooksForDashboardPaged({
+    const { items } = await API.getBooksForDashboardPaged({
           q: searchTerm || undefined,
           genre: filterGenre || undefined,
           status: filterStatus || undefined,
-          page,
-          pageSize,
           sortBy: serverSortBy as any,
           sortDir: 'asc',
         });
@@ -73,7 +67,6 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
           ? [...items].sort((a: any, b: any) => (a.author || '').localeCompare(b.author || ''))
           : items;
         setBooks(sortedItems);
-        setTotal(total);
       } catch (err) {
     console.error('Failed to load books', err);
     const msg = (err as any)?.response?.data?.error || (err as any)?.message || 'Failed to load books';
@@ -81,7 +74,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       }
     };
     fetchPage();
-  }, [searchTerm, filterGenre, filterStatus, sortBy, page, pageSize]);
+  }, [searchTerm, filterGenre, filterStatus, sortBy]);
 
   // Fetch MongoDB eBooks on mount
   useEffect(() => {
@@ -101,14 +94,16 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   }, [openMenuId]);
 
   const genres = [...new Set(books.map(book => book.genre))].sort();
-  // Supplement server filtering by allowing author search client-side (since backend q doesn't include author)
+  // Client-side search across title or author (backend q doesn't include author)
   const filteredBooks = books
     .filter(book => {
-      const term = searchTerm.toLowerCase();
-      const matchesAuthor = !term || (book.author || '').toLowerCase().includes(term);
+      const term = searchTerm.trim().toLowerCase();
+      const matchesSearch = !term
+        || (book.title || '').toLowerCase().includes(term)
+        || (book.author || '').toLowerCase().includes(term);
       const matchesGenre = !filterGenre || book.genre === filterGenre;
       const matchesStatus = !filterStatus || book.status === filterStatus;
-      return matchesAuthor && matchesGenre && matchesStatus;
+      return matchesSearch && matchesGenre && matchesStatus;
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -128,19 +123,16 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   // --- Handlers ---
   const handleSaveBook = async (_savedBook: any) => {
     try {
-      // Refresh current page
+  // Refresh full list
       const serverSortBy = sortBy === 'availability' ? 'copiesAvailable' : (sortBy === 'title' ? 'title' : undefined);
-      const { items, total } = await API.getBooksForDashboardPaged({
+  const { items } = await API.getBooksForDashboardPaged({
         q: searchTerm || undefined,
         genre: filterGenre || undefined,
         status: filterStatus || undefined,
-        page,
-        pageSize,
         sortBy: serverSortBy as any,
         sortDir: 'asc',
       });
-      setBooks(items);
-      setTotal(total);
+  setBooks(items);
       setShowBookForm(false);
       setSelectedBook(null);
       toast.show('Book saved', 'success');
@@ -154,17 +146,14 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     try {
   await API.retireBook(Number(bookId), Number(currentUser.id));
       const serverSortBy = sortBy === 'availability' ? 'copiesAvailable' : (sortBy === 'title' ? 'title' : undefined);
-      const { items, total } = await API.getBooksForDashboardPaged({
+  const { items } = await API.getBooksForDashboardPaged({
         q: searchTerm || undefined,
         genre: filterGenre || undefined,
         status: filterStatus || undefined,
-        page,
-        pageSize,
         sortBy: serverSortBy as any,
         sortDir: 'asc',
       });
-      setBooks(items);
-      setTotal(total);
+  setBooks(items);
       toast.show('Book retired', 'success');
     } catch (err) {
       toast.show('Failed to retire book', 'error');
@@ -177,17 +166,14 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
       console.log('Unretiring book:', bookId, 'Staff ID:', currentUser.id);
   await API.unretireBook(Number(bookId), Number(currentUser.id));
       const serverSortBy = sortBy === 'availability' ? 'copiesAvailable' : (sortBy === 'title' ? 'title' : undefined);
-      const { items, total } = await API.getBooksForDashboardPaged({
+  const { items } = await API.getBooksForDashboardPaged({
         q: searchTerm || undefined,
         genre: filterGenre || undefined,
         status: filterStatus || undefined,
-        page,
-        pageSize,
         sortBy: serverSortBy as any,
         sortDir: 'asc',
       });
-      setBooks(items);
-      setTotal(total);
+  setBooks(items);
       toast.show('Book unretired', 'success');
     } catch (err) {
       console.error('Unretire book error:', err);
@@ -200,17 +186,14 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
     try {
   await API.updateBookInventory(Number(bookId), Number(currentUser.id), newTotal);
       const serverSortBy = sortBy === 'availability' ? 'copiesAvailable' : (sortBy === 'title' ? 'title' : undefined);
-      const { items, total } = await API.getBooksForDashboardPaged({
+  const { items } = await API.getBooksForDashboardPaged({
         q: searchTerm || undefined,
         genre: filterGenre || undefined,
         status: filterStatus || undefined,
-        page,
-        pageSize,
         sortBy: serverSortBy as any,
         sortDir: 'asc',
       });
-      setBooks(items);
-      setTotal(total);
+  setBooks(items);
       toast.show('Inventory updated', 'success');
     } catch (err) {
       toast.show('Failed to update inventory', 'error');
@@ -518,45 +501,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
                   ))}
                 </tbody>
               </table>
-              {/* Pagination footer */}
-              <div className="flex items-center justify-between p-4 border-t border-gray-200">
-                <div className="text-sm text-gray-600">
-                  {(() => {
-                    const start = total === 0 ? 0 : (page - 1) * pageSize + 1;
-                    const end = Math.min(total, page * pageSize);
-                    return `Showing ${start}-${end} of ${total}`;
-                  })()}
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">Rows per page:</label>
-                  <select
-                    className="border border-gray-300 rounded px-2 py-1 text-sm"
-                    value={pageSize}
-                    onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-                  >
-                    <option value={10}>10</option>
-                    <option value={20}>20</option>
-                    <option value={50}>50</option>
-                  </select>
-                  <div className="flex items-center gap-1 ml-4">
-                    <button
-                      className="px-2 py-1 border rounded disabled:opacity-50"
-                      onClick={() => setPage(p => Math.max(1, p - 1))}
-                      disabled={page <= 1}
-                    >
-                      Prev
-                    </button>
-                    <span className="mx-2 text-sm text-gray-700">Page {page} of {Math.max(1, Math.ceil(total / pageSize) || 1)}</span>
-                    <button
-                      className="px-2 py-1 border rounded disabled:opacity-50"
-                      onClick={() => setPage(p => (p * pageSize < total ? p + 1 : p))}
-                      disabled={page * pageSize >= total}
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
-              </div>
+              {/* No pagination: showing all books */}
             </div>
           </div>
         )}

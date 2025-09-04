@@ -32,10 +32,12 @@ const BookCard: React.FC<BookCardProps> = ({ book, onViewDetails, onBorrow, user
   const publishedYear = book.publishedYear ?? 'Unknown';
   const genre = book.genre ?? 'Unknown';
   const title = book.title ?? 'Untitled';
-  const author =
-    Array.isArray(book.authors) && book.authors.length > 0
-      ? book.authors.join(', ')
-      : 'Unknown';
+  const author = (() => {
+    const anyBook: any = book as any;
+    if (Array.isArray(anyBook.authors) && anyBook.authors.length > 0) return anyBook.authors.join(', ');
+    if (typeof anyBook.author === 'string' && anyBook.author.trim()) return anyBook.author;
+    return 'Unknown';
+  })();
 
   // Determine if book is borrowable: must be active status AND have available copies
   const isBorrowable = book.status === 'active' && availableCopies > 0;
@@ -44,7 +46,8 @@ const BookCard: React.FC<BookCardProps> = ({ book, onViewDetails, onBorrow, user
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden group">
       <div className="relative">
         <img
-          src="/book.jpg"
+          src={book.coverImageUrl && book.coverImageUrl.trim() ? book.coverImageUrl : "/book.jpg"}
+          onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/book.jpg"; }}
           alt={title}
           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
         />

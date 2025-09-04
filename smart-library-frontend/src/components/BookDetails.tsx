@@ -137,7 +137,9 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, currentUser, onBack, on
         <div className="md:flex">
           <div className="md:w-1/3 lg:w-1/4">
             <img
-              src="/book.jpg"
+              src={book.coverImageUrl && String(book.coverImageUrl).trim() ? String(book.coverImageUrl) : "/book.jpg"}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/book.jpg"; }}
+              alt={book.title ?? 'Book cover'}
               className="w-full h-96 md:h-full object-cover"
             />
           </div>

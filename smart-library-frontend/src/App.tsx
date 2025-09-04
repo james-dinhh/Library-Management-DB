@@ -28,10 +28,10 @@ function App() {
   const [borrowRecords, setBorrowRecords] = useState<BorrowRecord[]>([]);
   const [userReviews, setUserReviews] = useState<Review[]>([]);
 
-  // Fetch books from backend and include reviews
+  // Fetch all books from backend and include reviews (no pagination)
   const fetchBooks = async () => {
     try {
-      const { items } = await API.getBooksPaged({});
+      const items = await API.getBooks();
       const booksWithReviews = await Promise.all(
         (items || []).map(async (b: any) => {
           try {

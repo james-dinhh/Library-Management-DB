@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Search, Filter, Grid, List } from 'lucide-react';
 import { Book, User } from '../types';
 import BookCard from './BookCard';
 import BookDetails from './BookDetails';
-import API from '../services/api';
 
 interface BookSearchProps {
   books: Book[];
@@ -20,75 +19,72 @@ const BookSearch: React.FC<BookSearchProps> = ({ books: initialBooks, currentUse
   const [sortBy, setSortBy] = useState('title');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12);
-  const [books, setBooks] = useState<Book[]>(initialBooks);
+  const allBooks = initialBooks;
 
-  // Sync books prop from App.tsx to local state whenever it changes
-  useEffect(() => {
-    setBooks(initialBooks);
-  }, [initialBooks]);
-  const [total, setTotal] = useState(0);
-
-  // Normalize authors: prefer backend authors[]; fallback to author string
-  const authorTextOf = (book: Book | any): string => {
-    try {
-      const arr = Array.isArray((book as any)?.authors) ? ((book as any).authors as string[]) : [];
-      const joined = arr.filter(Boolean).join(', ');
-      const single = String((book as any)?.author ?? '');
-      return (joined || single).trim();
-    } catch {
-      return String((book as any)?.author ?? '').trim();
-    }
+  // Normalize author text for search/sort
+  const authorTextOf = (book: Book): string => {
+    const arr = Array.isArray((book as any)?.authors) ? ((book as any).authors as string[]) : [];
+    const joined = arr.filter(Boolean).join(', ');
+    const single = String((book as any)?.author ?? '');
+    return (joined || single).trim();
   };
 
-  // Fetch books from backend when filters/search/sort/page/pageSize change
-  useEffect(() => {
-    let cancelled = false;
-    async function fetchBooks() {
-      try {
-        const params: any = {
-          q: searchTerm || undefined,
-          genre: selectedGenre || undefined,
-          status: availabilityFilter === 'all' ? undefined : (availabilityFilter === 'available' ? 'active' : 'retired'),
-          page,
-          pageSize,
-          sortBy,
-          sortDir: 'asc',
-        };
-        const { items, total } = await API.getBooksPaged(params);
-        if (!cancelled) {
-          setBooks(items);
-          setTotal(total);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setBooks([]);
-          setTotal(0);
-        }
-      } finally {
+  // Apply filters and sorting client-side
+  const displayBooks = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    const filtered = allBooks.filter((book) => {
+      // search across title, author(s), and genre
+      const inSearch = term
+        ? (
+            String(book.title ?? '').toLowerCase().includes(term) ||
+            authorTextOf(book).toLowerCase().includes(term) ||
+            String(book.genre ?? '').toLowerCase().includes(term)
+          )
+        : true;
+
+      // genre filter
+      const inGenre = selectedGenre ? String(book.genre ?? '') === selectedGenre : true;
+
+      // availability filter
+      const copies = Number((book as any).copiesAvailable ?? 0);
+      const inAvailability =
+        availabilityFilter === 'all'
+          ? true
+          : availabilityFilter === 'available'
+          ? copies > 0
+          : copies <= 0; // 'unavailable'
+
+      // rating filter
+      const rating = Number((book as any).rating ?? 0);
+      const inRating = rating >= minRating;
+
+      return inSearch && inGenre && inAvailability && inRating;
+    });
+
+    const sorted = [...filtered].sort((a, b) => {
+      const av = a as any;
+      const bv = b as any;
+      switch (sortBy) {
+        case 'author':
+          return authorTextOf(a).localeCompare(authorTextOf(b));
+        case 'rating':
+          return Number(av.rating ?? 0) - Number(bv.rating ?? 0);
+        case 'year':
+          return Number(av.publishedYear ?? 0) - Number(bv.publishedYear ?? 0);
+        case 'availability':
+          return Number(av.copiesAvailable ?? 0) - Number(bv.copiesAvailable ?? 0);
+        case 'title':
+        default:
+          return String(a.title ?? '').localeCompare(String(b.title ?? ''));
       }
-    }
-    fetchBooks();
-    return () => { cancelled = true; };
-  }, [searchTerm, selectedGenre, availabilityFilter, minRating, sortBy, page, pageSize]);
+    });
 
-  // Reset to first page when filters/search/sort change
-  useEffect(() => {
-    setPage(1);
-  }, [searchTerm, selectedGenre, availabilityFilter, minRating, sortBy]);
+    return sorted;
+  }, [allBooks, searchTerm, selectedGenre, availabilityFilter, minRating, sortBy]);
 
-  // Filter and sort client-side for rating/minRating
-  const filteredAndSortedBooks = books.filter(book => {
-    const rating = Number(book.rating ?? 0);
-    return rating >= minRating;
-  });
-
-  const genres = [...new Set(books.map(book => String(book.genre ?? '')))].sort();
-
-  const startIndex = filteredAndSortedBooks.length === 0 ? 0 : (page - 1) * pageSize;
-  const endIndex = Math.min(filteredAndSortedBooks.length, startIndex + pageSize);
-  const paginatedBooks = filteredAndSortedBooks; // Use filtered data for display
+  const genres = useMemo(() => {
+    return [...new Set(allBooks.map(book => String(book.genre ?? '')))].sort();
+  }, [allBooks]);
 
   if (selectedBook) {
     return (
@@ -216,10 +212,10 @@ const BookSearch: React.FC<BookSearchProps> = ({ books: initialBooks, currentUse
         </div>
       </div>
 
-      {/* Results Summary */}
+    {/* Results Summary */}
       <div className="flex items-center justify-between mb-6">
         <p className="text-gray-600">
-          Showing {filteredAndSortedBooks.length} of {total} books
+      Showing {displayBooks.length} of {allBooks.length} books
         </p>
         <div className="flex items-center space-x-2 text-sm text-gray-500">
           <Filter className="h-4 w-4" />
@@ -232,7 +228,7 @@ const BookSearch: React.FC<BookSearchProps> = ({ books: initialBooks, currentUse
         ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
         : 'space-y-4'
       }>
-        {paginatedBooks.map(book => (
+        {displayBooks.map((book: Book) => (
           <BookCard
             key={String(book.id)}
             book={book}
@@ -243,51 +239,13 @@ const BookSearch: React.FC<BookSearchProps> = ({ books: initialBooks, currentUse
         ))}
       </div>
 
-      {filteredAndSortedBooks.length === 0 && (
+      {displayBooks.length === 0 && (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
             <Search className="h-16 w-16 mx-auto" />
           </div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">No books found</h3>
           <p className="text-gray-600">Try adjusting your search criteria or filters.</p>
-        </div>
-      )}
-
-      {/* Pagination footer */}
-      {filteredAndSortedBooks.length > 0 && total > 0 && (
-        <div className="flex items-center justify-between mt-8">
-          <div className="text-sm text-gray-600">
-            {total === 0 ? 'No results' : `Showing ${((page - 1) * pageSize) + 1}-${Math.min(total, page * pageSize)} of ${total}`}
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-gray-600">Per page:</label>
-            <select
-              className="border border-gray-300 rounded px-2 py-1 text-sm"
-              value={pageSize}
-              onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-            >
-              <option value={12}>12</option>
-              <option value={24}>24</option>
-              <option value={48}>48</option>
-            </select>
-            <div className="flex items-center gap-1 ml-4">
-              <button
-                className="px-2 py-1 border rounded disabled:opacity-50"
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page <= 1}
-              >
-                Prev
-              </button>
-              <span className="mx-2 text-sm text-gray-700">Page {page} of {Math.max(1, Math.ceil(total / pageSize))}</span>
-              <button
-                className="px-2 py-1 border rounded disabled:opacity-50"
-                onClick={() => setPage(p => (p * pageSize < total ? p + 1 : p))}
-                disabled={page * pageSize >= total}
-              >
-                Next
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>
