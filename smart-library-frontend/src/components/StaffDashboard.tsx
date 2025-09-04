@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BookOpen, BarChart3, Plus, MoreVertical } from 'lucide-react';
-import { Book, User } from '../types';
+import { BookOpen, BarChart3, Plus, MoreVertical, List } from 'lucide-react';
+import { Book, User, StaffLog } from '../types';
 import BookForm from './BookForm';
 import API from '../services/api';
 import { ConfirmDialog, PromptDialog } from './ui/dialogs';
@@ -12,7 +12,7 @@ interface StaffDashboardProps {
 }
 
 const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
-  const [activeTab, setActiveTab] = useState<'inventory' | 'reports' | 'analytics'>('inventory');
+  const [activeTab, setActiveTab] = useState<'inventory' | 'reports' | 'analytics' | 'logs'>('inventory');
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [showBookForm, setShowBookForm] = useState(false);
@@ -47,6 +47,11 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   // Add state for MongoDB eBooks
   const [mongoBooks, setMongoBooks] = useState<any[]>([]);
 
+  // Staff logs state
+  const [logs, setLogs] = useState<StaffLog[]>([]);
+  const [logFilterAction, setLogFilterAction] = useState<'' | 'add_book' | 'update_book' | 'retire_book'>('');
+  const [logLoading, setLogLoading] = useState(false);
+
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch books (server-side sorting + server filters; no pagination)
@@ -80,6 +85,27 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
   useEffect(() => {
   API.listMongoEbooks().then(setMongoBooks);
   }, []);
+
+  // Fetch staff logs when tab is active or filters change
+  useEffect(() => {
+    if (activeTab !== 'logs') return;
+    const load = async () => {
+      try {
+        setLogLoading(true);
+        const data = await API.listStaffLogs({
+          staffId: Number(currentUser.id) || undefined,
+          actionType: logFilterAction || undefined,
+        } as any);
+        setLogs(data || []);
+      } catch (err) {
+        const msg = (err as any)?.response?.data?.error || (err as any)?.message || 'Failed to load staff logs';
+        toast.show(msg, 'error');
+      } finally {
+        setLogLoading(false);
+      }
+    };
+    load();
+  }, [activeTab, logFilterAction, currentUser.id]);
 
   // Close the action menu on outside click using a ref to the open menu container
   useEffect(() => {
@@ -341,6 +367,19 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
             >
               <BarChart3 className="h-4 w-4" />
               <span>Analytics</span>
+            </button>
+
+            {/* Logs tab button */}
+            <button
+              onClick={() => setActiveTab('logs')}
+              className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors duration-200 ${
+                activeTab === 'logs'
+                  ? 'border-blue-700 text-blue-700'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <List className="h-4 w-4" />
+              <span>Staff Logs</span>
             </button>
           </nav>
         </div>
@@ -635,6 +674,68 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ currentUser }) => {
                   </li>
                 ))}
               </ul>
+            </div>
+          </div>
+        )}
+
+        {/* --- Staff Logs Tab --- */}
+        {activeTab === 'logs' && (
+          <div className="p-8 space-y-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Staff Logs</h2>
+              <div className="flex items-center space-x-2">
+                <select
+                  value={logFilterAction}
+                  onChange={(e) => setLogFilterAction(e.target.value as any)}
+                  className="border border-gray-300 rounded-lg px-3 py-2"
+                >
+                  <option value="">All actions</option>
+                  <option value="add_book">Add Book</option>
+                  <option value="update_book">Update Book</option>
+                  <option value="retire_book">Retire Book</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto bg-white border border-gray-200 rounded-xl">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Staff</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Book</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {logLoading ? (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-8 text-center text-gray-500">Loading logs…</td>
+                    </tr>
+                  ) : logs.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-8 text-center text-gray-500">No logs to display</td>
+                    </tr>
+                  ) : (
+                    logs.map(l => (
+                      <tr key={l.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{new Date(l.timestamp).toLocaleString()}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{l.staffName || `User ${l.staffId}`}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            l.actionType === 'retire_book' ? 'bg-red-100 text-red-800' :
+                            l.actionType === 'update_book' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-green-100 text-green-800'
+                          }`}>
+                            {l.actionType.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{l.bookTitle || (l.bookId ? `Book ${l.bookId}` : '—')}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

@@ -374,3 +374,78 @@ router.post('/books/:id/authors', async (req, res) => {
 });
 
 export default router;
+
+/**
+ * @openapi
+ * /admin/staff-logs:
+ *   get:
+ *     tags: [Admin]
+ *     summary: List staff action logs
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: query
+ *         name: staffId
+ *         schema: { type: integer }
+ *         description: Filter by staff user id
+ *       - in: query
+ *         name: actionType
+ *         schema:
+ *           type: string
+ *           enum: [add_book, update_book, retire_book]
+ *         description: Filter by action type
+ *     responses:
+ *       200:
+ *         description: Array of staff logs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id: { type: integer }
+ *                   staffId: { type: integer }
+ *                   staffName: { type: string, nullable: true }
+ *                   actionType: { type: string }
+ *                   bookId: { type: integer, nullable: true }
+ *                   bookTitle: { type: string, nullable: true }
+ *                   timestamp: { type: string, format: date-time }
+ */
+router.get('/staff-logs', async (req, res) => {
+  try {
+    const { staffId, actionType } = req.query || {};
+
+    const where = [];
+    const params = [];
+    if (staffId) {
+      where.push('l.staff_id = ?');
+      params.push(Number(staffId));
+    }
+    if (actionType) {
+      where.push('l.action_type = ?');
+      params.push(String(actionType));
+    }
+
+    const sql = `
+      SELECT
+        l.log_id     AS id,
+        l.staff_id   AS staffId,
+        u.name       AS staffName,
+        l.action_type AS actionType,
+        l.book_id    AS bookId,
+        b.title      AS bookTitle,
+        l.timestamp  AS timestamp
+      FROM staff_logs l
+      LEFT JOIN users u ON u.user_id = l.staff_id
+      LEFT JOIN books b ON b.book_id = l.book_id
+      ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
+      ORDER BY l.timestamp DESC, l.log_id DESC
+    `;
+
+    const [rows] = await mysqlPool.query(sql, params);
+    res.json(rows);
+  } catch (e) {
+    console.error('Error fetching staff logs:', e);
+    res.status(500).json({ error: 'Failed to fetch staff logs' });
+  }
+});

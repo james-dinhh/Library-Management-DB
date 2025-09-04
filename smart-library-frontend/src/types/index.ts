@@ -61,3 +61,14 @@ export interface Analytics {
   monthlyBorrowings: { month: string; count: number }[];
   topBooks: { bookId: string; title: string; borrowCount: number }[];
 }
+
+// Staff action logs (admin)
+export interface StaffLog {
+  id: number;
+  staffId: number;
+  staffName?: string | null;
+  actionType: 'add_book' | 'update_book' | 'retire_book';
+  bookId?: number | null;
+  bookTitle?: string | null;
+  timestamp: string; // ISO string from backend
+}

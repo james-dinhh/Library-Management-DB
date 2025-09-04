@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Book, User, Review } from '../types';
+import { Book, User, Review, StaffLog } from '../types';
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4001',
@@ -287,6 +287,14 @@ const submitBookReview = async (
   return res.data;
 };
 
+// ---------- Admin: Staff Logs ----------
+const listStaffLogs = async (
+  params?: { staffId?: number; actionType?: 'add_book' | 'update_book' | 'retire_book' }
+): Promise<StaffLog[]> => {
+  const res = await API.get('/admin/staff-logs', { params });
+  return res.data;
+};
+
 // ---------- Export API ----------
 export default {
   login,
@@ -335,4 +343,5 @@ export default {
   getBookReviews,
   getUserReviews,
   submitBookReview,
+  listStaffLogs,
 };
