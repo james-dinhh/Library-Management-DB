@@ -33,10 +33,12 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
   );
   
   const getBooksWithRecords = (records: BorrowRecord[]) => {
-    return records.map(record => {
-      const book = books.find(book => book.id === record.bookId);
-      return { record, book: book! };
-    }).filter(({ book }) => book);
+    return records
+      .map(record => {
+        const book = books.find(b => String((b as any).id) === String(record.bookId));
+        return book ? { record, book } : null;
+      })
+      .filter((x): x is { record: BorrowRecord; book: Book } => Boolean(x));
   };
 
   const activeBooksWithRecords = useMemo(() => getBooksWithRecords(activeBorrowings), [activeBorrowings, books]);
@@ -172,18 +174,24 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
                     {activeBooksWithRecords.map(({ book, record }) => {
                       const daysUntilDue = calculateDaysUntilDue(record.dueDate);
                       const isOverdue = daysUntilDue < 0;
+                      const authorText = (book as any).authors?.length ? (book as any).authors.join(', ') : book.author;
                       
                       return (
                         <div key={record.id} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow flex flex-col justify-between">
                           <div>
                             <div className="flex space-x-3">
                               <img
-                                src='/book.jpg'
+                                src={book.coverImageUrl || '/book.jpg'}
+                                onError={(e) => {
+                                  const target = e.currentTarget as HTMLImageElement;
+                                  if (target.src !== window.location.origin + '/book.jpg') target.src = '/book.jpg';
+                                }}
+                                alt={book.title}
                                 className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
                               />
                               <div className="flex-1 min-w-0">
                                 <h3 className="font-semibold text-gray-900 truncate">{book.title}</h3>
-                                <p className="text-sm text-gray-600 truncate">{book.author}</p>
+                                <p className="text-sm text-gray-600 truncate">{authorText}</p>
                                 <div className="mt-2">
                                   <p className="text-xs text-gray-500">Due: {formatDate(record.dueDate)}</p>
                                   <p className={`text-xs font-medium ${
@@ -216,36 +224,44 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-6">Borrowing History</h2>
               <div className="space-y-4">
-                {allBooksWithRecords.map(({ book, record }) => (
-                  <div key={record.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                    <img
-                      src='/book.jpg'
-                      className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
-                    />
-                    
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{book.title}</h3>
-                      <p className="text-sm text-gray-600">{book.author}</p>
-                      <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                        <span>Borrowed: {formatDate(record.borrowDate)}</span>
-                        <span>Due: {formatDate(record.dueDate)}</span>
-                        {record.returnDate && (
-                          <span>Returned: {formatDate(record.returnDate)}</span>
-                        )}
+                {allBooksWithRecords.map(({ book, record }) => {
+                  const authorText = (book as any).authors?.length ? (book as any).authors.join(', ') : book.author;
+                  return (
+                    <div key={record.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                      <img
+                        src={book.coverImageUrl || '/book.jpg'}
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLImageElement;
+                          if (target.src !== window.location.origin + '/book.jpg') target.src = '/book.jpg';
+                        }}
+                        alt={book.title}
+                        className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
+                      />
+                      
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900">{book.title}</h3>
+                        <p className="text-sm text-gray-600">{authorText}</p>
+                        <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                          <span>Borrowed: {formatDate(record.borrowDate)}</span>
+                          <span>Due: {formatDate(record.dueDate)}</span>
+                          {record.returnDate && (
+                            <span>Returned: {formatDate(record.returnDate)}</span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          record.status === 'returned' ? 'bg-green-100 text-green-800' :
+                          record.status === 'overdue' ? 'bg-red-100 text-red-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
+                        </span>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        record.status === 'returned' ? 'bg-green-100 text-green-800' :
-                        record.status === 'overdue' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
                 
                 {allBooksWithRecords.length === 0 && (
                   <div className="text-center py-12 text-gray-500">
@@ -262,11 +278,18 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-6">My Reviews</h2>
               <div className="space-y-6">
-                {userReviews.map((review) => (
+                {userReviews.map((review) => {
+                  const reviewBook = books.find(b => String((b as any).id) === String(review.bookId));
+                  const cover = reviewBook?.coverImageUrl || '/book.jpg';
+                  return (
                     <div key={review.id} className="border border-gray-200 rounded-xl p-6">
                       <div className="flex items-start space-x-4">
                         <img
-                          src='/book.jpg'
+                          src={cover}
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLImageElement;
+                            if (target.src !== window.location.origin + '/book.jpg') target.src = '/book.jpg';
+                          }}
                           alt={review.bookTitle}
                           className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
                         />
@@ -286,7 +309,8 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
                         </div>
                       </div>
                     </div>
-                ))}
+                  );
+                })}
                 
                 {userReviews.length === 0 && (
                   <div className="text-center py-12 text-gray-500">
