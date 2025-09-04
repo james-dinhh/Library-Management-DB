@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { User, Calendar, BookOpen, Star, Award, TrendingUp } from 'lucide-react';
 import { User as UserType, BorrowRecord, Book, Review } from '../types';
 import { formatDate as rawFormatDate, calculateDaysUntilDue } from '../utils/helpers';
@@ -9,6 +9,7 @@ interface UserProfileProps {
   books: Book[];
   userReviews: Review[];
   onReturn: (checkoutId: string) => void;
+  onRefreshData?: () => Promise<void>; // Add this prop
 }
 
 // Safe formatDate wrapper
@@ -19,8 +20,34 @@ const formatDate = (date?: string | Date) => {
 };
 
 // Profile Page
-const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, books, onReturn, userReviews }) => {
+const UserProfile: React.FC<UserProfileProps> = ({ 
+  currentUser, 
+  borrowRecords, 
+  books, 
+  onReturn, 
+  userReviews,
+  onRefreshData 
+}) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'reviews'>('overview');
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Add effect to refresh data when component mounts
+  useEffect(() => {
+    const refreshData = async () => {
+      if (onRefreshData) {
+        setIsLoading(true);
+        try {
+          await onRefreshData();
+        } catch (error) {
+          console.error('Failed to refresh user profile data:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    refreshData();
+  }, [onRefreshData]);
 
   const userBorrowRecords = useMemo(() => 
     borrowRecords.filter(record => record.userId === currentUser.id),
@@ -52,6 +79,17 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, borrowRecords, b
       ? (userReviews.reduce((sum, review) => sum + review.rating, 0) / userReviews.length).toFixed(1)
       : '0'
   };
+
+  // Add loading state to the component
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-500">Loading profile data...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-opacity duration-300 opacity-100">
